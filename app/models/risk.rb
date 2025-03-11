@@ -1,6 +1,13 @@
 class Risk < ActiveRecord::Base
   include Redmine::SafeAttributes
 
+  include Redmine::Acts::Customizable
+ 
+  include Redmine::Acts::Searchable
+  include Redmine::Acts::Event
+  include Redmine::Acts::ActivityProvider
+  include Redmine::I18n
+
   belongs_to :project
   belongs_to :author, :class_name => 'User'
   belongs_to :assigned_to, :class_name => 'Principal'
@@ -38,7 +45,7 @@ class Risk < ActiveRecord::Base
   validates_inclusion_of :impact, :in => 0..100, :allow_nil => true
   validates_inclusion_of :strategy, :in => RISK_STRATEGY, :allow_nil => true
 
-  attr_protected :id if ActiveRecord::VERSION::MAJOR <= 4
+ # attr_protected :id if ActiveRecord::VERSION::MAJOR <= 4
 
   scope :open, lambda {|*args|
     is_closed = args.size > 0 ? !args.first : false
@@ -75,26 +82,27 @@ class Risk < ActiveRecord::Base
   before_save :force_updated_on_change, :update_closed_on, :set_assigned_to_was
   after_save :create_journal
 
-  state_machine :status, initial: :open do
-    event :close do
-      transition [:open] => :closed
-    end
+  enum status: { open: 0, closed: 1, rejected: 2 }, _default: :open
 
-    event :reopen do
-      transition [:closed] => :open
-    end
+  def close
+      return if closed?
+        self.closed_on = Time.now
+          self.status = :closed
+            save
+  end
 
-    before_transition from: [:closed, :rejected] do |risk, transition|
-      risk.closed_on  = nil
-    end
+  def reopen
+      return unless closed? || rejected?
+        self.closed_on = nil
+          self.status = :open
+            save
+  end
 
-    before_transition any => [:closed, :rejected] do |risk, transition|
-      risk.closed_on  = Time.now
-    end
-
-    state :open
-    state :closed
-    state :rejected
+  def reject
+      return if rejected?
+        self.closed_on = Time.now
+          self.status = :rejected
+            save
   end
 
   # Returns true if usr or current user is allowed to view the issue
@@ -229,7 +237,7 @@ class Risk < ActiveRecord::Base
     index = (ratio * RISK_MAGNITUDE.count).clamp(0, RISK_MAGNITUDE.count - 1).to_i
     level = RISK_MAGNITUDE[index]
 
-    l(("label_risk_level_" + level).to_sym)
+    I18n.t(("label_risk_level_" + level).to_sym)
   end
 
   def init_journal(user, notes = "")
@@ -295,8 +303,17 @@ class Risk < ActiveRecord::Base
 
   # Return true if the risk is closed, otherwise false
   def closed?
-    closed_on.present?
+      status == "closed"
   end
+
+  def open?
+      status == "open"
+  end
+
+  def rejected?
+      status == "rejected"
+  end
+
 
   # Return true if the risk is being closed
   def closing?
