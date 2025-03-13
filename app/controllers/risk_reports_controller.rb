@@ -330,12 +330,13 @@ class RiskReportsController < ApplicationController
       pdf.font_size(16) { pdf.text "Top Risks", :style => :bold }
       pdf.move_down 5
       
+      require 'arel'
       top_risks = Risk.joins(:project)
                       .where(projects: { status: Project::STATUS_ACTIVE })
                       .where(closed_on: nil)
                       .where.not(probability: nil)
                       .where.not(impact: nil)
-                      .order('probability * impact DESC')
+                      .order(Arel.sql('probability * impact DESC'))
                       .limit(10)
                       .includes(:project)
       
@@ -391,10 +392,11 @@ class RiskReportsController < ApplicationController
       pdf.font_size(16) { pdf.text "Top Risks by Magnitude", :style => :bold }
       pdf.move_down 5
       
+      require 'arel'
       top_risks = @risks.where(closed_on: nil)
                          .where.not(probability: nil)
                          .where.not(impact: nil)
-                         .order('probability * impact DESC')
+                         .order(Arel.sql('probability * impact DESC'))
                          .limit(10)
       
       if top_risks.any?

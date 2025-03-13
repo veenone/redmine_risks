@@ -82,11 +82,12 @@ class RiskDashboardController < ApplicationController
       # Recent risks
       @recent_risks = project_risks.order(created_on: :desc).limit(5)
       
-      # Top risks by magnitude
+      # Top risks by magnitude - using safe SQL with Arel.sql
+      require 'arel'
       @top_risks = project_risks.where(closed_on: nil)
                            .where.not(probability: nil)
                            .where.not(impact: nil)
-                           .order('probability * impact DESC')
+                           .order(Arel.sql('probability * impact DESC'))
                            .limit(5)
       
       render 'dashboard/project'
