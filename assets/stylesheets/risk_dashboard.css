@@ -1,0 +1,175 @@
+/* Dashboard Layout */
+.dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 15px;
+  }
+  
+  .dashboard-row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  
+  .dashboard-card {
+    background-color: #fff;
+    border: 1px solid #e1e4e8;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    padding: 15px;
+    flex: 1;
+    min-width: 250px;
+  }
+  
+  .dashboard-card.wide {
+    flex-basis: 100%;
+    width: 100%;
+  }
+  
+  .dashboard-card h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #e1e4e8;
+    padding-bottom: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #505050;
+  }
+  
+  /* Stats */
+  .dashboard-stats {
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+    padding: 10px 0;
+  }
+  
+  .stat-item {
+    padding: 0 15px;
+  }
+  
+  .stat-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: #3c8dbc;
+  }
+  
+  .stat-label {
+    font-size: 13px;
+    color: #777;
+    margin-top: 5px;
+  }
+  
+  /* Charts */
+  .chart-container {
+    position: relative;
+    height: 200px;
+    width: 100%;
+  }
+  
+  /* Risk Matrix */
+  .risk-matrix {
+    width: 100%;
+    overflow-x: auto;
+  }
+  
+  .risk-matrix table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .matrix-header {
+    background-color: #f8f9fa;
+    text-align: center;
+    font-weight: bold;
+    padding: 8px;
+    border: 1px solid #ddd;
+  }
+  
+  .probability-header {
+    text-align: right;
+    width: 100px;
+  }
+  
+  .impact-header {
+    width: 120px;
+  }
+  
+  .matrix-cell {
+    border: 1px solid #ddd;
+    text-align: center;
+    height: 60px;
+    position: relative;
+  }
+  
+  .matrix-cell-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .matrix-magnitude {
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .matrix-risk-count {
+    font-size: 12px;
+  }
+  
+  /* Risk level colors */
+  .risk-low {
+    background-color: #dff0d8;
+  }
+  
+  .risk-medium {
+    background-color: #fcf8e3;
+  }
+  
+  .risk-high {
+    background-color: #f2dede;
+  }
+  
+  .risk-extreme {
+    background-color: #d9534f;
+    color: white;
+  }
+  
+  /* Tables in dashboard */
+  .dashboard-card .list {
+    width: 100%;
+  }
+  
+  .dashboard-card .list th {
+    background-color: #f8f9fa;
+    text-align: left;
+    padding: 8px;
+  }
+  
+  .dashboard-card .list td {
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .text-center {
+    text-align: center;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .dashboard-row {
+      flex-direction: column;
+    }
+    
+    .dashboard-card {
+      width: 100%;
+    }
+    
+    .dashboard-stats {
+      flex-direction: column;
+      gap: 15px;
+    }
+  }

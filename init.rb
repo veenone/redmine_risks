@@ -1,6 +1,6 @@
 require 'redmine'
 
-RISKS_VERSION_NUMBER = '1.8.0'
+RISKS_VERSION_NUMBER = '1.9.0'
 
 Redmine::Plugin.register :redmine_risks do
   name 'Risks'
@@ -14,12 +14,16 @@ Redmine::Plugin.register :redmine_risks do
 
   menu :project_menu, :risks, { :controller => 'risks', :action => 'index' }, :caption => :label_risks, :before => :settings, :param => :project_id
   menu :project_menu, :new_risk, { :controller => 'risks', :action => 'new' }, :caption => :label_new_risk, :after => :new_wiki_sub, :param => :project_id, :parent => :new_object
+  menu :project_menu, :risk_dashboard, { :controller => 'risk_dashboard', :action => 'project' }, :caption => :label_risk_dashboard, :after => :risks, :param => :project_id
+
+  menu :top_menu, :risk_dashboard, { :controller => 'risk_dashboard', :action => 'index' }, :caption => :label_risk_dashboard, :if => Proc.new { User.current.admin? }
 
   project_module :risks do
     permission :view_risks,            { :risks => [:index, :show] }, :read => true
     permission :add_risks,             { :risks => [:new, :create, :commit] }
     permission :edit_risks,            { :risks => [:edit, :update] }
     permission :delete_risks,          { :risks => [:destroy] }, :require => :member
+    permission :view_risk_dashboard,   { :risk_dashboard => [:project] }, :read => true
 
     # Related issues
     permission :manage_risk_relations, {}
