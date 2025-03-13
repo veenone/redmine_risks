@@ -37,13 +37,20 @@ class RiskDashboardController < ApplicationController
       # Show dashboard for a specific project
       retrieve_query(RiskQuery)
       
-      @total_risks = @project.risks.count
-      @open_risks = @project.risks.open.count
-      @closed_risks = @project.risks.open(true).count
+      # Use the association if it exists, otherwise use direct Risk query
+      if @project.respond_to?(:risks)
+        project_risks = @project.risks
+      else
+        project_risks = Risk.where(project_id: @project.id)
+      end
+      
+      @total_risks = project_risks.count
+      @open_risks = project_risks.open.count
+      @closed_risks = project_risks.open(true).count
       
       # Risks by probability and impact
-      @risks_by_probability = @project.risks.group(:probability).count.transform_keys { |k| k || 0 }
-      @risks_by_impact = @project.risks.group(:impact).count.transform_keys { |k| k || 0 }
+      @risks_by_probability = project_risks.group(:probability).count.transform_keys { |k| k || 0 }
+      @risks_by_impact = project_risks.group(:impact).count.transform_keys { |k| k || 0 }
       
       # Risk probability/impact matrix
       @risk_matrix = {}
@@ -57,7 +64,7 @@ class RiskDashboardController < ApplicationController
       end
       
       # Fill matrix with risks
-      @project.risks.each do |risk|
+      project_risks.each do |risk|
         next unless risk.probability && risk.impact
         
         p_index = risk.probability / 25  # 0, 25, 50, 75, 100 -> 0, 1, 2, 3, 4
@@ -67,16 +74,16 @@ class RiskDashboardController < ApplicationController
       end
       
       # Risks by status
-      @risks_by_status = @project.risks.group(:status).count
+      @risks_by_status = project_risks.group(:status).count
       
       # Risks by strategy
-      @risks_by_strategy = @project.risks.group(:strategy).count.reject { |k, _| k.nil? }
+      @risks_by_strategy = project_risks.group(:strategy).count.reject { |k, _| k.nil? }
       
       # Recent risks
-      @recent_risks = @project.risks.order(created_on: :desc).limit(5)
+      @recent_risks = project_risks.order(created_on: :desc).limit(5)
       
       # Top risks by magnitude
-      @top_risks = @project.risks.open
+      @top_risks = project_risks.open
                            .where.not(probability: nil)
                            .where.not(impact: nil)
                            .order('probability * impact DESC')
