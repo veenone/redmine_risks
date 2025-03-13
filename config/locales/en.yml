@@ -61,12 +61,10 @@ en:
   label_risk_list: Risk List
   label_no_data: No data available
   label_actions: Actions
-  
-  # Risk status labels
-  label_risk_status_open: Open
-  label_risk_status_closed: Closed
-  label_risk_status_rejected: Rejected
-  
+ 
+  label_risk_status_unknown: Unknown
+
+    
   # Report specific labels
   label_export_to_excel: Excel
   label_export_to_pdf: PDF

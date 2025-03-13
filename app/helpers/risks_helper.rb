@@ -28,7 +28,11 @@ module RisksHelper
   end
 
   def format_risk_status(status)
-    l("label_risk_status_#{status}")
+    if status.present?
+      l("label_risk_status_#{status}")
+    else
+      l(:label_risk_status_unknown)
+    end
   end
 
   def format_risk_probability(probability)
