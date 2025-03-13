@@ -7,7 +7,7 @@ module RedmineRisks
         base.send(:include, InstanceMethods)
 
         base.class_eval do
-         # remove unloadable
+          # Remove the unloadable call
         end
       end
 

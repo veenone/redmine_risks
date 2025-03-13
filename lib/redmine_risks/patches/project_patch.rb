@@ -7,7 +7,7 @@ module RedmineRisks
         base.send(:include, InstanceMethods)
 
         base.class_eval do
-          unloadable # Send unloadable so it will not be unloaded in development
+          # unloadable # Send unloadable so it will not be unloaded in development
           
           has_many :risks, :dependent => :destroy
         end
