@@ -11,8 +11,8 @@ class RiskReportsController < ApplicationController
       
       # Get risks statistics for all visible projects
       @total_risks = Risk.joins(:project).where(projects: { status: Project::STATUS_ACTIVE }).count
-      @open_risks = Risk.open.joins(:project).where(projects: { status: Project::STATUS_ACTIVE }).count
-      @closed_risks = Risk.open(true).joins(:project).where(projects: { status: Project::STATUS_ACTIVE }).count
+      @open_risks = Risk.where(closed_on: nil).joins(:project).where(projects: { status: Project::STATUS_ACTIVE }).count
+      @closed_risks = Risk.where.not(closed_on: nil).joins(:project).where(projects: { status: Project::STATUS_ACTIVE }).count
       
       # Risks by probability and impact
       @risks_by_probability = Risk.joins(:project).where(projects: { status: Project::STATUS_ACTIVE })
@@ -56,8 +56,8 @@ class RiskReportsController < ApplicationController
       end
       
       @total_risks = project_risks.count
-      @open_risks = project_risks.open.count
-      @closed_risks = project_risks.open(true).count
+      @open_risks = project_risks.where(closed_on: nil).count
+      @closed_risks = project_risks.where.not(closed_on: nil).count
       
       # Risks by probability and impact
       @risks_by_probability = project_risks.group(:probability).count.transform_keys { |k| k || 0 }
@@ -130,8 +130,8 @@ class RiskReportsController < ApplicationController
           sheet.add_row [
             project.name, 
             project_risks.count, 
-            project_risks.open.count, 
-            project_risks.open.where("probability >= ? AND impact >= ?", 50, 50).count
+            project_risks.where(closed_on: nil).count, 
+            project_risks.where(closed_on: nil).where("probability >= ? AND impact >= ?", 50, 50).count
           ]
         end
       end
@@ -314,8 +314,8 @@ class RiskReportsController < ApplicationController
         projects_data << [
           project.name, 
           project_risks.count.to_s, 
-          project_risks.open.count.to_s, 
-          project_risks.open.where("probability >= ? AND impact >= ?", 50, 50).count.to_s
+          project_risks.where(closed_on: nil).count.to_s, 
+          project_risks.where(closed_on: nil).where("probability >= ? AND impact >= ?", 50, 50).count.to_s
         ]
       end
       
@@ -332,6 +332,7 @@ class RiskReportsController < ApplicationController
       
       top_risks = Risk.joins(:project)
                       .where(projects: { status: Project::STATUS_ACTIVE })
+                      .where(closed_on: nil)
                       .where.not(probability: nil)
                       .where.not(impact: nil)
                       .order('probability * impact DESC')
@@ -390,7 +391,7 @@ class RiskReportsController < ApplicationController
       pdf.font_size(16) { pdf.text "Top Risks by Magnitude", :style => :bold }
       pdf.move_down 5
       
-      top_risks = @risks.open
+      top_risks = @risks.where(closed_on: nil)
                          .where.not(probability: nil)
                          .where.not(impact: nil)
                          .order('probability * impact DESC')

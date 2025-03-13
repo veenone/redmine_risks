@@ -11,8 +11,8 @@ class RiskDashboardController < ApplicationController
       
       # Get risks statistics for all visible projects
       @total_risks = Risk.joins(:project).where(projects: { status: Project::STATUS_ACTIVE }).count
-      @open_risks = Risk.open.joins(:project).where(projects: { status: Project::STATUS_ACTIVE }).count
-      @closed_risks = Risk.open(true).joins(:project).where(projects: { status: Project::STATUS_ACTIVE }).count
+      @open_risks = Risk.where(closed_on: nil).joins(:project).where(projects: { status: Project::STATUS_ACTIVE }).count
+      @closed_risks = Risk.where.not(closed_on: nil).joins(:project).where(projects: { status: Project::STATUS_ACTIVE }).count
       
       # Risks by probability and impact
       @risks_by_probability = Risk.joins(:project).where(projects: { status: Project::STATUS_ACTIVE })
@@ -45,8 +45,8 @@ class RiskDashboardController < ApplicationController
       end
       
       @total_risks = project_risks.count
-      @open_risks = project_risks.open.count
-      @closed_risks = project_risks.open(true).count
+      @open_risks = project_risks.where(closed_on: nil).count
+      @closed_risks = project_risks.where.not(closed_on: nil).count
       
       # Risks by probability and impact
       @risks_by_probability = project_risks.group(:probability).count.transform_keys { |k| k || 0 }
@@ -83,7 +83,7 @@ class RiskDashboardController < ApplicationController
       @recent_risks = project_risks.order(created_on: :desc).limit(5)
       
       # Top risks by magnitude
-      @top_risks = project_risks.open
+      @top_risks = project_risks.where(closed_on: nil)
                            .where.not(probability: nil)
                            .where.not(impact: nil)
                            .order('probability * impact DESC')
