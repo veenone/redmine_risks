@@ -41,3 +41,37 @@ en:
   notice_risk_successful_update: "Risk successfully updated."
   notice_risk_successful_delete: "Risk successfully deleted."
   text_risks_destroy_confirmation: 'Are you sure you want to delete the selected risk(s)?'
+  
+  # Dashboard specific labels
+  label_risk_dashboard: Risk Dashboard
+  label_risks_overview: Risks Overview
+  label_total_risks: Total Risks
+  label_open_risks: Open Risks
+  label_closed_risks: Closed Risks
+  label_risks_by_status: Risks by Status
+  label_risks_by_strategy: Risks by Strategy
+  label_risk_matrix: Risk Matrix
+  label_top_risks: Top Risks by Magnitude
+  label_recent_risks: Recent Risks
+  label_risk_probability_impact_distribution: Probability & Impact Distribution
+  label_projects_with_risks: Projects with Risks
+  label_high_risks: High/Extreme Risks
+  label_view_dashboard: View Dashboard
+  label_view_risks: View Risk List
+  label_risk_list: Risk List
+  label_no_data: No data available
+  label_actions: Actions
+ 
+  label_risk_status_unknown: Unknown
+
+    
+  # Report specific labels
+  label_export_to_excel: Excel
+  label_export_to_pdf: PDF
+  label_risk_report: Risk Report
+  label_global_risk_report: Global Risk Report
+  label_project_risk_report: Project Risk Report
+  label_summary: Summary
+  label_risk_details: Risk Details
+  label_treatments_and_lessons: Treatments & Lessons
+  label_generated_on: Generated on

@@ -1,0 +1,225 @@
+<%# Dashboard for a specific project %>
+<div class="contextual">
+  <%= link_to l(:label_new_risk), new_project_risk_path(@project), class: 'icon icon-add' if User.current.allowed_to?(:add_risks, @project) %>
+  <%= link_to l(:label_risk_list), project_risks_path(@project), class: 'icon icon-list' %>
+</div>
+
+<h2><%= l(:label_risk_dashboard) %>: <%= @project.name %></h2>
+
+<div class="dashboard">
+  <div class="dashboard-row">
+    <div class="dashboard-card">
+      <h3><%= l(:label_risks_overview) %></h3>
+      <div class="dashboard-stats">
+        <div class="stat-item">
+          <div class="stat-value"><%= @total_risks %></div>
+          <div class="stat-label"><%= l(:label_total_risks) %></div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value"><%= @open_risks %></div>
+          <div class="stat-label"><%= l(:label_open_risks) %></div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value"><%= @closed_risks %></div>
+          <div class="stat-label"><%= l(:label_closed_risks) %></div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="dashboard-card">
+      <h3><%= l(:label_risks_by_status) %></h3>
+      <div class="chart-container">
+        <canvas id="risksStatusChart"></canvas>
+      </div>
+    </div>
+    
+    <div class="dashboard-card">
+      <h3><%= l(:label_risks_by_strategy) %></h3>
+      <div class="chart-container">
+        <canvas id="risksStrategyChart"></canvas>
+      </div>
+    </div>
+  </div>
+  
+  <div class="dashboard-row">
+    <div class="dashboard-card wide">
+      <h3><%= l(:label_risk_matrix) %></h3>
+      <div class="risk-matrix">
+        <table class="list">
+          <thead>
+            <tr>
+              <th class="matrix-header"></th>
+              <% Risk::RISK_IMPACT.each_with_index do |impact, index| %>
+                <th class="matrix-header impact-header">
+                  <%= l("label_risk_impact_#{impact}") %><br>
+                  <small><%= index * 25 %>%</small>
+                </th>
+              <% end %>
+            </tr>
+          </thead>
+          <tbody>
+            <% Risk::RISK_PROBABILITY.reverse.each_with_index do |probability, rev_index| %>
+              <% index = Risk::RISK_PROBABILITY.size - 1 - rev_index %>
+              <tr>
+                <th class="matrix-header probability-header">
+                  <%= l("label_risk_probability_#{probability}") %><br>
+                  <small><%= index * 25 %>%</small>
+                </th>
+                
+                <% Risk::RISK_IMPACT.each_with_index do |impact, i_index| %>
+                  <% 
+                    magnitude = nil
+                    magnitude_text = ""
+                    
+                    p_value = index * 25
+                    i_value = i_index * 25
+                    ratio = (p_value / 100.0) * (i_value / 100.0)
+                    m_index = (ratio * Risk::RISK_MAGNITUDE.count).clamp(0, Risk::RISK_MAGNITUDE.count - 1).to_i
+                    magnitude = Risk::RISK_MAGNITUDE[m_index]
+                    
+                    # Set CSS class based on risk level
+                    cell_class = "matrix-cell risk-#{magnitude}"
+                    
+                    if magnitude
+                      magnitude_text = l("label_risk_level_#{magnitude}")
+                    end
+                    
+                    risks_in_cell = @risk_matrix[index][i_index]
+                  %>
+                  
+                  <td class="<%= cell_class %>">
+                    <div class="matrix-cell-content">
+                      <div class="matrix-magnitude"><%= magnitude_text %></div>
+                      <div class="matrix-risk-count">
+                        <% if risks_in_cell.any? %>
+                          <%= link_to pluralize(risks_in_cell.count, l(:label_risk).downcase, l(:label_risk_plural).downcase), 
+                              project_risks_path(@project, 
+                                :set_filter => 1, 
+                                :f => [:probability, :impact], 
+                                :op => {:probability => '=', :impact => '='}, 
+                                :v => {:probability => ["#{p_value}"], :impact => ["#{i_value}"]}) %>
+                        <% else %>
+                          0
+                        <% end %>
+                      </div>
+                    </div>
+                  </td>
+                <% end %>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  
+  <div class="dashboard-row">
+    <div class="dashboard-card">
+      <h3><%= l(:label_top_risks) %></h3>
+      <table class="list">
+        <thead>
+          <tr>
+            <th><%= l(:label_risk_id) %></th>
+            <th><%= l(:field_subject) %></th>
+            <th><%= l(:field_magnitude) %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if @top_risks.any? %>
+            <% @top_risks.each do |risk| %>
+              <tr class="<%= risk.css_classes %>">
+                <td><%= link_to "##{risk.id}", risk_path(risk) %></td>
+                <td><%= link_to risk.subject, risk_path(risk) %></td>
+                <td><%= risk.magnitude %></td>
+              </tr>
+            <% end %>
+          <% else %>
+            <tr>
+              <td colspan="3" class="text-center"><%= l(:label_no_data) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    
+    <div class="dashboard-card">
+      <h3><%= l(:label_recent_risks) %></h3>
+      <table class="list">
+        <thead>
+          <tr>
+            <th><%= l(:label_risk_id) %></th>
+            <th><%= l(:field_subject) %></th>
+            <th><%= l(:field_created_on) %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if @recent_risks.any? %>
+            <% @recent_risks.each do |risk| %>
+              <tr class="<%= risk.css_classes %>">
+                <td><%= link_to "##{risk.id}", risk_path(risk) %></td>
+                <td><%= link_to risk.subject, risk_path(risk) %></td>
+                <td><%= format_time(risk.created_on) %></td>
+              </tr>
+            <% end %>
+          <% else %>
+            <tr>
+              <td colspan="3" class="text-center"><%= l(:label_no_data) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  <div class="dashboard-row">
+    <div class="dashboard-card wide">
+      <h3><%= l(:label_risk_probability_impact_distribution) %></h3>
+      <div class="chart-container">
+        <canvas id="riskDistributionChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% content_for :header_tags do %>
+  <%= stylesheet_link_tag 'risk_dashboard', :plugin => 'redmine_risks' %>
+  <%= javascript_include_tag 'chart.min.js', :plugin => 'redmine_risks' %>
+  <%= javascript_include_tag 'risk_dashboard', :plugin => 'redmine_risks' %>
+  
+  <script type="text/javascript">
+    $(document).ready(function() {
+      // Status chart data
+      var statusLabels = <%= Risk::RISK_STATUS.map { |s| l("label_risk_status_#{s}") }.to_json.html_safe %>;
+      var statusData = <%= Risk::RISK_STATUS.map { |s| @risks_by_status[s] || 0 }.to_json.html_safe %>;
+      
+      // Strategy chart data
+      var strategyLabels = <%= Risk::RISK_STRATEGY.map { |s| l("label_risk_strategy_#{s}") }.to_json.html_safe %>;
+      var strategyData = <%= Risk::RISK_STRATEGY.map { |s| @risks_by_strategy[s] || 0 }.to_json.html_safe %>;
+      
+      // Probability and Impact data
+      var probabilityLabels = <%= Risk::RISK_PROBABILITY.map.with_index { |p, i| l("label_risk_probability_#{p}") }.to_json.html_safe %>;
+      var impactLabels = <%= Risk::RISK_IMPACT.map.with_index { |i, idx| l("label_risk_impact_#{i}") }.to_json.html_safe %>;
+      
+      // Probability data
+      var probabilityData = [
+        <% (0..4).each do |p_idx| %>
+          <%= @risks_by_probability[p_idx * 25] || 0 %>,
+        <% end %>
+      ];
+      
+      // Impact data
+      var impactData = [
+        <% (0..4).each do |i_idx| %>
+          <%= @risks_by_impact[i_idx * 25] || 0 %>,
+        <% end %>
+      ];
+      
+      initDashboardCharts(
+        statusLabels, statusData,
+        strategyLabels, strategyData,
+        probabilityLabels, probabilityData,
+        impactLabels, impactData
+      );
+    });
+  </script>
+<% end %>

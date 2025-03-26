@@ -1,5 +1,10 @@
 class Risk < ActiveRecord::Base
   include Redmine::SafeAttributes
+  include Redmine::Acts::Customizable
+  include Redmine::Acts::Searchable
+  include Redmine::Acts::Event
+  include Redmine::Acts::ActivityProvider
+  include Redmine::I18n
 
   belongs_to :project
   belongs_to :author, :class_name => 'User'
@@ -31,14 +36,21 @@ class Risk < ActiveRecord::Base
   RISK_MAGNITUDE = %w(low medium high extreme)
   RISK_STRATEGY = %w(accept mitigate transfer eliminate)
 
+  # Add callback to ensure status is set
+  before_validation :ensure_status_set, on: :create
+  
   validates_presence_of :subject, :project
   validates_presence_of :author, :if => Proc.new {|issue| issue.new_record? || issue.author_id_changed?}
   validates_length_of :subject, :maximum => 255
   validates_inclusion_of :probability, :in => 0..100, :allow_nil => true
   validates_inclusion_of :impact, :in => 0..100, :allow_nil => true
   validates_inclusion_of :strategy, :in => RISK_STRATEGY, :allow_nil => true
+  validates_inclusion_of :status, :in => RISK_STATUS
 
-  attr_protected :id if ActiveRecord::VERSION::MAJOR <= 4
+  # Remove attr_protected as it's deprecated
+  # attr_protected :id if ActiveRecord::VERSION::MAJOR <= 4
+
+  # Remove state_machine and enum declarations - they're conflicting
 
   scope :open, lambda {|*args|
     is_closed = args.size > 0 ? !args.first : false
@@ -75,26 +87,26 @@ class Risk < ActiveRecord::Base
   before_save :force_updated_on_change, :update_closed_on, :set_assigned_to_was
   after_save :create_journal
 
-  state_machine :status, initial: :open do
-    event :close do
-      transition [:open] => :closed
-    end
+  # Status transition methods
+  def close
+    return if closed?
+    self.status = 'closed'
+    self.closed_on = Time.now
+    save
+  end
 
-    event :reopen do
-      transition [:closed] => :open
-    end
+  def reopen
+    return unless closed? || rejected?
+    self.status = 'open'
+    self.closed_on = nil
+    save
+  end
 
-    before_transition from: [:closed, :rejected] do |risk, transition|
-      risk.closed_on  = nil
-    end
-
-    before_transition any => [:closed, :rejected] do |risk, transition|
-      risk.closed_on  = Time.now
-    end
-
-    state :open
-    state :closed
-    state :rejected
+  def reject
+    return if rejected?
+    self.status = 'rejected'
+    self.closed_on = Time.now
+    save
   end
 
   # Returns true if usr or current user is allowed to view the issue
@@ -108,7 +120,7 @@ class Risk < ActiveRecord::Base
   end
 
   def closable?(user=User.current)
-    editable?(user) && ! closed?
+    editable?(user) && !closed?
   end
 
   # Returns true if user or current user is allowed to edit the issue
@@ -229,7 +241,7 @@ class Risk < ActiveRecord::Base
     index = (ratio * RISK_MAGNITUDE.count).clamp(0, RISK_MAGNITUDE.count - 1).to_i
     level = RISK_MAGNITUDE[index]
 
-    l(("label_risk_level_" + level).to_sym)
+    I18n.t(("label_risk_level_" + level).to_sym)
   end
 
   def init_journal(user, notes = "")
@@ -293,9 +305,17 @@ class Risk < ActiveRecord::Base
     result
   end
 
-  # Return true if the risk is closed, otherwise false
+  # Status checking methods
   def closed?
-    closed_on.present?
+    status == "closed"
+  end
+
+  def open?
+    status == "open"
+  end
+
+  def rejected?
+    status == "rejected"
   end
 
   # Return true if the risk is being closed
@@ -416,7 +436,11 @@ class Risk < ActiveRecord::Base
   end
 
   private
-
+  
+  def ensure_status_set
+    self.status = 'open' if self.status.blank?
+  end
+  
   def user_permission?(user, permission)
     if project && !project.active?
       perm = Redmine::AccessControl.permission(permission)

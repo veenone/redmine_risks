@@ -7,6 +7,10 @@ post '/risks/:id/quoted', :to => 'risks#quoted', :id => /\d+/, :as => 'quoted_ri
 
 match '/risks/context_menu', :to => 'context_menus#risks', :as => 'risks_context_menu', :via => [:get, :post]
 
+# Dashboard routes
+get '/risk_dashboard', :to => 'risk_dashboard#index', :as => 'risk_dashboard'
+get '/projects/:project_id/risk_dashboard', :to => 'risk_dashboard#project', :as => 'project_risk_dashboard'
+
 resources :projects do
   resources :risks, :only => [:index, :new, :create]
 end
