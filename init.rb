@@ -16,7 +16,7 @@ Redmine::Plugin.register :redmine_risks do
   menu :project_menu, :new_risk, { :controller => 'risks', :action => 'new' }, :caption => :label_new_risk, :after => :new_wiki_sub, :param => :project_id, :parent => :new_object
   menu :project_menu, :risk_dashboard, { :controller => 'risk_dashboard', :action => 'project' }, :caption => :label_risk_dashboard, :after => :risks, :param => :project_id
 
-  menu :top_menu, :risk_dashboard, { :controller => 'risk_dashboard', :action => 'index' }, :caption => :label_risk_dashboard, :if => Proc.new { User.current.admin? }
+  # menu :top_menu, :risk_dashboard, { :controller => 'risk_dashboard', :action => 'index' }, :caption => :label_risk_dashboard, :if => Proc.new { User.current.admin? }
 
   project_module :risks do
     permission :view_risks,            { :risks => [:index, :show] }, :read => true
