@@ -110,29 +110,6 @@ module RisksHelper
     details_to_strings(details, no_html, options)
   end
 
-  def column_value_with_risks(column, item, value)
-    case column.name
-    when :id, :subject
-      # link_to value, risk_path(item)
-      link_to value, {:controller => 'risks', :action => 'show', :id => item.id}
-    when :probability
-      format_risk_probability(value)
-    when :impact
-      format_risk_impact(value)
-    when :status
-      format_risk_status(value)
-    when :strategy
-      format_risk_strategy(value)
-    when :treatments
-      item.treatments? ? content_tag('div', textilizable(item, :treatments), :class => "wiki") : ''
-    when :lessons
-      item.lessons? ? content_tag('div', textilizable(item, :lessons), :class => "wiki") : ''
-    else
-      column_value_without_risks(column, item, value)
-    end
-  end
-
-
   def format_risk_confidentiality(level)
     return unless level.present? && level.to_i < Risk::RISK_CONFIDENTIALITY.length
     l("label_risk_confidentiality_#{Risk::RISK_CONFIDENTIALITY[level.to_i]}")
@@ -150,6 +127,20 @@ module RisksHelper
 
   def column_value_with_risks(column, item, value)
     case column.name
+    when :id, :subject
+      link_to value, risk_path(item)
+    when :probability
+      format_risk_probability(value)
+    when :impact
+      format_risk_impact(value)
+    when :status
+      format_risk_status(value)
+    when :strategy
+      format_risk_strategy(value)
+    when :treatments
+      item.treatments? ? content_tag('div', textilizable(item, :treatments), :class => "wiki") : ''
+    when :lessons
+      item.lessons? ? content_tag('div', textilizable(item, :lessons), :class => "wiki") : ''
     when :confidentiality
       format_risk_confidentiality(value)
     when :integrity
@@ -166,9 +157,21 @@ module RisksHelper
       value
     when :level_of_significance
       value
-    # Existing cases...
     else
       column_value_without_risks(column, item, value)
+    end
+  end
+
+  def status_color(status)
+    case status.to_s
+    when 'open'
+      'rgba(54, 162, 235, 0.8)'  # Blue
+    when 'closed'
+      'rgba(75, 192, 192, 0.8)'  # Green
+    when 'rejected'
+      'rgba(255, 99, 132, 0.8)'  # Red
+    else
+      'rgba(201, 203, 207, 0.8)' # Grey
     end
   end
   
