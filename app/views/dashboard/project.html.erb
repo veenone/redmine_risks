@@ -179,6 +179,63 @@
       </div>
     </div>
   </div>
+
+  <div class="dashboard-row">
+    <div class="dashboard-card">
+      <h3><%= l(:label_risk_cia_assessment) %></h3>
+      <div class="chart-container">
+        <canvas id="riskCiaChart"></canvas>
+      </div>
+    </div>
+    
+    <div class="dashboard-card">
+      <h3><%= l(:label_risk_significance) %></h3>
+      <div class="dashboard-stats">
+        <div class="stat-item">
+          <div class="stat-value"><%= @avg_significance ? @avg_significance.round(2) : 0 %></div>
+          <div class="stat-label"><%= l(:label_average_significance) %></div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value"><%= @max_significance || 0 %></div>
+          <div class="stat-label"><%= l(:label_max_significance) %></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dashboard-row">
+    <div class="dashboard-card wide">
+      <h3><%= l(:label_top_risks_by_significance) %></h3>
+      <table class="list">
+        <thead>
+          <tr>
+            <th><%= l(:label_risk_id) %></th>
+            <th><%= l(:field_subject) %></th>
+            <th><%= l(:field_level_of_significance) %></th>
+            <th><%= l(:field_risk_owner) %></th>
+            <th><%= l(:field_action_owner) %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if @top_risks_by_significance && @top_risks_by_significance.any? %>
+            <% @top_risks_by_significance.each do |risk| %>
+              <tr class="<%= risk.css_classes %>">
+                <td><%= link_to "##{risk.id}", risk_path(risk) %></td>
+                <td><%= link_to risk.subject, risk_path(risk) %></td>
+                <td><%= risk.level_of_significance %></td>
+                <td><%= risk.risk_owner ? link_to_user(risk.risk_owner) : "-" %></td>
+                <td><%= risk.action_owner ? link_to_user(risk.action_owner) : "-" %></td>
+              </tr>
+            <% end %>
+          <% else %>
+            <tr>
+              <td colspan="5" class="text-center"><%= l(:label_no_data) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
 <% content_for :header_tags do %>
@@ -220,6 +277,70 @@
         probabilityLabels, probabilityData,
         impactLabels, impactData
       );
+      
+      // CIA chart data
+      var ciaLabels = ["Confidentiality", "Integrity", "Availability"];
+      var ciaDataLow = [
+        <%= @risks_by_confidentiality[0] || 0 %>,
+        <%= @risks_by_integrity[0] || 0 %>,
+        <%= @risks_by_availability[0] || 0 %>
+      ];
+      var ciaDataMedium = [
+        <%= @risks_by_confidentiality[1] || 0 %>,
+        <%= @risks_by_integrity[1] || 0 %>,
+        <%= @risks_by_availability[1] || 0 %>
+      ];
+      var ciaDataHigh = [
+        <%= @risks_by_confidentiality[2] || 0 %>,
+        <%= @risks_by_integrity[2] || 0 %>,
+        <%= @risks_by_availability[2] || 0 %>
+      ];
+      
+      // Create CIA Chart
+      if (document.getElementById('riskCiaChart')) {
+        var ciaCtx = document.getElementById('riskCiaChart').getContext('2d');
+        var ciaChart = new Chart(ciaCtx, {
+          type: 'bar',
+          data: {
+            labels: ciaLabels,
+            datasets: [
+              {
+                label: 'Low',
+                data: ciaDataLow,
+                backgroundColor: chartColors.green,
+                borderWidth: 1
+              },
+              {
+                label: 'Medium',
+                data: ciaDataMedium,
+                backgroundColor: chartColors.orange,
+                borderWidth: 1
+              },
+              {
+                label: 'High',
+                data: ciaDataHigh,
+                backgroundColor: chartColors.red,
+                borderWidth: 1
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              xAxes: [{
+                stacked: true
+              }],
+              yAxes: [{
+                stacked: true,
+                ticks: {
+                  beginAtZero: true
+                }
+              }]
+            }
+          }
+        });
+      }
     });
   </script>
 <% end %>

@@ -10,6 +10,8 @@ class Risk < ActiveRecord::Base
   belongs_to :author, :class_name => 'User'
   belongs_to :assigned_to, :class_name => 'Principal'
   belongs_to :category, :class_name => 'RiskCategory'
+  belongs_to :action_owner, :class_name => 'Principal'
+  belongs_to :risk_owner, :class_name => 'Principal'
 
   has_many :journals, :as => :journalized, :dependent => :destroy, :inverse_of => :journalized
 
@@ -35,7 +37,10 @@ class Risk < ActiveRecord::Base
   RISK_IMPACT = %w(negligible minor moderate significant severe)
   RISK_MAGNITUDE = %w(low medium high extreme)
   RISK_STRATEGY = %w(accept mitigate transfer eliminate)
-
+  RISK_CONFIDENTIALITY = %w(low medium high)
+  RISK_INTEGRITY = %w(low medium high)
+  RISK_AVAILABILITY = %w(low medium high)
+  
   # Add callback to ensure status is set
   before_validation :ensure_status_set, on: :create
   
@@ -206,6 +211,16 @@ class Risk < ActiveRecord::Base
 
   safe_attributes 'private_notes',
                   :if => lambda {|risk, user| !risk.new_record? && user.allowed_to?(:set_notes_private, risk.project)}
+
+  safe_attributes 'confidentiality',
+                  'integrity',
+                  'availability',
+                  'level_of_significance',
+                  'action_owner_id',
+                  'risk_owner_id',
+                  'probability_point',
+                  'impact_point',
+                  :if => lambda {|risk, user| risk.new_record? || risk.attributes_editable?(user) }
 
   # Safely sets attributes
   # Should be called from controllers instead of #attributes=
@@ -514,4 +529,13 @@ class Risk < ActiveRecord::Base
     current_journal.details << JournalDetail.new(*args)
     current_journal.save
   end
+
+  def calculate_significance
+    if probability_point.present? && impact_point.present?
+      self.level_of_significance = probability_point * impact_point
+    end
+  end
+
+  before_save :calculate_significance
+
 end

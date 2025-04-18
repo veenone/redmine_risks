@@ -75,3 +75,43 @@ en:
   label_risk_details: Risk Details
   label_treatments_and_lessons: Treatments & Lessons
   label_generated_on: Generated on
+
+  # CIA-related labels
+  field_confidentiality: Confidentiality
+  field_integrity: Integrity
+  field_availability: Availability
+  label_risk_cia_assessment: CIA Assessment
+  
+  # CIA levels
+  label_risk_confidentiality_low: Low
+  label_risk_confidentiality_medium: Medium
+  label_risk_confidentiality_high: High
+  label_risk_integrity_low: Low
+  label_risk_integrity_medium: Medium
+  label_risk_integrity_high: High
+  label_risk_availability_low: Low
+  label_risk_availability_medium: Medium
+  label_risk_availability_high: High
+  
+  # Ownership labels
+  field_risk_owner_id: Risk Owner
+  field_action_owner_id: Action Owner
+  label_risk_ownership: Risk Ownership
+  
+  # Significance assessment
+  field_probability_point: Probability Point
+  field_impact_point: Impact Point
+  field_level_of_significance: Level of Significance
+  label_risk_significance: Risk Significance Assessment
+  
+  # Help text
+  text_probability_point_info: "Scale from 1 (lowest) to 10 (highest)"
+  text_impact_point_info: "Scale from 1 (lowest) to 10 (highest)"
+  text_significance_calculation_info: "Calculated as Probability Point × Impact Point"
+
+  # Dashboard labels
+  label_average_significance: "Significance average"
+  label_max_significance: "Max significance"
+  label_top_risks_by_significance: "Top Risks by Significance"
+  field_risk_owner: "Risk owner"
+  field_action_owner: "Action owner"
