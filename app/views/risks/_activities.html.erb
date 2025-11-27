@@ -1,108 +1,84 @@
 <% activities = risk.activities.by_planned_date %>
 <% manage_activities = User.current.allowed_to?(:manage_risk_activities, risk.project) %>
 
-<% if activities.any? || manage_activities %>
-  <div id="risk-activities" class="risk-activities-section">
-    <div class="contextual">
-      <% if manage_activities %>
-        <%= link_to l(:label_risk_activity_new), new_risk_activity_path(risk), class: 'icon icon-add' %>
-      <% end %>
-    </div>
+<div class="contextual">
+  <% if manage_activities %>
+    <%= link_to l(:label_risk_activity_new), new_risk_activity_path(risk), class: 'icon icon-add' %>
+  <% end %>
+</div>
 
-    <h3><%= l(:label_risk_activities) %></h3>
+<p><strong><%= l(:label_risk_activities) %></strong></p>
 
-    <% if activities.any? %>
-      <% open_activities = activities.select(&:open?) %>
-      <% completed_activities = activities.select { |a| a.completed? || a.cancelled? } %>
+<% if activities.any? %>
+  <% open_activities = activities.select(&:open?) %>
+  <% completed_activities = activities.select { |a| a.completed? || a.cancelled? } %>
+  <% overdue_count = activities.count(&:overdue?) %>
 
-      <div class="activities-summary">
-        <span class="activity-stat">
-          <strong><%= activities.count %></strong> <%= l(:label_total) %>
-        </span>
-        <span class="activity-stat open">
-          <strong><%= open_activities.count %></strong> <%= l(:label_open) %>
-        </span>
-        <span class="activity-stat completed">
-          <strong><%= completed_activities.count %></strong> <%= l(:label_completed) %>
-        </span>
-        <% overdue_count = activities.count(&:overdue?) %>
-        <% if overdue_count > 0 %>
-          <span class="activity-stat overdue">
-            <strong><%= overdue_count %></strong> <%= l(:label_overdue) %>
-          </span>
-        <% end %>
-      </div>
-
-      <div class="activities-list">
-        <% activities.each do |activity| %>
-          <div class="activity-card <%= activity.status_css_class %> <%= 'overdue' if activity.overdue? %>">
-            <div class="activity-header">
-              <div class="activity-type-badge <%= activity.activity_type %>">
-                <%= l("label_risk_activity_type_#{activity.activity_type}") %>
-              </div>
-              <div class="activity-status-badge <%= activity.status %>">
-                <%= l("label_risk_activity_status_#{activity.status}") %>
-              </div>
-            </div>
-
-            <div class="activity-content">
-              <h4 class="activity-subject">
-                <%= link_to activity.subject, risk_activity_path(risk, activity) %>
-              </h4>
-
-              <% if activity.description.present? %>
-                <p class="activity-description"><%= truncate(activity.description, length: 100) %></p>
-              <% end %>
-
-              <div class="activity-meta">
-                <% if activity.assigned_to %>
-                  <span class="meta-item">
-                    <span class="meta-icon">&#128100;</span>
-                    <%= link_to_user(activity.assigned_to) %>
-                  </span>
-                <% end %>
-
-                <% if activity.planned_date %>
-                  <span class="meta-item <%= 'overdue' if activity.overdue? %>">
-                    <span class="meta-icon">&#128197;</span>
-                    <%= format_date(activity.planned_date) %>
-                    <% if activity.open? && activity.days_until_due %>
-                      <% days = activity.days_until_due %>
-                      <small class="days-indicator <%= days < 0 ? 'overdue' : (days <= 7 ? 'soon' : '') %>">
-                        (<%= days < 0 ? l(:label_overdue_by, :count => days.abs) : l(:label_due_in, :count => days) %>)
-                      </small>
-                    <% end %>
-                  </span>
-                <% end %>
-
-                <% if activity.notes.any? %>
-                  <span class="meta-item notes-count">
-                    <span class="meta-icon">&#128172;</span>
-                    <%= activity.notes.count %> <%= l(:label_updates) %>
-                  </span>
-                <% end %>
-              </div>
-
-              <% if activity.open? %>
-                <div class="activity-progress">
-                  <div class="progress-bar">
-                    <div class="progress-fill" style="width: <%= activity.progress_percentage %>%"></div>
-                  </div>
-                </div>
-              <% end %>
-            </div>
-
-            <% if manage_activities %>
-              <div class="activity-actions">
-                <%= link_to l(:button_edit), edit_risk_activity_path(risk, activity), class: 'icon-only icon-edit', title: l(:button_edit) %>
-                <%= link_to l(:button_delete), risk_activity_path(risk, activity), method: :delete, data: { confirm: l(:text_are_you_sure) }, class: 'icon-only icon-del', title: l(:button_delete) %>
-              </div>
-            <% end %>
-          </div>
-        <% end %>
-      </div>
-    <% else %>
-      <p class="nodata"><%= l(:label_no_data) %></p>
+  <div class="activities-stats-bar">
+    <span class="stat-badge total"><%= activities.count %> <%= l(:label_total) %></span>
+    <span class="stat-badge open"><%= open_activities.count %> <%= l(:label_open) %></span>
+    <span class="stat-badge completed"><%= completed_activities.count %> <%= l(:label_completed) %></span>
+    <% if overdue_count > 0 %>
+      <span class="stat-badge overdue"><%= overdue_count %> <%= l(:label_overdue) %></span>
     <% end %>
   </div>
+
+  <table class="list activities-table">
+    <thead>
+      <tr>
+        <th><%= l(:field_activity_type) %></th>
+        <th><%= l(:field_subject) %></th>
+        <th><%= l(:field_status) %></th>
+        <th><%= l(:field_assigned_to) %></th>
+        <th><%= l(:field_planned_date) %></th>
+        <% if manage_activities %>
+          <th></th>
+        <% end %>
+      </tr>
+    </thead>
+    <tbody>
+      <% activities.each do |activity| %>
+        <tr class="activity-row <%= activity.status %> <%= 'overdue' if activity.overdue? %>">
+          <td>
+            <span class="activity-type-badge <%= activity.activity_type %>">
+              <%= l("label_risk_activity_type_#{activity.activity_type}") %>
+            </span>
+          </td>
+          <td class="subject">
+            <%= link_to activity.subject, risk_activity_path(risk, activity) %>
+            <% if activity.notes.any? %>
+              <span class="note-count" title="<%= l(:label_updates) %>">(<%= activity.notes.count %>)</span>
+            <% end %>
+          </td>
+          <td>
+            <span class="activity-status-badge <%= activity.status %>">
+              <%= l("label_risk_activity_status_#{activity.status}") %>
+            </span>
+          </td>
+          <td><%= activity.assigned_to ? link_to_user(activity.assigned_to) : "-" %></td>
+          <td class="<%= 'overdue-date' if activity.overdue? %>">
+            <% if activity.planned_date %>
+              <%= format_date(activity.planned_date) %>
+              <% if activity.open? && activity.days_until_due %>
+                <% days = activity.days_until_due %>
+                <br><small class="<%= days < 0 ? 'overdue' : (days <= 7 ? 'soon' : '') %>">
+                  <%= days < 0 ? l(:label_overdue_by, :count => days.abs) : l(:label_due_in, :count => days) %>
+                </small>
+              <% end %>
+            <% else %>
+              -
+            <% end %>
+          </td>
+          <% if manage_activities %>
+            <td class="buttons">
+              <%= link_to '', edit_risk_activity_path(risk, activity), class: 'icon-only icon-edit', title: l(:button_edit) %>
+              <%= link_to '', risk_activity_path(risk, activity), method: :delete, data: { confirm: l(:text_are_you_sure) }, class: 'icon-only icon-del', title: l(:button_delete) %>
+            </td>
+          <% end %>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% elsif manage_activities %>
+  <p class="nodata"><%= l(:label_no_data) %></p>
 <% end %>

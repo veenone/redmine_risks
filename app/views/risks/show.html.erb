@@ -69,12 +69,13 @@
     </div>
   <% end -%>
 
-  <hr />
+</div>
 
-  <div id="relations">
-    <%= render :partial => 'relations' %>
-  </div>
+<div id="relations" class="risk-section box">
+  <%= render :partial => 'relations' %>
+</div>
 
+<div id="risk-activities-container" class="risk-section box">
   <%= render :partial => 'activities', :locals => { :risk => @risk } %>
 </div>
 
@@ -99,3 +100,7 @@
 <% html_title l(:label_risk) + " ##{@risk.id}: #{@risk.subject}" %>
 
 <%= context_menu %>
+
+<% content_for :header_tags do %>
+  <%= stylesheet_link_tag 'risk_activities', :plugin => 'redmine_risks' %>
+<% end %>
