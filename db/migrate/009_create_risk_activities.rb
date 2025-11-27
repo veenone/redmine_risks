@@ -11,6 +11,7 @@ class CreateRiskActivities < migration_class
       t.date     :planned_date
       t.date     :completed_date
       t.string   :status,          :null => false, :default => 'planned'
+      t.string   :period
       t.integer  :author_id,       :null => false
       t.datetime :created_on,      :null => false
       t.datetime :updated_on,      :null => false
