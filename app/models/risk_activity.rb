@@ -10,11 +10,13 @@ class RiskActivity < ActiveRecord::Base
 
   ACTIVITY_TYPES = %w(assessment mitigation monitoring review contingency)
   ACTIVITY_STATUSES = %w(planned in_progress completed cancelled)
+  ACTIVITY_PERIODS = %w(once weekly bi_weekly monthly bi_monthly quarterly semi_annual annual)
 
   validates_presence_of :risk, :subject, :activity_type, :author
   validates_length_of :subject, :maximum => 255
   validates_inclusion_of :activity_type, :in => ACTIVITY_TYPES
   validates_inclusion_of :status, :in => ACTIVITY_STATUSES
+  validates_inclusion_of :period, :in => ACTIVITY_PERIODS, :allow_blank => true
 
   before_validation :set_default_status, on: :create
 
@@ -29,7 +31,8 @@ class RiskActivity < ActiveRecord::Base
                   'assigned_to_id',
                   'planned_date',
                   'completed_date',
-                  'status'
+                  'status',
+                  'period'
 
   def visible?(user = User.current)
     risk && risk.visible?(user)
@@ -101,6 +104,32 @@ class RiskActivity < ActiveRecord::Base
 
   def last_note
     notes.recent.first
+  end
+
+  def recurring?
+    period.present? && period != 'once'
+  end
+
+  def period_in_days
+    case period
+    when 'weekly' then 7
+    when 'bi_weekly' then 14
+    when 'monthly' then 30
+    when 'bi_monthly' then 60
+    when 'quarterly' then 90
+    when 'semi_annual' then 180
+    when 'annual' then 365
+    else nil
+    end
+  end
+
+  def next_occurrence_date
+    return nil unless recurring? && planned_date
+    if completed_date
+      completed_date + period_in_days
+    else
+      planned_date + period_in_days
+    end
   end
 
   private

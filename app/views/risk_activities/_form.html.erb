@@ -17,6 +17,10 @@
 
       <div class="splitcontentright">
         <p>
+          <%= f.select :period, RiskActivity::ACTIVITY_PERIODS.collect {|p| [l("label_risk_activity_period_#{p}"), p]}, { :include_blank => true }, { :class => 'activity-period-select' } %>
+        </p>
+
+        <p>
           <%= f.date_field :planned_date %>
         </p>
 

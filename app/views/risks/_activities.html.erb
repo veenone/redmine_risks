@@ -28,6 +28,7 @@
       <tr>
         <th><%= l(:field_activity_type) %></th>
         <th><%= l(:field_subject) %></th>
+        <th><%= l(:field_period) %></th>
         <th><%= l(:field_status) %></th>
         <th><%= l(:field_assigned_to) %></th>
         <th><%= l(:field_planned_date) %></th>
@@ -48,6 +49,15 @@
             <%= link_to activity.subject, risk_activity_path(risk, activity) %>
             <% if activity.notes.any? %>
               <span class="note-count" title="<%= l(:label_updates) %>">(<%= activity.notes.count %>)</span>
+            <% end %>
+          </td>
+          <td>
+            <% if activity.period.present? %>
+              <span class="period-badge <%= activity.period %>">
+                <%= l("label_risk_activity_period_#{activity.period}") %>
+              </span>
+            <% else %>
+              -
             <% end %>
           </td>
           <td>

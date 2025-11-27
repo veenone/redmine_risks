@@ -104,6 +104,19 @@ en:
   label_risk_activity_status_completed: Completed
   label_risk_activity_status_cancelled: Cancelled
 
+  # Activity Periods
+  field_period: Period
+  field_next_occurrence: Next Occurrence
+  label_recurring_activity: Recurring Activity
+  label_risk_activity_period_once: One-time
+  label_risk_activity_period_weekly: Weekly
+  label_risk_activity_period_bi_weekly: Bi-weekly
+  label_risk_activity_period_monthly: Monthly
+  label_risk_activity_period_bi_monthly: Bi-monthly
+  label_risk_activity_period_quarterly: Quarterly
+  label_risk_activity_period_semi_annual: Semi-annual
+  label_risk_activity_period_annual: Annual
+
   # Activity Type Descriptions
   label_activity_type_guide: Activity Type Guide
   label_risk_activity_type_assessment_desc: Evaluate and analyze the risk to understand its nature, likelihood, and potential impact.

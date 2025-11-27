@@ -53,6 +53,21 @@
           <th><%= l(:field_author) %>:</th>
           <td><%= link_to_user(@activity.author) %></td>
         </tr>
+        <tr>
+          <th><%= l(:field_period) %>:</th>
+          <td>
+            <% if @activity.period.present? %>
+              <span class="period-badge <%= @activity.period %>">
+                <%= l("label_risk_activity_period_#{@activity.period}") %>
+              </span>
+              <% if @activity.recurring? %>
+                <span class="recurring-indicator" title="<%= l(:label_recurring_activity) %>">&#x21BB;</span>
+              <% end %>
+            <% else %>
+              -
+            <% end %>
+          </td>
+        </tr>
       </table>
     </div>
 
@@ -83,6 +98,12 @@
           <th><%= l(:field_updated_on) %>:</th>
           <td><%= format_time(@activity.updated_on) %></td>
         </tr>
+        <% if @activity.recurring? && @activity.next_occurrence_date %>
+          <tr>
+            <th><%= l(:field_next_occurrence) %>:</th>
+            <td><%= format_date(@activity.next_occurrence_date) %></td>
+          </tr>
+        <% end %>
       </table>
     </div>
   </div>
