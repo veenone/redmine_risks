@@ -1,0 +1,70 @@
+<div class="box tabular">
+  <%= labelled_fields_for :risk_activity, @activity do |f| %>
+    <div class="splitcontent">
+      <div class="splitcontentleft">
+        <p>
+          <%= f.select :activity_type, RiskActivity::ACTIVITY_TYPES.collect {|t| [l("label_risk_activity_type_#{t}"), t]}, { :required => true }, { :class => 'activity-type-select' } %>
+        </p>
+
+        <p>
+          <%= f.text_field :subject, :size => 60, :maxlength => 255, :required => true %>
+        </p>
+
+        <p>
+          <%= f.select :assigned_to_id, principals_options_for_select(@risk.assignable_users, @activity.assigned_to), :include_blank => true %>
+        </p>
+      </div>
+
+      <div class="splitcontentright">
+        <p>
+          <%= f.date_field :planned_date %>
+        </p>
+
+        <% unless @activity.new_record? %>
+          <p>
+            <%= f.select :status, RiskActivity::ACTIVITY_STATUSES.collect {|s| [l("label_risk_activity_status_#{s}"), s]}, {}, { :class => 'activity-status-select' } %>
+          </p>
+
+          <p>
+            <%= f.date_field :completed_date %>
+          </p>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="clear"></div>
+
+    <p>
+      <%= f.label :description %>
+      <%= link_to_function content_tag(:span, l(:button_edit), :class => 'icon icon-edit'), '$(this).hide(); $("#activity_description_and_toolbar").show()' unless @activity.new_record? && @activity.description.blank? %>
+      <%= content_tag 'span', :id => "activity_description_and_toolbar", :style => (@activity.new_record? || @activity.description.present? ? nil : 'display:none') do %>
+        <%= f.text_area :description,
+                        :cols => 60,
+                        :rows => 8,
+                        :class => 'wiki-edit',
+                        :no_label => true %>
+      <% end %>
+    </p>
+    <%= wikitoolbar_for 'risk_activity_description' %>
+  <% end %>
+</div>
+
+<div class="activity-type-hints box">
+  <h4><%= l(:label_activity_type_guide) %></h4>
+  <dl class="activity-type-descriptions">
+    <dt class="assessment"><%= l(:label_risk_activity_type_assessment) %></dt>
+    <dd><%= l(:label_risk_activity_type_assessment_desc) %></dd>
+
+    <dt class="mitigation"><%= l(:label_risk_activity_type_mitigation) %></dt>
+    <dd><%= l(:label_risk_activity_type_mitigation_desc) %></dd>
+
+    <dt class="monitoring"><%= l(:label_risk_activity_type_monitoring) %></dt>
+    <dd><%= l(:label_risk_activity_type_monitoring_desc) %></dd>
+
+    <dt class="review"><%= l(:label_risk_activity_type_review) %></dt>
+    <dd><%= l(:label_risk_activity_type_review_desc) %></dd>
+
+    <dt class="contingency"><%= l(:label_risk_activity_type_contingency) %></dt>
+    <dd><%= l(:label_risk_activity_type_contingency_desc) %></dd>
+  </dl>
+</div>

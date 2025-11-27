@@ -27,6 +27,9 @@ Redmine::Plugin.register :redmine_risks do
 
     # Related issues
     permission :manage_risk_relations, {}
+
+    # Risk activities
+    permission :manage_risk_activities, { :risk_activities => [:new, :create, :edit, :update, :destroy] }
   end
 
   # Pulls are added to the activity view

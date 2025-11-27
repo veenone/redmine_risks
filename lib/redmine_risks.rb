@@ -5,6 +5,7 @@ require File.dirname(__FILE__) + '/redmine_risks/patches/project_patch'
 
 # Force load the subclasses in development mode
 require_dependency File.dirname(__FILE__) + '/../app/models/risk_category'
+require_dependency File.dirname(__FILE__) + '/../app/models/risk_activity'
 
 module RedmineRisks
   class << self

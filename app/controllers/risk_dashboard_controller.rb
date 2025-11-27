@@ -36,17 +36,30 @@ class RiskDashboardController < ApplicationController
     def project
       # Show dashboard for a specific project
       retrieve_query(RiskQuery)
-      
+
       # Use the association if it exists, otherwise use direct Risk query
       if @project.respond_to?(:risks)
         project_risks = @project.risks
       else
         project_risks = Risk.where(project_id: @project.id)
       end
-      
+
       @total_risks = project_risks.count
       @open_risks = project_risks.where(closed_on: nil).count
       @closed_risks = project_risks.where.not(closed_on: nil).count
+
+      # Risk Activities data
+      risk_ids = project_risks.pluck(:id)
+      @all_activities = RiskActivity.where(risk_id: risk_ids)
+      @open_activities = @all_activities.open
+      @overdue_activities = @all_activities.overdue.includes(:risk, :assigned_to).limit(5)
+      @upcoming_activities = @all_activities.open
+                                            .where('planned_date >= ?', Date.today)
+                                            .order(planned_date: :asc)
+                                            .includes(:risk, :assigned_to)
+                                            .limit(5)
+      @activities_by_status = @all_activities.group(:status).count
+      @activities_by_type = @all_activities.group(:activity_type).count
       
       # Risks by probability and impact
       @risks_by_probability = project_risks.group(:probability).count.transform_keys { |k| k || 0 }

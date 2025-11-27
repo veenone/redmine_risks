@@ -1,0 +1,445 @@
+/* Risk Activities Section */
+.risk-activities-section {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #e1e4e8;
+}
+
+.risk-activities-section h3 {
+  margin-bottom: 15px;
+  color: #505050;
+}
+
+/* Activities Summary */
+.activities-summary {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+  padding: 12px 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.activity-stat {
+  font-size: 13px;
+  color: #666;
+}
+
+.activity-stat strong {
+  font-size: 16px;
+  margin-right: 4px;
+}
+
+.activity-stat.open strong { color: #3c8dbc; }
+.activity-stat.completed strong { color: #5cb85c; }
+.activity-stat.overdue strong { color: #d9534f; }
+
+/* Activity Cards */
+.activities-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.activity-card {
+  background: #fff;
+  border: 1px solid #e1e4e8;
+  border-radius: 6px;
+  padding: 15px;
+  position: relative;
+  transition: box-shadow 0.2s;
+}
+
+.activity-card:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.activity-card.overdue {
+  border-left: 4px solid #d9534f;
+}
+
+.activity-card.activity-completed {
+  background: #f9fff9;
+  border-left: 4px solid #5cb85c;
+}
+
+.activity-card.activity-cancelled {
+  background: #fafafa;
+  opacity: 0.7;
+}
+
+/* Activity Header */
+.activity-header {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+/* Activity Type Badge */
+.activity-type-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.activity-type-badge.assessment { background: #e3f2fd; color: #1565c0; }
+.activity-type-badge.mitigation { background: #fff3e0; color: #ef6c00; }
+.activity-type-badge.monitoring { background: #e8f5e9; color: #2e7d32; }
+.activity-type-badge.review { background: #f3e5f5; color: #7b1fa2; }
+.activity-type-badge.contingency { background: #ffebee; color: #c62828; }
+
+/* Activity Status Badge */
+.activity-status-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.activity-status-badge.planned { background: #e0e0e0; color: #616161; }
+.activity-status-badge.in_progress { background: #bbdefb; color: #1565c0; }
+.activity-status-badge.completed { background: #c8e6c9; color: #2e7d32; }
+.activity-status-badge.cancelled { background: #ffcdd2; color: #c62828; }
+
+/* Activity Content */
+.activity-content {
+  flex: 1;
+}
+
+.activity-subject {
+  margin: 0 0 8px 0;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.activity-subject a {
+  color: #333;
+  text-decoration: none;
+}
+
+.activity-subject a:hover {
+  color: #3c8dbc;
+}
+
+.activity-description {
+  color: #666;
+  font-size: 13px;
+  margin: 0 0 10px 0;
+}
+
+/* Activity Meta */
+.activity-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  font-size: 12px;
+  color: #777;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.meta-icon {
+  font-size: 14px;
+}
+
+.meta-item.overdue {
+  color: #d9534f;
+  font-weight: 500;
+}
+
+.days-indicator {
+  font-size: 11px;
+  margin-left: 4px;
+}
+
+.days-indicator.overdue { color: #d9534f; }
+.days-indicator.soon { color: #f0ad4e; }
+
+.notes-count {
+  color: #3c8dbc;
+}
+
+/* Progress Bar */
+.activity-progress {
+  margin-top: 12px;
+}
+
+.progress-bar {
+  height: 6px;
+  background: #e9ecef;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-bar.large {
+  height: 24px;
+  border-radius: 4px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3c8dbc, #5bc0de);
+  border-radius: 3px;
+  transition: width 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.progress-text {
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Activity Actions */
+.activity-actions {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  display: flex;
+  gap: 5px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.activity-card:hover .activity-actions {
+  opacity: 1;
+}
+
+/* Activity Detail Page */
+.risk-activity-detail {
+  background: #fff;
+  border: 1px solid #e1e4e8;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.activity-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e1e4e8;
+}
+
+.activity-status-large {
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.activity-status-large.planned { background: #e0e0e0; color: #616161; }
+.activity-status-large.in_progress { background: #bbdefb; color: #1565c0; }
+.activity-status-large.completed { background: #c8e6c9; color: #2e7d32; }
+.activity-status-large.cancelled { background: #ffcdd2; color: #c62828; }
+
+.activity-overdue-badge {
+  background: #d9534f;
+  color: #fff;
+  padding: 5px 15px;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.activity-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+}
+
+@media (max-width: 768px) {
+  .activity-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.detail-section h4 {
+  margin: 0 0 12px 0;
+  color: #505050;
+  font-size: 14px;
+  border-bottom: 1px solid #e1e4e8;
+  padding-bottom: 8px;
+}
+
+.attributes-table {
+  width: 100%;
+}
+
+.attributes-table th {
+  text-align: left;
+  width: 40%;
+  padding: 8px 0;
+  color: #777;
+  font-weight: normal;
+  vertical-align: top;
+}
+
+.attributes-table td {
+  padding: 8px 0;
+}
+
+.attributes-table td.overdue {
+  color: #d9534f;
+  font-weight: 500;
+}
+
+.activity-progress-section,
+.activity-description-section {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #e1e4e8;
+}
+
+.activity-progress-section h4,
+.activity-description-section h4 {
+  margin: 0 0 12px 0;
+  color: #505050;
+}
+
+/* Activity Notes Section */
+.activity-notes-section {
+  background: #fff;
+  border: 1px solid #e1e4e8;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.activity-notes-section h3 {
+  margin: 0 0 20px 0;
+  color: #505050;
+  border-bottom: 1px solid #e1e4e8;
+  padding-bottom: 10px;
+}
+
+.add-note-form {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.note-input {
+  margin-bottom: 10px;
+}
+
+.note-input textarea {
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+  font-size: 14px;
+}
+
+.note-actions {
+  text-align: right;
+}
+
+.notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.note-item {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 3px solid #3c8dbc;
+}
+
+.note-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 12px;
+}
+
+.note-author {
+  font-weight: 600;
+  color: #333;
+}
+
+.note-date {
+  color: #999;
+}
+
+.note-content {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Risk Info Box */
+.risk-info.box {
+  background: #f0f7ff;
+  border: 1px solid #bdd7ff;
+  margin-bottom: 20px;
+}
+
+.risk-meta {
+  color: #666;
+  font-size: 13px;
+}
+
+/* Activity Type Guide */
+.activity-type-hints {
+  margin-top: 20px;
+  background: #f8f9fa;
+}
+
+.activity-type-hints h4 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #505050;
+}
+
+.activity-type-descriptions dt {
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-bottom: 5px;
+}
+
+.activity-type-descriptions dt.assessment { background: #e3f2fd; color: #1565c0; }
+.activity-type-descriptions dt.mitigation { background: #fff3e0; color: #ef6c00; }
+.activity-type-descriptions dt.monitoring { background: #e8f5e9; color: #2e7d32; }
+.activity-type-descriptions dt.review { background: #f3e5f5; color: #7b1fa2; }
+.activity-type-descriptions dt.contingency { background: #ffebee; color: #c62828; }
+
+.activity-type-descriptions dd {
+  margin: 0 0 15px 0;
+  color: #666;
+  font-size: 13px;
+}
+
+/* Dashboard Activities Card */
+.dashboard-activities-card .activity-item {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.dashboard-activities-card .activity-item:last-child {
+  border-bottom: none;
+}
+
+.dashboard-activities-card .activity-item.overdue {
+  background: #fff5f5;
+}
+
+.dashboard-activities-card .activity-risk {
+  font-size: 12px;
+  color: #666;
+}

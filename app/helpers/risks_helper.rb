@@ -126,6 +126,8 @@ module RisksHelper
       item.treatments? ? content_tag('div', textilizable(item, :treatments), :class => "wiki") : ''
     when :lessons
       item.lessons? ? content_tag('div', textilizable(item, :lessons), :class => "wiki") : ''
+    when :owner
+      value ? link_to_user(value) : ''
     else
       column_value_without_risks(column, item, value)
     end

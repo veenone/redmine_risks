@@ -115,6 +115,96 @@
   
   <div class="dashboard-row">
     <div class="dashboard-card">
+      <h3><%= l(:label_activities_summary) %></h3>
+      <div class="dashboard-stats">
+        <div class="stat-item">
+          <div class="stat-value"><%= @all_activities.count %></div>
+          <div class="stat-label"><%= l(:label_total) %></div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" style="color: #3c8dbc;"><%= @open_activities.count %></div>
+          <div class="stat-label"><%= l(:label_open) %></div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" style="color: #5cb85c;"><%= @activities_by_status['completed'] || 0 %></div>
+          <div class="stat-label"><%= l(:label_completed) %></div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" style="color: #d9534f;"><%= @overdue_activities.count %></div>
+          <div class="stat-label"><%= l(:label_overdue) %></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-card">
+      <h3><%= l(:label_overdue_activities) %></h3>
+      <% if @overdue_activities.any? %>
+        <table class="list">
+          <tbody>
+            <% @overdue_activities.each do |activity| %>
+              <tr class="activity-item overdue">
+                <td>
+                  <span class="activity-type-badge <%= activity.activity_type %>">
+                    <%= l("label_risk_activity_type_#{activity.activity_type}") %>
+                  </span>
+                </td>
+                <td>
+                  <%= link_to activity.subject, risk_activity_path(activity.risk, activity) %>
+                  <div class="activity-risk">
+                    <%= l(:field_risk) %>: <%= link_to activity.risk.subject, risk_path(activity.risk) %>
+                  </div>
+                </td>
+                <td class="overdue">
+                  <%= format_date(activity.planned_date) %>
+                  <small>(<%= l(:label_overdue_by, :days => activity.days_until_due.abs) %>)</small>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <p class="nodata"><%= l(:label_no_data) %></p>
+      <% end %>
+    </div>
+
+    <div class="dashboard-card">
+      <h3><%= l(:label_upcoming_activities) %></h3>
+      <% if @upcoming_activities.any? %>
+        <table class="list">
+          <tbody>
+            <% @upcoming_activities.each do |activity| %>
+              <tr class="activity-item">
+                <td>
+                  <span class="activity-type-badge <%= activity.activity_type %>">
+                    <%= l("label_risk_activity_type_#{activity.activity_type}") %>
+                  </span>
+                </td>
+                <td>
+                  <%= link_to activity.subject, risk_activity_path(activity.risk, activity) %>
+                  <div class="activity-risk">
+                    <%= l(:field_risk) %>: <%= link_to activity.risk.subject, risk_path(activity.risk) %>
+                  </div>
+                </td>
+                <td>
+                  <%= format_date(activity.planned_date) %>
+                  <% if activity.days_until_due %>
+                    <small class="<%= activity.days_until_due <= 7 ? 'soon' : '' %>">
+                      (<%= l(:label_due_in, :days => activity.days_until_due) %>)
+                    </small>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% else %>
+        <p class="nodata"><%= l(:label_no_data) %></p>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="dashboard-row">
+    <div class="dashboard-card">
       <h3><%= l(:label_top_risks) %></h3>
       <table class="list">
         <thead>
@@ -183,6 +273,7 @@
 
 <% content_for :header_tags do %>
   <%= stylesheet_link_tag 'risk_dashboard', :plugin => 'redmine_risks' %>
+  <%= stylesheet_link_tag 'risk_activities', :plugin => 'redmine_risks' %>
   <%= javascript_include_tag 'chart.min.js', :plugin => 'redmine_risks' %>
   <%= javascript_include_tag 'risk_dashboard', :plugin => 'redmine_risks' %>
   

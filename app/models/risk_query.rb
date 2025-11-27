@@ -16,6 +16,7 @@ class RiskQuery < Query
     QueryColumn.new(:strategy, :sortable => "#{Risk.table_name}.strategy"),
     QueryColumn.new(:author, :sortable => lambda {User.fields_for_order_statement("authors")}, :groupable => true),
     QueryColumn.new(:assigned_to, :sortable => lambda {User.fields_for_order_statement}, :groupable => true),
+    QueryColumn.new(:owner, :sortable => lambda {User.fields_for_order_statement("owners")}, :groupable => true),
     QueryColumn.new(:created_on, :sortable => "#{Risk.table_name}.created_on", :default_order => 'desc'),
     QueryColumn.new(:updated_on, :sortable => "#{Risk.table_name}.updated_on", :default_order => 'desc'),
     QueryColumn.new(:closed_on, :sortable => "#{Risk.table_name}.closed_on", :default_order => 'desc'),
@@ -36,6 +37,7 @@ class RiskQuery < Query
     add_available_filter "category_id", :type => :list, :values => RiskCategory.all.collect{|s| [s.name, s.id.to_s] }
     add_available_filter "author_id", :type => :list, :values => lambda { author_values }
     add_available_filter "assigned_to_id", :type => :list_optional, :values => lambda { assigned_to_values }
+    add_available_filter "owner_id", :type => :list_optional, :values => lambda { assigned_to_values }
     add_available_filter "member_of_group", :type => :list_optional, :values => lambda { Group.givable.visible.collect {|g| [g.name, g.id.to_s] } }
     add_available_filter "assigned_to_role", :type => :list_optional, :values => lambda { Role.givable.collect {|r| [r.name, r.id.to_s] } }
     add_available_filter "status", :type => :list, :values => Risk::RISK_STATUS.map{|s| [format_risk_status(s), s] }
@@ -83,7 +85,7 @@ class RiskQuery < Query
       limit(options[:limit]).
       offset(options[:offset])
 
-    scope = scope.preload([:author, :assigned_to] & columns.map(&:name))
+    scope = scope.preload([:author, :assigned_to, :owner] & columns.map(&:name))
     if has_custom_field_column?
       scope = scope.preload(:custom_values)
     end
@@ -217,6 +219,9 @@ class RiskQuery < Query
       end
       if order_options.include?('users')
         joins << "LEFT OUTER JOIN #{User.table_name} ON #{User.table_name}.id = #{queried_table_name}.assigned_to_id"
+      end
+      if order_options.include?('owners')
+        joins << "LEFT OUTER JOIN #{User.table_name} owners ON owners.id = #{queried_table_name}.owner_id"
       end
       if order_options.include?('last_journal_user')
         joins << "LEFT OUTER JOIN #{Journal.table_name} ON #{Journal.table_name}.id = (SELECT MAX(#{Journal.table_name}.id) FROM #{Journal.table_name}" +

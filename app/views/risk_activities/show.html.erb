@@ -1,0 +1,150 @@
+<div class="contextual">
+  <% if @activity.editable? %>
+    <%= link_to l(:button_edit), edit_risk_activity_path(@risk, @activity), class: 'icon icon-edit' %>
+  <% end %>
+  <%= link_to l(:button_back), risk_path(@risk), class: 'icon icon-back' %>
+</div>
+
+<h2>
+  <span class="activity-type-badge <%= @activity.activity_type %>">
+    <%= l("label_risk_activity_type_#{@activity.activity_type}") %>
+  </span>
+  <%= @activity.subject %>
+</h2>
+
+<div class="risk-activity-detail <%= @activity.status_css_class %>">
+  <div class="activity-detail-header">
+    <div class="activity-status-large <%= @activity.status %>">
+      <%= l("label_risk_activity_status_#{@activity.status}") %>
+    </div>
+
+    <% if @activity.overdue? %>
+      <div class="activity-overdue-badge">
+        <%= l(:label_overdue) %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="activity-detail-grid">
+    <div class="detail-section">
+      <h4><%= l(:label_details) %></h4>
+      <table class="attributes-table">
+        <tr>
+          <th><%= l(:field_risk) %>:</th>
+          <td><%= link_to @risk.subject, risk_path(@risk) %></td>
+        </tr>
+        <tr>
+          <th><%= l(:field_activity_type) %>:</th>
+          <td><%= l("label_risk_activity_type_#{@activity.activity_type}") %></td>
+        </tr>
+        <tr>
+          <th><%= l(:field_status) %>:</th>
+          <td>
+            <span class="activity-status-badge <%= @activity.status %>">
+              <%= l("label_risk_activity_status_#{@activity.status}") %>
+            </span>
+          </td>
+        </tr>
+        <tr>
+          <th><%= l(:field_assigned_to) %>:</th>
+          <td><%= @activity.assigned_to ? link_to_user(@activity.assigned_to) : "-" %></td>
+        </tr>
+        <tr>
+          <th><%= l(:field_author) %>:</th>
+          <td><%= link_to_user(@activity.author) %></td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="detail-section">
+      <h4><%= l(:label_dates) %></h4>
+      <table class="attributes-table">
+        <tr>
+          <th><%= l(:field_planned_date) %>:</th>
+          <td class="<%= 'overdue' if @activity.overdue? %>">
+            <%= @activity.planned_date ? format_date(@activity.planned_date) : "-" %>
+            <% if @activity.open? && @activity.days_until_due %>
+              <% days = @activity.days_until_due %>
+              <small class="days-indicator <%= days < 0 ? 'overdue' : (days <= 7 ? 'soon' : '') %>">
+                (<%= days < 0 ? l(:label_overdue_by, :days => days.abs) : l(:label_due_in, :days => days) %>)
+              </small>
+            <% end %>
+          </td>
+        </tr>
+        <tr>
+          <th><%= l(:field_completed_date) %>:</th>
+          <td><%= @activity.completed_date ? format_date(@activity.completed_date) : "-" %></td>
+        </tr>
+        <tr>
+          <th><%= l(:field_created_on) %>:</th>
+          <td><%= format_time(@activity.created_on) %></td>
+        </tr>
+        <tr>
+          <th><%= l(:field_updated_on) %>:</th>
+          <td><%= format_time(@activity.updated_on) %></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <% if @activity.open? %>
+    <div class="activity-progress-section">
+      <h4><%= l(:label_progress) %></h4>
+      <div class="progress-bar large">
+        <div class="progress-fill" style="width: <%= @activity.progress_percentage %>%">
+          <span class="progress-text"><%= @activity.progress_percentage %>%</span>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <% if @activity.description.present? %>
+    <div class="activity-description-section">
+      <h4><%= l(:field_description) %></h4>
+      <div class="wiki">
+        <%= textilizable @activity.description %>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<div class="activity-notes-section">
+  <h3><%= l(:label_activity_updates) %> (<%= @activity.notes.count %>)</h3>
+
+  <% if @activity.editable? %>
+    <div class="add-note-form">
+      <%= form_tag(risk_activity_notes_path(@risk, @activity), method: :post) do %>
+        <div class="note-input">
+          <%= text_area_tag 'risk_activity_note[content]', '', rows: 3, placeholder: l(:label_add_update_placeholder), class: 'wiki-edit' %>
+        </div>
+        <div class="note-actions">
+          <%= submit_tag l(:button_add_update), class: 'btn btn-primary' %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="notes-list">
+    <% if @activity.notes.any? %>
+      <% @activity.notes.recent.each do |note| %>
+        <div class="note-item">
+          <div class="note-header">
+            <span class="note-author"><%= link_to_user(note.author) %></span>
+            <span class="note-date"><%= format_time(note.created_on) %></span>
+          </div>
+          <div class="note-content">
+            <%= textilizable note.content %>
+          </div>
+        </div>
+      <% end %>
+    <% else %>
+      <p class="nodata"><%= l(:label_no_updates_yet) %></p>
+    <% end %>
+  </div>
+</div>
+
+<% content_for :header_tags do %>
+  <%= stylesheet_link_tag 'risk_activities', :plugin => 'redmine_risks' %>
+<% end %>
+
+<% html_title l(:label_risk_activity), @activity.subject %>

@@ -1,0 +1,32 @@
+<div class="contextual">
+  <%= link_to l(:button_back), risk_path(@risk), class: 'icon icon-back' %>
+</div>
+
+<h2><%= l(:label_risk_activity_new) %></h2>
+
+<div class="risk-info box">
+  <strong><%= l(:field_risk) %>:</strong>
+  <%= link_to @risk.subject, risk_path(@risk) %>
+  <span class="risk-meta">
+    (<%= l(:field_status) %>: <%= format_risk_status(@risk.status) %>
+    <% if @risk.probability && @risk.impact %>
+      | <%= l(:field_magnitude) %>: <%= @risk.magnitude %>
+    <% end %>)
+  </span>
+</div>
+
+<%= form_for @activity, url: risk_activities_path(@risk), method: :post do |f| %>
+  <%= render partial: 'form' %>
+
+  <p class="buttons">
+    <%= submit_tag l(:button_create) %>
+    <%= submit_tag l(:button_create_and_continue), :name => 'continue' %>
+    <%= link_to l(:button_cancel), risk_path(@risk) %>
+  </p>
+<% end %>
+
+<% content_for :header_tags do %>
+  <%= stylesheet_link_tag 'risk_activities', :plugin => 'redmine_risks' %>
+<% end %>
+
+<% html_title l(:label_risk_activity_new) %>

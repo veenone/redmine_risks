@@ -19,6 +19,10 @@ resources :risks, :except => [:index, :new, :create] do
   post   'issues', :to => 'risk_issues#create'
   delete 'issues/:issue_id', :to => 'risk_issues#destroy'
 
+  resources :activities, controller: 'risk_activities', except: [:index] do
+    resources :notes, controller: 'risk_activity_notes', only: [:create, :destroy]
+  end
+
   collection do
     post 'bulk_update'
   end

@@ -14,11 +14,13 @@
     <% end %>
   </p>
 
-  <div class="attributes">    
+  <div class="attributes">
     <%= issue_fields_rows do |rows|
       rows.left l(:field_status), format_risk_status(@risk.status), :class => 'status'
 
       rows.left l(:field_assigned_to), (@risk.assigned_to ? link_to_user(@risk.assigned_to) : "-"), :class => 'assigned-to'
+
+      rows.left l(:field_owner), (@risk.owner ? link_to_user(@risk.owner) : "-"), :class => 'owner'
 
       rows.left l(:field_category), (@risk.category ? @risk.category.name : "-"), :class => 'category'
 
@@ -72,6 +74,8 @@
   <div id="relations">
     <%= render :partial => 'relations' %>
   </div>
+
+  <%= render :partial => 'activities', :locals => { :risk => @risk } %>
 </div>
 
 <% if @journals.present? %>

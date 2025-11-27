@@ -9,9 +9,11 @@ class Risk < ActiveRecord::Base
   belongs_to :project
   belongs_to :author, :class_name => 'User'
   belongs_to :assigned_to, :class_name => 'Principal'
+  belongs_to :owner, :class_name => 'Principal'
   belongs_to :category, :class_name => 'RiskCategory'
 
   has_many :journals, :as => :journalized, :dependent => :destroy, :inverse_of => :journalized
+  has_many :activities, :class_name => 'RiskActivity', :dependent => :destroy
 
   has_and_belongs_to_many :issues, :join_table => 'risk_issues', :after_add => :relation_added, :after_remove => :relation_removed
 
@@ -184,6 +186,7 @@ class Risk < ActiveRecord::Base
 
   safe_attributes 'category_id',
                   'assigned_to_id',
+                  'owner_id',
                   'subject',
                   'description',
                   'probability',
@@ -334,6 +337,14 @@ class Risk < ActiveRecord::Base
     if assigned_to_id_was.present? && assignee = Principal.find_by_id(assigned_to_id_was)
       users << assignee
     end
+    users.uniq.sort
+  end
+
+  # Users that can be set as risk owner
+  def assignable_owners
+    users = project.assignable_users.to_a
+    users << author if author && author.active?
+    users << owner if owner && owner.active?
     users.uniq.sort
   end
 

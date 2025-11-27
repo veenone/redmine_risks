@@ -11,6 +11,10 @@ en:
   field_strategy: Strategy
   field_treatments: Treatments
   field_lessons: Lessons learned
+  field_owner: Owner
+  field_activity_type: Activity Type
+  field_planned_date: Planned Date
+  field_completed_date: Completed Date
   label_risk_status_open: Open
   label_risk_status_closed: Closed
   label_risk_status_rejected: Rejected
@@ -75,3 +79,65 @@ en:
   label_risk_details: Risk Details
   label_treatments_and_lessons: Treatments & Lessons
   label_generated_on: Generated on
+
+  # Risk Activities
+  label_risk_activities: Risk Activities
+  label_risk_activity: Risk Activity
+  label_risk_activity_new: New Risk Activity
+  label_risk_activity_edit: Edit Risk Activity
+  label_risk_activity_plural: Risk Activities
+  permission_manage_risk_activities: Manage risk activities
+  notice_risk_activity_successful_create: Risk activity successfully created.
+  notice_risk_activity_successful_update: Risk activity successfully updated.
+  notice_risk_activity_successful_delete: Risk activity successfully deleted.
+
+  # Activity Types
+  label_risk_activity_type_assessment: Assessment
+  label_risk_activity_type_mitigation: Mitigation
+  label_risk_activity_type_monitoring: Monitoring
+  label_risk_activity_type_review: Review
+  label_risk_activity_type_contingency: Contingency
+
+  # Activity Statuses
+  label_risk_activity_status_planned: Planned
+  label_risk_activity_status_in_progress: In Progress
+  label_risk_activity_status_completed: Completed
+  label_risk_activity_status_cancelled: Cancelled
+
+  # Activity Type Descriptions
+  label_activity_type_guide: Activity Type Guide
+  label_risk_activity_type_assessment_desc: Evaluate and analyze the risk to understand its nature, likelihood, and potential impact.
+  label_risk_activity_type_mitigation_desc: Actions to reduce the probability or impact of the risk occurring.
+  label_risk_activity_type_monitoring_desc: Ongoing tracking and observation of risk indicators and triggers.
+  label_risk_activity_type_review_desc: Periodic evaluation of risk status and effectiveness of response strategies.
+  label_risk_activity_type_contingency_desc: Backup plans to be activated if the risk materializes.
+
+  # Activity Notes
+  label_activity_updates: Updates & Notes
+  label_add_update_placeholder: Add an update or note about this activity...
+  button_add_update: Add Update
+  label_no_updates_yet: No updates yet
+  notice_risk_activity_note_successful_create: Update added successfully.
+  notice_risk_activity_note_successful_delete: Update deleted successfully.
+  error_risk_activity_note_create_failed: Failed to add update.
+  error_risk_activity_note_delete_failed: Failed to delete update.
+
+  # Activity Dashboard
+  label_upcoming_activities: Upcoming Activities
+  label_overdue_activities: Overdue Activities
+  label_activities_summary: Activities Summary
+  label_due_in:
+    one: "%{days} day left"
+    other: "%{days} days left"
+  label_overdue_by:
+    one: "%{days} day overdue"
+    other: "%{days} days overdue"
+  label_overdue: Overdue
+  label_total: Total
+  label_open: Open
+  label_completed: Completed
+  label_updates: updates
+  label_progress: Progress
+  label_details: Details
+  label_dates: Dates
+  field_risk: Risk
