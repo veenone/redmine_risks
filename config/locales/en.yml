@@ -127,11 +127,11 @@ en:
   label_overdue_activities: Overdue Activities
   label_activities_summary: Activities Summary
   label_due_in:
-    one: "%{days} day left"
-    other: "%{days} days left"
+    one: "%{count} day left"
+    other: "%{count} days left"
   label_overdue_by:
-    one: "%{days} day overdue"
-    other: "%{days} days overdue"
+    one: "%{count} day overdue"
+    other: "%{count} days overdue"
   label_overdue: Overdue
   label_total: Total
   label_open: Open

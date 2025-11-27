@@ -69,7 +69,7 @@
                     <% if activity.open? && activity.days_until_due %>
                       <% days = activity.days_until_due %>
                       <small class="days-indicator <%= days < 0 ? 'overdue' : (days <= 7 ? 'soon' : '') %>">
-                        (<%= days < 0 ? l(:label_overdue_by, :days => days.abs) : l(:label_due_in, :days => days) %>)
+                        (<%= days < 0 ? l(:label_overdue_by, :count => days.abs) : l(:label_due_in, :count => days) %>)
                       </small>
                     <% end %>
                   </span>

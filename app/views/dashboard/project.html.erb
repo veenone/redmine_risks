@@ -156,7 +156,7 @@
                 </td>
                 <td class="overdue">
                   <%= format_date(activity.planned_date) %>
-                  <small>(<%= l(:label_overdue_by, :days => activity.days_until_due.abs) %>)</small>
+                  <small>(<%= l(:label_overdue_by, :count => activity.days_until_due.abs) %>)</small>
                 </td>
               </tr>
             <% end %>
@@ -189,7 +189,7 @@
                   <%= format_date(activity.planned_date) %>
                   <% if activity.days_until_due %>
                     <small class="<%= activity.days_until_due <= 7 ? 'soon' : '' %>">
-                      (<%= l(:label_due_in, :days => activity.days_until_due) %>)
+                      (<%= l(:label_due_in, :count => activity.days_until_due) %>)
                     </small>
                   <% end %>
                 </td>
