@@ -8,35 +8,56 @@
 
 <div class="dashboard">
   <div class="dashboard-row">
-    <div class="dashboard-card">
-      <h3><%= l(:label_risks_overview) %></h3>
-      <div class="dashboard-stats">
-        <div class="stat-item">
-          <div class="stat-value"><%= @total_risks %></div>
-          <div class="stat-label"><%= l(:label_total_risks) %></div>
+    <div class="dashboard-card wide">
+      <h3><%= l(:label_risk_status_and_trends) %></h3>
+      <div class="dashboard-flex-container">
+        <div class="dashboard-stats-container">
+          <div class="dashboard-stats">
+            <div class="stat-item">
+              <div class="stat-value"><%= @total_risks %></div>
+              <div class="stat-label"><%= l(:label_total_risks) %></div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value"><%= @open_risks %></div>
+              <div class="stat-label"><%= l(:label_open_risks) %></div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value"><%= @closed_risks %></div>
+              <div class="stat-label"><%= l(:label_closed_risks) %></div>
+            </div>
+          </div>
+          <div class="status-details">
+            <% Risk::RISK_STATUS.each do |status| %>
+              <div class="status-item">
+                <div class="status-color" style="background-color: <%= status == 'open' ? 'rgba(54, 162, 235, 0.8)' : (status == 'closed' ? 'rgba(75, 192, 192, 0.8)' : 'rgba(255, 99, 132, 0.8)') %>;"></div>
+                <div class="status-name"><%= l("label_risk_status_#{status}") %></div>
+                <div class="status-count"><%= @risks_by_status[status] || 0 %></div>
+                <div class="status-percent">
+                  <%= number_to_percentage((@risks_by_status[status] || 0).to_f / (@total_risks > 0 ? @total_risks : 1) * 100, precision: 0) %>
+                </div>
+              </div>
+            <% end %>
+          </div>
         </div>
-        <div class="stat-item">
-          <div class="stat-value"><%= @open_risks %></div>
-          <div class="stat-label"><%= l(:label_open_risks) %></div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value"><%= @closed_risks %></div>
-          <div class="stat-label"><%= l(:label_closed_risks) %></div>
+        <div class="dashboard-chart-container">
+          <canvas id="risksStatusChart"></canvas>
         </div>
       </div>
     </div>
-    
-    <div class="dashboard-card">
-      <h3><%= l(:label_risks_by_status) %></h3>
-      <div class="chart-container">
-        <canvas id="risksStatusChart"></canvas>
-      </div>
-    </div>
-    
+  </div>
+  
+  <div class="dashboard-row">
     <div class="dashboard-card">
       <h3><%= l(:label_risks_by_strategy) %></h3>
       <div class="chart-container">
         <canvas id="risksStrategyChart"></canvas>
+      </div>
+    </div>
+    
+    <div class="dashboard-card">
+      <h3><%= l(:label_risk_cia_assessment) %></h3>
+      <div class="chart-container">
+        <canvas id="riskCiaChart"></canvas>
       </div>
     </div>
   </div>
@@ -269,6 +290,50 @@
       </div>
     </div>
   </div>
+
+  <div class="dashboard-row">
+    <div class="dashboard-card">
+      <h3><%= l(:label_risk_significance) %></h3>
+      <div class="dashboard-stats">
+        <div class="stat-item">
+          <div class="stat-value"><%= @avg_significance ? @avg_significance.round(2) : 0 %></div>
+          <div class="stat-label"><%= l(:label_average_significance) %></div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value"><%= @max_significance || 0 %></div>
+          <div class="stat-label"><%= l(:label_max_significance) %></div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="dashboard-card">
+      <h3><%= l(:label_top_risks_by_significance) %></h3>
+      <table class="list">
+        <thead>
+          <tr>
+            <th><%= l(:label_risk_id) %></th>
+            <th><%= l(:field_subject) %></th>
+            <th><%= l(:field_level_of_significance) %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if @top_risks_by_significance && @top_risks_by_significance.any? %>
+            <% @top_risks_by_significance.each do |risk| %>
+              <tr class="<%= risk.css_classes %>">
+                <td><%= link_to "##{risk.id}", risk_path(risk) %></td>
+                <td><%= link_to risk.subject, risk_path(risk) %></td>
+                <td><%= risk.level_of_significance %></td>
+              </tr>
+            <% end %>
+          <% else %>
+            <tr>
+              <td colspan="3" class="text-center"><%= l(:label_no_data) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
 <% content_for :header_tags do %>
@@ -277,40 +342,288 @@
   <%= javascript_include_tag 'chart.min.js', :plugin => 'redmine_risks' %>
   <%= javascript_include_tag 'risk_dashboard', :plugin => 'redmine_risks' %>
   
+  <style>
+    .dashboard-flex-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    
+    .dashboard-stats-container {
+      flex: 1;
+      min-width: 300px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    
+    .dashboard-chart-container {
+      flex: 1;
+      min-width: 300px;
+      height: 250px;
+    }
+    
+    .status-details {
+      margin-top: 20px;
+    }
+    
+    .status-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    
+    .status-color {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      margin-right: 8px;
+    }
+    
+    .status-name {
+      flex: 1;
+    }
+    
+    .status-count {
+      font-weight: bold;
+      margin-right: 10px;
+    }
+    
+    .status-percent {
+      width: 40px;
+      text-align: right;
+      color: #666;
+    }
+    
+    @media (max-width: 768px) {
+      .dashboard-flex-container {
+        flex-direction: column;
+      }
+      
+      .dashboard-chart-container {
+        min-height: 250px;
+      }
+    }
+  </style>
+  
   <script type="text/javascript">
     $(document).ready(function() {
-      // Status chart data
-      var statusLabels = <%= Risk::RISK_STATUS.map { |s| l("label_risk_status_#{s}") }.to_json.html_safe %>;
-      var statusData = <%= Risk::RISK_STATUS.map { |s| @risks_by_status[s] || 0 }.to_json.html_safe %>;
-      
-      // Strategy chart data
-      var strategyLabels = <%= Risk::RISK_STRATEGY.map { |s| l("label_risk_strategy_#{s}") }.to_json.html_safe %>;
-      var strategyData = <%= Risk::RISK_STRATEGY.map { |s| @risks_by_strategy[s] || 0 }.to_json.html_safe %>;
-      
-      // Probability and Impact data
-      var probabilityLabels = <%= Risk::RISK_PROBABILITY.map.with_index { |p, i| l("label_risk_probability_#{p}") }.to_json.html_safe %>;
-      var impactLabels = <%= Risk::RISK_IMPACT.map.with_index { |i, idx| l("label_risk_impact_#{i}") }.to_json.html_safe %>;
-      
-      // Probability data
-      var probabilityData = [
-        <% (0..4).each do |p_idx| %>
-          <%= @risks_by_probability[p_idx * 25] || 0 %>,
-        <% end %>
-      ];
-      
-      // Impact data
-      var impactData = [
-        <% (0..4).each do |i_idx| %>
-          <%= @risks_by_impact[i_idx * 25] || 0 %>,
-        <% end %>
-      ];
-      
-      initDashboardCharts(
-        statusLabels, statusData,
-        strategyLabels, strategyData,
-        probabilityLabels, probabilityData,
-        impactLabels, impactData
-      );
+      // Chart colors
+      var chartColors = {
+        blue: 'rgba(54, 162, 235, 0.8)',
+        blueLight: 'rgba(54, 162, 235, 0.2)',
+        green: 'rgba(75, 192, 192, 0.8)',
+        greenLight: 'rgba(75, 192, 192, 0.2)',
+        red: 'rgba(255, 99, 132, 0.8)',
+        redLight: 'rgba(255, 99, 132, 0.2)',
+        orange: 'rgba(255, 159, 64, 0.8)',
+        orangeLight: 'rgba(255, 159, 64, 0.2)',
+        purple: 'rgba(153, 102, 255, 0.8)',
+        purpleLight: 'rgba(153, 102, 255, 0.2)',
+        yellow: 'rgba(255, 205, 86, 0.8)',
+        yellowLight: 'rgba(255, 205, 86, 0.2)',
+        grey: 'rgba(201, 203, 207, 0.8)',
+        greyLight: 'rgba(201, 203, 207, 0.2)'
+      };
+
+      // 1. STATUS CHART
+      var statusCtx = document.getElementById('risksStatusChart');
+      if (statusCtx) {
+        var statusLabels = <%= Risk::RISK_STATUS.map { |s| l("label_risk_status_#{s}") }.to_json.html_safe %>;
+        var statusData = <%= Risk::RISK_STATUS.map { |s| @risks_by_status[s] || 0 }.to_json.html_safe %>;
+        var statusColors = [chartColors.blue, chartColors.green, chartColors.red];
+        
+        new Chart(statusCtx, {
+          type: 'doughnut',
+          data: {
+            labels: statusLabels,
+            datasets: [{
+              data: statusData,
+              backgroundColor: statusColors,
+              borderWidth: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            legend: {
+              position: 'right',
+              labels: {
+                boxWidth: 12
+              }
+            },
+            tooltips: {
+              callbacks: {
+                label: function(tooltipItem, data) {
+                  var dataset = data.datasets[tooltipItem.datasetIndex];
+                  var total = dataset.data.reduce(function(previousValue, currentValue) {
+                    return previousValue + currentValue;
+                  });
+                  var currentValue = dataset.data[tooltipItem.index];
+                  var percentage = Math.floor(((currentValue/total) * 100)+0.5);
+                  return data.labels[tooltipItem.index] + ': ' + currentValue + ' (' + percentage + '%)';
+                }
+              }
+            }
+          }
+        });
+      }
+
+      // 2. STRATEGY CHART
+      var strategyCtx = document.getElementById('risksStrategyChart');
+      if (strategyCtx) {
+        var strategyLabels = <%= Risk::RISK_STRATEGY.map { |s| l("label_risk_strategy_#{s}") }.to_json.html_safe %>;
+        var strategyData = <%= Risk::RISK_STRATEGY.map { |s| @risks_by_strategy[s] || 0 }.to_json.html_safe %>;
+        var strategyColors = [chartColors.green, chartColors.blue, chartColors.orange, chartColors.purple];
+        
+        new Chart(strategyCtx, {
+          type: 'doughnut',
+          data: {
+            labels: strategyLabels,
+            datasets: [{
+              data: strategyData,
+              backgroundColor: strategyColors,
+              borderWidth: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            legend: {
+              position: 'right',
+              labels: {
+                boxWidth: 12
+              }
+            },
+            tooltips: {
+              callbacks: {
+                label: function(tooltipItem, data) {
+                  var dataset = data.datasets[tooltipItem.datasetIndex];
+                  var total = dataset.data.reduce(function(previousValue, currentValue) {
+                    return previousValue + currentValue;
+                  });
+                  var currentValue = dataset.data[tooltipItem.index];
+                  var percentage = Math.floor(((currentValue/total) * 100)+0.5);
+                  return data.labels[tooltipItem.index] + ': ' + currentValue + ' (' + percentage + '%)';
+                }
+              }
+            }
+          }
+        });
+      }
+
+      // 3. DISTRIBUTION CHART
+      var distributionCtx = document.getElementById('riskDistributionChart');
+      if (distributionCtx) {
+        var probabilityLabels = <%= Risk::RISK_PROBABILITY.map.with_index { |p, i| l("label_risk_probability_#{p}") }.to_json.html_safe %>;
+        var probabilityData = [
+          <% (0..4).each do |p_idx| %>
+            <%= @risks_by_probability[p_idx * 25] || 0 %>,
+          <% end %>
+        ];
+        var impactData = [
+          <% (0..4).each do |i_idx| %>
+            <%= @risks_by_impact[i_idx * 25] || 0 %>,
+          <% end %>
+        ];
+        
+        new Chart(distributionCtx, {
+          type: 'bar',
+          data: {
+            labels: probabilityLabels,
+            datasets: [
+              {
+                label: 'Probability',
+                data: probabilityData,
+                backgroundColor: chartColors.blue,
+                borderColor: chartColors.blue,
+                borderWidth: 1
+              },
+              {
+                label: 'Impact',
+                data: impactData,
+                backgroundColor: chartColors.red,
+                borderColor: chartColors.red,
+                borderWidth: 1
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              yAxes: [{
+                ticks: {
+                  beginAtZero: true
+                }
+              }]
+            }
+          }
+        });
+      }
+
+      // 4. CIA CHART
+      var ciaCtx = document.getElementById('riskCiaChart');
+      if (ciaCtx) {
+        var ciaLabels = ["Confidentiality", "Integrity", "Availability"];
+        var ciaDataLow = [
+          <%= @risks_by_confidentiality[0] || 0 %>,
+          <%= @risks_by_integrity[0] || 0 %>,
+          <%= @risks_by_availability[0] || 0 %>
+        ];
+        var ciaDataMedium = [
+          <%= @risks_by_confidentiality[1] || 0 %>,
+          <%= @risks_by_integrity[1] || 0 %>,
+          <%= @risks_by_availability[1] || 0 %>
+        ];
+        var ciaDataHigh = [
+          <%= @risks_by_confidentiality[2] || 0 %>,
+          <%= @risks_by_integrity[2] || 0 %>,
+          <%= @risks_by_availability[2] || 0 %>
+        ];
+        
+        new Chart(ciaCtx, {
+          type: 'bar',
+          data: {
+            labels: ciaLabels,
+            datasets: [
+              {
+                label: 'Low',
+                data: ciaDataLow,
+                backgroundColor: chartColors.green,
+                borderWidth: 1
+              },
+              {
+                label: 'Medium',
+                data: ciaDataMedium,
+                backgroundColor: chartColors.orange,
+                borderWidth: 1
+              },
+              {
+                label: 'High',
+                data: ciaDataHigh,
+                backgroundColor: chartColors.red,
+                borderWidth: 1
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              xAxes: [{
+                stacked: true
+              }],
+              yAxes: [{
+                stacked: true,
+                ticks: {
+                  beginAtZero: true
+                }
+              }]
+            }
+          }
+        });
+      }
     });
   </script>
 <% end %>

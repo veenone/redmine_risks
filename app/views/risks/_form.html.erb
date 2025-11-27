@@ -61,4 +61,87 @@
   <% end %>
 
   <%= call_hook(:view_risks_form_details_bottom, { :risk => @risk, :form => f }) %>
+
+  <div class="splitcontent">
+  <div class="splitcontentleft">
+    <h3><%= l(:label_risk_cia_assessment) %></h3>
+    
+    <% if @risk.safe_attribute?('confidentiality') %>
+      <p>
+        <%= f.label_for_field :confidentiality %>
+        <%= f.select :confidentiality, 
+                     Risk::RISK_CONFIDENTIALITY.map { |c| [l("label_risk_confidentiality_#{c}"), Risk::RISK_CONFIDENTIALITY.index(c)] }, 
+                     :include_blank => true %>
+      </p>
+    <% end %>
+    
+    <% if @risk.safe_attribute?('integrity') %>
+      <p>
+        <%= f.label_for_field :integrity %>
+        <%= f.select :integrity, 
+                     Risk::RISK_INTEGRITY.map { |i| [l("label_risk_integrity_#{i}"), Risk::RISK_INTEGRITY.index(i)] }, 
+                     :include_blank => true %>
+      </p>
+    <% end %>
+    
+    <% if @risk.safe_attribute?('availability') %>
+      <p>
+        <%= f.label_for_field :availability %>
+        <%= f.select :availability, 
+                     Risk::RISK_AVAILABILITY.map { |a| [l("label_risk_availability_#{a}"), Risk::RISK_AVAILABILITY.index(a)] }, 
+                     :include_blank => true %>
+      </p>
+    <% end %>
+  </div>
+  
+  <div class="splitcontentright">
+    <h3><%= l(:label_risk_ownership) %></h3>
+    
+    <% if @risk.safe_attribute?('risk_owner_id') %>
+      <p>
+        <%= f.label_for_field :risk_owner_id %>
+        <%= f.select :risk_owner_id, principals_options_for_select(@risk.assignable_users, @risk.risk_owner), 
+                     :include_blank => true %>
+      </p>
+    <% end %>
+    
+    <% if @risk.safe_attribute?('action_owner_id') %>
+      <p>
+        <%= f.label_for_field :action_owner_id %>
+        <%= f.select :action_owner_id, principals_options_for_select(@risk.assignable_users, @risk.action_owner), 
+                     :include_blank => true %>
+      </p>
+    <% end %>
+  </div>
+</div>
+
+<div class="splitcontent">
+  <div class="splitcontentleft">
+    <h3><%= l(:label_risk_significance) %></h3>
+    
+    <% if @risk.safe_attribute?('probability_point') %>
+      <p>
+        <%= f.label_for_field :probability_point %>
+        <%= f.select :probability_point, (1..10).map { |p| [p, p] }, :include_blank => true %>
+        <em class="info"><%= l(:text_probability_point_info) %></em>
+      </p>
+    <% end %>
+    
+    <% if @risk.safe_attribute?('impact_point') %>
+      <p>
+        <%= f.label_for_field :impact_point %>
+        <%= f.select :impact_point, (1..10).map { |i| [i, i] }, :include_blank => true %>
+        <em class="info"><%= l(:text_impact_point_info) %></em>
+      </p>
+    <% end %>
+    
+    <% if @risk.level_of_significance.present? %>
+      <p>
+        <label><%= l(:field_level_of_significance) %></label>
+        <span class="value"><%= @risk.level_of_significance %></span>
+        <em class="info"><%= l(:text_significance_calculation_info) %></em>
+      </p>
+    <% end %>
+  </div>
+</div>
 <% end %>

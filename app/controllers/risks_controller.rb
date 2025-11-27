@@ -215,7 +215,23 @@ class RisksController < ApplicationController
   def build_risk_params_for_update
     risk_attributes = (params[:risk] || {}).deep_dup
     risk_attributes.transform_values! { |value| value.present? ? value : nil }
-
+  
+    # Add probability_point and impact_point calculated from probability and impact if they're present
+    if risk_attributes[:probability].present?
+      # Convert percentage to a point scale (e.g., 0-10)
+      risk_attributes[:probability_point] = (risk_attributes[:probability].to_i / 10.0).ceil
+    end
+    
+    if risk_attributes[:impact].present?
+      # Convert percentage to a point scale (e.g., 0-10)
+      risk_attributes[:impact_point] = (risk_attributes[:impact].to_i / 10.0).ceil
+    end
+    
+    # Calculate level_of_significance
+    if risk_attributes[:probability_point].present? && risk_attributes[:impact_point].present?
+      risk_attributes[:level_of_significance] = risk_attributes[:probability_point] * risk_attributes[:impact_point]
+    end
+  
     if risk_attributes && params[:conflict_resolution]
       case params[:conflict_resolution]
       when 'overwrite'
@@ -226,7 +242,7 @@ class RisksController < ApplicationController
         return nil
       end
     end
-
+  
     risk_attributes
   end
 

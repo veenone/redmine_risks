@@ -110,6 +110,21 @@ module RisksHelper
     details_to_strings(details, no_html, options)
   end
 
+  def format_risk_confidentiality(level)
+    return unless level.present? && level.to_i < Risk::RISK_CONFIDENTIALITY.length
+    l("label_risk_confidentiality_#{Risk::RISK_CONFIDENTIALITY[level.to_i]}")
+  end
+  
+  def format_risk_integrity(level)
+    return unless level.present? && level.to_i < Risk::RISK_INTEGRITY.length
+    l("label_risk_integrity_#{Risk::RISK_INTEGRITY[level.to_i]}")
+  end
+  
+  def format_risk_availability(level)
+    return unless level.present? && level.to_i < Risk::RISK_AVAILABILITY.length
+    l("label_risk_availability_#{Risk::RISK_AVAILABILITY[level.to_i]}")
+  end
+
   def column_value_with_risks(column, item, value)
     case column.name
     when :id, :subject
@@ -128,11 +143,40 @@ module RisksHelper
       item.lessons? ? content_tag('div', textilizable(item, :lessons), :class => "wiki") : ''
     when :owner
       value ? link_to_user(value) : ''
+    when :confidentiality
+      format_risk_confidentiality(value)
+    when :integrity
+      format_risk_integrity(value)
+    when :availability
+      format_risk_availability(value)
+    when :risk_owner
+      item.risk_owner ? link_to_user(item.risk_owner) : ''
+    when :action_owner
+      item.action_owner ? link_to_user(item.action_owner) : ''
+    when :probability_point
+      value
+    when :impact_point
+      value
+    when :level_of_significance
+      value
     else
       column_value_without_risks(column, item, value)
     end
   end
 
+  def status_color(status)
+    case status.to_s
+    when 'open'
+      'rgba(54, 162, 235, 0.8)'  # Blue
+    when 'closed'
+      'rgba(75, 192, 192, 0.8)'  # Green
+    when 'rejected'
+      'rgba(255, 99, 132, 0.8)'  # Red
+    else
+      'rgba(201, 203, 207, 0.8)' # Grey
+    end
+  end
+  
   alias_method :column_value_without_risks, :column_value
   alias_method :column_value, :column_value_with_risks
 end

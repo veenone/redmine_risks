@@ -32,6 +32,29 @@
     end %>
   </div>
 
+  <div class="attributes">
+  <%= issue_fields_rows do |rows|
+    rows.left l(:field_risk_owner), (@risk.risk_owner ? link_to_user(@risk.risk_owner) : "-"), :class => 'risk-owner'
+    rows.left l(:field_action_owner), (@risk.action_owner ? link_to_user(@risk.action_owner) : "-"), :class => 'action-owner'
+  end %>
+</div>
+
+<div class="attributes">
+  <%= issue_fields_rows do |rows|
+    rows.left l(:field_confidentiality), (@risk.confidentiality.present? ? l("label_risk_confidentiality_#{Risk::RISK_CONFIDENTIALITY[@risk.confidentiality]}") : "-"), :class => 'confidentiality'
+    rows.left l(:field_integrity), (@risk.integrity.present? ? l("label_risk_integrity_#{Risk::RISK_INTEGRITY[@risk.integrity]}") : "-"), :class => 'integrity'
+    rows.left l(:field_availability), (@risk.availability.present? ? l("label_risk_availability_#{Risk::RISK_AVAILABILITY[@risk.availability]}") : "-"), :class => 'availability'
+  end %>
+</div>
+
+<div class="attributes">
+  <%= issue_fields_rows do |rows|
+    rows.left l(:field_probability_point), (@risk.probability_point.present? ? @risk.probability_point : "-"), :class => 'probability-point'
+    rows.left l(:field_impact_point), (@risk.impact_point.present? ? @risk.impact_point : "-"), :class => 'impact-point'
+    rows.left l(:field_level_of_significance), (@risk.level_of_significance.present? ? @risk.level_of_significance : "-"), :class => 'level-of-significance'
+  end %>
+</div>
+
   <% if @risk.description? -%>
     <hr />
 

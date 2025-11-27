@@ -24,7 +24,15 @@ class RiskQuery < Query
     QueryColumn.new(:description, :inline => false),
     QueryColumn.new(:treatments, :inline => false),
     QueryColumn.new(:lessons, :inline => false),
-    QueryColumn.new(:last_notes, :caption => :label_last_notes, :inline => false)
+    QueryColumn.new(:last_notes, :caption => :label_last_notes, :inline => false),
+    QueryColumn.new(:confidentiality, :sortable => "#{Risk.table_name}.confidentiality"),
+    QueryColumn.new(:integrity, :sortable => "#{Risk.table_name}.integrity"),
+    QueryColumn.new(:availability, :sortable => "#{Risk.table_name}.availability"),
+    QueryColumn.new(:risk_owner, :sortable => lambda {User.fields_for_order_statement("risk_owners")}, :groupable => true),
+    QueryColumn.new(:action_owner, :sortable => lambda {User.fields_for_order_statement("action_owners")}, :groupable => true),
+    QueryColumn.new(:probability_point, :sortable => "#{Risk.table_name}.probability_point", :default_order => 'desc'),
+    QueryColumn.new(:impact_point, :sortable => "#{Risk.table_name}.impact_point", :default_order => 'desc'),
+    QueryColumn.new(:level_of_significance, :sortable => "#{Risk.table_name}.level_of_significance", :default_order => 'desc')
   ]
 
   def initialize(attributes=nil, *args)
@@ -52,6 +60,36 @@ class RiskQuery < Query
     add_available_filter "subproject_id", :type => :list_subprojects, :values => lambda { subproject_values } if project && !project.leaf?
     add_available_filter "related_issue", :type => :relation, :label => options[:name], :values => lambda {all_projects_values}
     add_available_filter "risk_id", :type => :integer, :label => :label_risk
+
+    # Add the new CIA and significance filters
+    add_available_filter "confidentiality", 
+      :type => :list, 
+      :values => Risk::RISK_CONFIDENTIALITY.map.with_index { |c, i| [l("label_risk_confidentiality_#{c}"), i.to_s] }
+
+    add_available_filter "integrity", 
+      :type => :list, 
+      :values => Risk::RISK_INTEGRITY.map.with_index { |i, index| [l("label_risk_integrity_#{i}"), index.to_s] }
+
+    add_available_filter "availability", 
+      :type => :list, 
+      :values => Risk::RISK_AVAILABILITY.map.with_index { |a, index| [l("label_risk_availability_#{a}"), index.to_s] }
+
+    add_available_filter "risk_owner_id", 
+      :type => :list_optional, 
+      :values => lambda { assignable_values_options(:risk_owner_id) }
+
+    add_available_filter "action_owner_id", 
+      :type => :list_optional, 
+      :values => lambda { assignable_values_options(:action_owner_id) }
+
+    add_available_filter "probability_point", 
+      :type => :integer
+
+    add_available_filter "impact_point", 
+      :type => :integer
+
+    add_available_filter "level_of_significance", 
+      :type => :integer
 
     add_associations_custom_fields_filters :project, :author, :assigned_to
   end
@@ -230,6 +268,12 @@ class RiskQuery < Query
       end
       if order_options.include?('enumerations')
         joins << "LEFT OUTER JOIN #{RiskCategory.table_name} ON #{RiskCategory.table_name}.id = #{queried_table_name}.priority_id"
+      end
+      if order_options.include?('risk_owners')
+        joins << "LEFT OUTER JOIN #{User.table_name} risk_owners ON risk_owners.id = #{queried_table_name}.risk_owner_id"
+      end
+      if order_options.include?('action_owners')
+        joins << "LEFT OUTER JOIN #{User.table_name} action_owners ON action_owners.id = #{queried_table_name}.action_owner_id"
       end
     end
 
