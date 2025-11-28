@@ -5,34 +5,46 @@ class RiskQuery < Query
   self.view_permission = :view_risks
 
   self.available_columns = [
+    # Primary columns (in requested order)
     QueryColumn.new(:id, :sortable => "#{Risk.table_name}.id", :default_order => 'desc', :caption => :label_risk_id),
-    QueryColumn.new(:project, :groupable => "#{Risk.table_name}.project_id", :sortable => "#{Project.table_name}.id"),
-    QueryColumn.new(:subject, :sortable => "#{Risk.table_name}.subject"),
     QueryColumn.new(:category, :sortable => "#{RiskCategory.table_name}.position", :default_order => 'desc', :groupable => true),
+    QueryColumn.new(:subject, :sortable => "#{Risk.table_name}.subject", :caption => :field_risk_name),
+    QueryColumn.new(:description, :inline => false, :caption => :field_threat_event),
+    QueryColumn.new(:risk_owner, :sortable => lambda {User.fields_for_order_statement("risk_owners")}, :groupable => true),
+    QueryColumn.new(:impacted_assets, :sortable => "#{Risk.table_name}.impacted_assets"),
+    QueryColumn.new(:confidentiality, :sortable => "#{Risk.table_name}.confidentiality", :caption => :label_cia_c),
+    QueryColumn.new(:integrity, :sortable => "#{Risk.table_name}.integrity", :caption => :label_cia_i),
+    QueryColumn.new(:availability, :sortable => "#{Risk.table_name}.availability", :caption => :label_cia_a),
+    QueryColumn.new(:impact_point, :sortable => "#{Risk.table_name}.impact_point", :default_order => 'desc', :caption => :field_impact),
+    QueryColumn.new(:probability_point, :sortable => "#{Risk.table_name}.probability_point", :default_order => 'desc', :caption => :field_probability),
+    QueryColumn.new(:level_of_significance, :sortable => "#{Risk.table_name}.level_of_significance", :default_order => 'desc'),
+    QueryColumn.new(:risk_treatment_plan, :sortable => "#{Risk.table_name}.risk_treatment_plan"),
+    QueryColumn.new(:risk_treatment_owner, :sortable => lambda {User.fields_for_order_statement("risk_treatment_owners")}, :groupable => true),
+
+    # Additional columns
+    QueryColumn.new(:project, :groupable => "#{Risk.table_name}.project_id", :sortable => "#{Project.table_name}.id"),
+    QueryColumn.new(:status, :sortable => "#{Risk.table_name}.status"),
+    QueryColumn.new(:strategy, :sortable => "#{Risk.table_name}.strategy"),
     QueryColumn.new(:probability, :sortable => "#{Risk.table_name}.probability", :default_order => 'desc'),
     QueryColumn.new(:impact, :sortable => "#{Risk.table_name}.impact", :default_order => 'desc'),
     QueryColumn.new(:magnitude, :sortable => "(#{Risk.table_name}.impact * #{Risk.table_name}.probability)", :default_order => 'desc'),
-    QueryColumn.new(:status, :sortable => "#{Risk.table_name}.status"),
-    QueryColumn.new(:strategy, :sortable => "#{Risk.table_name}.strategy"),
     QueryColumn.new(:author, :sortable => lambda {User.fields_for_order_statement("authors")}, :groupable => true),
     QueryColumn.new(:assigned_to, :sortable => lambda {User.fields_for_order_statement}, :groupable => true),
     QueryColumn.new(:owner, :sortable => lambda {User.fields_for_order_statement("owners")}, :groupable => true),
+    QueryColumn.new(:action_owner, :sortable => lambda {User.fields_for_order_statement("action_owners")}, :groupable => true),
     QueryColumn.new(:created_on, :sortable => "#{Risk.table_name}.created_on", :default_order => 'desc'),
     QueryColumn.new(:updated_on, :sortable => "#{Risk.table_name}.updated_on", :default_order => 'desc'),
     QueryColumn.new(:closed_on, :sortable => "#{Risk.table_name}.closed_on", :default_order => 'desc'),
     QueryColumn.new(:last_updated_by, :sortable => lambda {User.fields_for_order_statement("last_journal_user")}),
-    QueryColumn.new(:description, :inline => false),
+
+    # Block columns (text fields)
+    QueryColumn.new(:vulnerabilities, :inline => false),
+    QueryColumn.new(:consequences, :inline => false),
+    QueryColumn.new(:counter_measures, :inline => false),
+    QueryColumn.new(:risk_treatment, :inline => false),
     QueryColumn.new(:treatments, :inline => false),
     QueryColumn.new(:lessons, :inline => false),
-    QueryColumn.new(:last_notes, :caption => :label_last_notes, :inline => false),
-    QueryColumn.new(:confidentiality, :sortable => "#{Risk.table_name}.confidentiality"),
-    QueryColumn.new(:integrity, :sortable => "#{Risk.table_name}.integrity"),
-    QueryColumn.new(:availability, :sortable => "#{Risk.table_name}.availability"),
-    QueryColumn.new(:risk_owner, :sortable => lambda {User.fields_for_order_statement("risk_owners")}, :groupable => true),
-    QueryColumn.new(:action_owner, :sortable => lambda {User.fields_for_order_statement("action_owners")}, :groupable => true),
-    QueryColumn.new(:probability_point, :sortable => "#{Risk.table_name}.probability_point", :default_order => 'desc'),
-    QueryColumn.new(:impact_point, :sortable => "#{Risk.table_name}.impact_point", :default_order => 'desc'),
-    QueryColumn.new(:level_of_significance, :sortable => "#{Risk.table_name}.level_of_significance", :default_order => 'desc')
+    QueryColumn.new(:last_notes, :caption => :label_last_notes, :inline => false)
   ]
 
   def initialize(attributes=nil, *args)
@@ -88,8 +100,16 @@ class RiskQuery < Query
     add_available_filter "impact_point", 
       :type => :integer
 
-    add_available_filter "level_of_significance", 
+    add_available_filter "level_of_significance",
       :type => :integer
+
+    add_available_filter "risk_treatment_plan",
+      :type => :list,
+      :values => Risk::RISK_TREATMENT_PLAN.map { |p| [l("label_risk_treatment_plan_#{p}"), p] }
+
+    add_available_filter "risk_treatment_owner_id",
+      :type => :list_optional,
+      :values => lambda { assignable_values_options(:risk_treatment_owner_id) }
 
     add_associations_custom_fields_filters :project, :author, :assigned_to
   end
@@ -100,7 +120,12 @@ class RiskQuery < Query
   end
 
   def default_columns_names
-    @default_columns_names = [:id, :subject, :category, :probability, :impact, :magnitude, :strategy, :assigned_to, :updated_on, :treatments]
+    @default_columns_names = [
+      :id, :category, :subject, :risk_owner, :impacted_assets,
+      :confidentiality, :integrity, :availability,
+      :impact_point, :probability_point, :level_of_significance,
+      :risk_treatment_plan, :risk_treatment_owner
+    ]
   end
 
   def default_sort_criteria
@@ -274,6 +299,9 @@ class RiskQuery < Query
       end
       if order_options.include?('action_owners')
         joins << "LEFT OUTER JOIN #{User.table_name} action_owners ON action_owners.id = #{queried_table_name}.action_owner_id"
+      end
+      if order_options.include?('risk_treatment_owners')
+        joins << "LEFT OUTER JOIN #{User.table_name} risk_treatment_owners ON risk_treatment_owners.id = #{queried_table_name}.risk_treatment_owner_id"
       end
     end
 

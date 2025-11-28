@@ -177,13 +177,61 @@ module RisksHelper
     when :action_owner
       item.action_owner ? link_to_user(item.action_owner) : ''
     when :probability_point
-      value
+      format_probability_point(value)
     when :impact_point
-      value
+      format_impact_point(value)
     when :level_of_significance
-      value
+      format_level_of_significance(value)
+    when :risk_treatment_plan
+      format_risk_treatment_plan(value)
+    when :risk_treatment_owner
+      item.risk_treatment_owner ? link_to_user(item.risk_treatment_owner) : ''
+    when :impacted_assets
+      truncate_text(item.impacted_assets, 50)
+    when :vulnerabilities
+      item.vulnerabilities.present? ? content_tag('div', textilizable(item, :vulnerabilities), :class => "wiki") : ''
+    when :consequences
+      item.consequences.present? ? content_tag('div', textilizable(item, :consequences), :class => "wiki") : ''
+    when :counter_measures
+      item.counter_measures.present? ? content_tag('div', textilizable(item, :counter_measures), :class => "wiki") : ''
+    when :risk_treatment
+      item.risk_treatment.present? ? content_tag('div', textilizable(item, :risk_treatment), :class => "wiki") : ''
     else
       column_value_without_risks(column, item, value)
+    end
+  end
+
+  def format_probability_point(value)
+    return '' unless value.present?
+    label = Risk.probability_point_label(value.to_i)
+    content_tag('span', label || value, :class => "probability-point point-#{value}")
+  end
+
+  def format_impact_point(value)
+    return '' unless value.present?
+    label = Risk.impact_point_label(value.to_i)
+    content_tag('span', label || value, :class => "impact-point point-#{value}")
+  end
+
+  def format_level_of_significance(value)
+    return '' unless value.present?
+    css_class = get_significance_class(value.to_i)
+    content_tag('span', value, :class => "significance-badge #{css_class}")
+  end
+
+  def format_risk_treatment_plan(value)
+    return '' unless value.present?
+    label = l("label_risk_treatment_plan_#{value}", :default => value.humanize)
+    content_tag('span', label, :class => "treatment-plan-badge #{value}")
+  end
+
+  def truncate_text(text, length = 50)
+    return '' unless text.present?
+    truncated = text.to_s.gsub(/[\r\n]+/, ' ').strip
+    if truncated.length > length
+      truncated[0, length] + '...'
+    else
+      truncated
     end
   end
 

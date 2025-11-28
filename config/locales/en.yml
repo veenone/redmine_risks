@@ -74,11 +74,16 @@ en:
   label_risk_probability_impact_distribution: Probability & Impact Distribution
   label_projects_with_risks: Projects with Risks
   label_high_risks: High/Extreme Risks
+  label_high_significance_risks: High Significance
   label_view_dashboard: View Dashboard
   label_view_risks: View Risk List
   label_risk_list: Risk List
   label_no_data: No data available
   label_actions: Actions
+  label_columns: Columns
+  label_show_hide_columns: Show/Hide Columns
+  label_show_all: Show All
+  label_show_essential: Essential Only
  
   label_risk_status_unknown: Unknown
 
@@ -112,6 +117,11 @@ en:
   field_integrity: Integrity
   field_availability: Availability
   label_risk_cia_assessment: CIA Assessment
+  label_cia_c: "C"
+  label_cia_i: "I"
+  label_cia_a: "A"
+  field_risk_name: "Risk"
+  field_threat_event: "Threat Event"
   
   # CIA levels
   label_risk_confidentiality_low: Low

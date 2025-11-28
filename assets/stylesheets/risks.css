@@ -1,13 +1,283 @@
+/* ============================================
+   Risk Index View Styles
+   ============================================ */
+
+/* Summary Cards Section */
+.risk-index-summary {
+  margin-bottom: 20px;
+}
+
+.summary-cards {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.summary-card {
+  flex: 1;
+  min-width: 140px;
+  max-width: 200px;
+  padding: 15px 20px;
+  border-radius: 6px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+  border: 1px solid #e0e0e0;
+  background: #fff;
+}
+
+.summary-card .card-value {
+  display: block;
+  font-size: 28px;
+  font-weight: bold;
+  line-height: 1.2;
+}
+
+.summary-card .card-label {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  margin-top: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summary-card.total {
+  border-left: 4px solid #628db6;
+}
+.summary-card.total .card-value {
+  color: #628db6;
+}
+
+.summary-card.open {
+  border-left: 4px solid #f0ad4e;
+}
+.summary-card.open .card-value {
+  color: #f0ad4e;
+}
+
+.summary-card.closed {
+  border-left: 4px solid #5cb85c;
+}
+.summary-card.closed .card-value {
+  color: #5cb85c;
+}
+
+.summary-card.critical {
+  border-left: 4px solid #d9534f;
+}
+.summary-card.critical .card-value {
+  color: #d9534f;
+}
+
+/* Index Content Container */
+.risk-index-content {
+  background: #fff;
+  border: 1px solid #d7d7d7;
+  border-radius: 4px;
+  padding: 15px;
+}
+
+/* No Data Container */
+.nodata-container {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.nodata-container .nodata {
+  margin-bottom: 15px;
+}
+
+/* Pagination Container */
+.pagination-container {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* Column Toggle Feature */
+.column-toggle-container {
+  position: relative;
+  margin: 10px 0;
+  text-align: right;
+}
+
+.column-toggle-btn {
+  padding: 6px 12px;
+  background: #f8f8f8;
+  border: 1px solid #d7d7d7;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+  color: #505050;
+}
+
+.column-toggle-btn:hover {
+  background: #e8e8e8;
+}
+
+.column-toggle-btn .icon {
+  margin-right: 5px;
+}
+
+.column-selector {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 100;
+  background: #fff;
+  border: 1px solid #d7d7d7;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  width: auto;
+  min-width: 200px;
+}
+
+.column-selector-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  background: #f8f8f8;
+  border-bottom: 1px solid #e0e0e0;
+  border-radius: 4px 4px 0 0;
+}
+
+.column-selector-header .close-btn {
+  font-size: 18px;
+  color: #999;
+  text-decoration: none;
+  line-height: 1;
+  margin-left: 15px;
+}
+
+.column-selector-header .close-btn:hover {
+  color: #333;
+}
+
+.column-selector-content {
+  padding: 8px 0;
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+.column-checkbox {
+  display: flex;
+  align-items: center;
+  padding: 6px 15px;
+  cursor: pointer;
+  font-size: 13px;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.column-checkbox:hover {
+  background: #f0f4f7;
+}
+
+.column-checkbox input {
+  margin: 0 10px 0 0;
+  flex-shrink: 0;
+}
+
+.column-selector-actions {
+  padding: 10px 15px;
+  background: #f8f8f8;
+  border-top: 1px solid #e0e0e0;
+  text-align: left;
+  font-size: 12px;
+  border-radius: 0 0 4px 4px;
+}
+
+.column-selector-actions a {
+  color: #628db6;
+  text-decoration: none;
+}
+
+.column-selector-actions a:hover {
+  text-decoration: underline;
+}
+
 /* Risk list table styles */
 table.risks td.description,
 table.risks td.treatments,
 table.risks td.lessons,
-table.risks td.last_notes {
+table.risks td.last_notes,
+table.risks td.impacted_assets,
+table.risks td.vulnerabilities,
+table.risks td.consequences,
+table.risks td.counter_measures,
+table.risks td.risk_treatment {
   color: #777;
   font-size: 90%;
   padding: 4px 4px 4px 24px;
   text-align: left;
   white-space: normal;
+}
+
+/* Significance Badge in List */
+.significance-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.significance-badge.critical {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.significance-badge.high {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+}
+
+.significance-badge.medium {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.significance-badge.low {
+  background-color: #e2e3e5;
+  color: #383d41;
+  border: 1px solid #d6d8db;
+}
+
+/* Probability and Impact Point Badges */
+.probability-point,
+.impact-point {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+.probability-point.point-1,
+.impact-point.point-1 {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.probability-point.point-2,
+.impact-point.point-2 {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.probability-point.point-3,
+.impact-point.point-3 {
+  background-color: #ffe0b2;
+  color: #e65100;
+}
+
+.probability-point.point-4,
+.impact-point.point-4 {
+  background-color: #f8d7da;
+  color: #721c24;
 }
 
 /* ============================================

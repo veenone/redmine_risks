@@ -2,22 +2,152 @@
   <% if User.current.allowed_to?(:add_risks, @project) %>
     <%= link_to l(:label_new_risk), new_project_risk_path(@project), :class => 'icon icon-add' %>
   <% end %>
+  <% if User.current.allowed_to?(:view_risk_dashboard, @project) %>
+    <%= link_to l(:label_risk_dashboard), project_risk_dashboard_path(@project), :class => 'icon icon-stats' %>
+  <% end %>
 </div>
 
 <h2><%= l(:label_risks) %></h2>
 
-<%= form_tag(project_risks_path(@project), :method => :get, :id => 'query_form') do %>
-  <%= render :partial => 'queries/query_form' %>
+<%# Risk Summary Statistics %>
+<% if @query.valid? %>
+  <div class="risk-index-summary">
+    <div class="summary-cards">
+      <div class="summary-card total">
+        <span class="card-value"><%= @risk_count %></span>
+        <span class="card-label"><%= l(:label_total_risks) %></span>
+      </div>
+      <%
+        open_count = @risks.count { |r| r.status == 'open' }
+        closed_count = @risks.count { |r| r.status == 'closed' }
+        high_significance = @risks.count { |r| r.level_of_significance.to_i >= 12 }
+      %>
+      <div class="summary-card open">
+        <span class="card-value"><%= open_count %></span>
+        <span class="card-label"><%= l(:label_open_risks) %></span>
+      </div>
+      <div class="summary-card closed">
+        <span class="card-value"><%= closed_count %></span>
+        <span class="card-label"><%= l(:label_closed_risks) %></span>
+      </div>
+      <div class="summary-card critical">
+        <span class="card-value"><%= high_significance %></span>
+        <span class="card-label"><%= l(:label_high_significance_risks) %></span>
+      </div>
+    </div>
+  </div>
 <% end %>
 
-<% if @query.valid? %>
-  <% if @risks.empty? %>
-    <p class="nodata"><%= l(:label_no_data) %></p>
-  <% else %>
-    <%= render :partial => 'risks/list', :locals => {:risks => @risks, :query => @query} %>
-    <span class="pagination"><%= pagination_links_full @risk_pages, @risk_count %></span>
+<div class="risk-index-content">
+  <%= form_tag(project_risks_path(@project), :method => :get, :id => 'query_form') do %>
+    <%= render :partial => 'queries/query_form' %>
   <% end %>
-<% end %>
+
+  <% if @query.valid? && !@risks.empty? %>
+    <%# Column Visibility Toggle %>
+    <div class="column-toggle-container">
+      <button type="button" class="column-toggle-btn" onclick="toggleColumnSelector()">
+        <span class="icon icon-settings"></span> <%= l(:label_columns) %>
+      </button>
+      <div id="column-selector" class="column-selector" style="display: none;">
+        <div class="column-selector-header">
+          <strong><%= l(:label_show_hide_columns) %></strong>
+          <a href="#" onclick="toggleColumnSelector(); return false;" class="close-btn">&times;</a>
+        </div>
+        <div class="column-selector-content">
+          <% @query.inline_columns.each_with_index do |column, index| %>
+            <label class="column-checkbox">
+              <input type="checkbox" checked="checked" onchange="toggleColumn(<%= index + 1 %>)" data-column-index="<%= index + 1 %>">
+              <%= column.caption %>
+            </label>
+          <% end %>
+        </div>
+        <div class="column-selector-actions">
+          <a href="#" onclick="showAllColumns(); return false;"><%= l(:label_show_all) %></a>
+          |
+          <a href="#" onclick="hideOptionalColumns(); return false;"><%= l(:label_show_essential) %></a>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <% if @query.valid? %>
+    <% if @risks.empty? %>
+      <div class="nodata-container">
+        <p class="nodata"><%= l(:label_no_data) %></p>
+        <% if User.current.allowed_to?(:add_risks, @project) %>
+          <p><%= link_to l(:label_new_risk), new_project_risk_path(@project), :class => 'icon icon-add' %></p>
+        <% end %>
+      </div>
+    <% else %>
+      <%= render :partial => 'risks/list', :locals => {:risks => @risks, :query => @query} %>
+      <div class="pagination-container">
+        <span class="pagination"><%= pagination_links_full @risk_pages, @risk_count %></span>
+      </div>
+    <% end %>
+  <% end %>
+</div>
+
+<script type="text/javascript">
+  function toggleColumnSelector() {
+    var selector = document.getElementById('column-selector');
+    selector.style.display = selector.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function toggleColumn(columnIndex) {
+    var table = document.querySelector('table.risks');
+    if (!table) return;
+
+    var cells = table.querySelectorAll('th:nth-child(' + (columnIndex + 1) + '), td:nth-child(' + (columnIndex + 1) + ')');
+    cells.forEach(function(cell) {
+      cell.style.display = cell.style.display === 'none' ? '' : 'none';
+    });
+  }
+
+  function showAllColumns() {
+    var table = document.querySelector('table.risks');
+    if (!table) return;
+
+    var checkboxes = document.querySelectorAll('.column-checkbox input');
+    checkboxes.forEach(function(checkbox) {
+      checkbox.checked = true;
+      var columnIndex = parseInt(checkbox.getAttribute('data-column-index'));
+      var cells = table.querySelectorAll('th:nth-child(' + (columnIndex + 1) + '), td:nth-child(' + (columnIndex + 1) + ')');
+      cells.forEach(function(cell) {
+        cell.style.display = '';
+      });
+    });
+  }
+
+  function hideOptionalColumns() {
+    var table = document.querySelector('table.risks');
+    if (!table) return;
+
+    // Essential columns: checkbox, id, category, subject, significance
+    var essentialIndices = [0, 1, 2, 3, 11]; // checkbox, #, Category, Risk, Level of Significance
+
+    var checkboxes = document.querySelectorAll('.column-checkbox input');
+    checkboxes.forEach(function(checkbox) {
+      var columnIndex = parseInt(checkbox.getAttribute('data-column-index'));
+      var isEssential = essentialIndices.includes(columnIndex);
+
+      checkbox.checked = isEssential;
+      var cells = table.querySelectorAll('th:nth-child(' + (columnIndex + 1) + '), td:nth-child(' + (columnIndex + 1) + ')');
+      cells.forEach(function(cell) {
+        cell.style.display = isEssential ? '' : 'none';
+      });
+    });
+  }
+
+  // Close column selector when clicking outside
+  document.addEventListener('click', function(event) {
+    var selector = document.getElementById('column-selector');
+    var toggleBtn = document.querySelector('.column-toggle-btn');
+    if (selector && !selector.contains(event.target) && !toggleBtn.contains(event.target)) {
+      selector.style.display = 'none';
+    }
+  });
+</script>
 
 <% content_for :header_tags do %>
   <%= stylesheet_link_tag 'risks', :plugin => 'redmine_risks' %>
