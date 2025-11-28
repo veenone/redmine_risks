@@ -1,0 +1,35 @@
+<h2><%= l(:label_risk_settings) %></h2>
+
+<%= form_for @risk_project_setting, url: project_risk_settings_path(@project), method: :patch do |f| %>
+  <%= error_messages_for @risk_project_setting %>
+
+  <fieldset class="box">
+    <legend><%= l(:label_cia_assessment_settings) %></legend>
+
+    <p>
+      <label><%= l(:field_cia_assessment_mode) %></label>
+    </p>
+
+    <p>
+      <%= radio_button_tag 'risk_project_setting[cia_assessment_mode]',
+                           RiskProjectSetting::CIA_MODE_LEVELS,
+                           @risk_project_setting.levels_cia_mode?,
+                           id: 'cia_mode_levels' %>
+      <%= label_tag 'cia_mode_levels', l(:label_cia_mode_levels) %>
+      <em class="info"><%= l(:text_cia_mode_levels_info) %></em>
+    </p>
+
+    <p>
+      <%= radio_button_tag 'risk_project_setting[cia_assessment_mode]',
+                           RiskProjectSetting::CIA_MODE_BOOLEAN,
+                           @risk_project_setting.boolean_cia_mode?,
+                           id: 'cia_mode_boolean' %>
+      <%= label_tag 'cia_mode_boolean', l(:label_cia_mode_boolean) %>
+      <em class="info"><%= l(:text_cia_mode_boolean_info) %></em>
+    </p>
+  </fieldset>
+
+  <p>
+    <%= submit_tag l(:button_save) %>
+  </p>
+<% end %>

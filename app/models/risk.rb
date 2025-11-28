@@ -42,6 +42,111 @@ class Risk < ActiveRecord::Base
   RISK_CONFIDENTIALITY = %w(low medium high)
   RISK_INTEGRITY = %w(low medium high)
   RISK_AVAILABILITY = %w(low medium high)
+
+  # Boolean CIA values (Yes/No mode) - stored as integers: 0 = no, 1 = yes
+  RISK_CIA_BOOLEAN = %w(no yes)
+
+  # Impact point mapping configuration
+  # Each entry: score => { key: 'translation_key_suffix', label: 'Label', description: 'Description' }
+  IMPACT_POINT_MAPPING = {
+    1 => { key: 'low', label: 'Low' },
+    2 => { key: 'significant', label: 'Significant' },
+    3 => { key: 'critical', label: 'Critical' },
+    4 => { key: 'catastrophic', label: 'Catastrophic' }
+  }.freeze
+
+  # Probability point mapping configuration
+  PROBABILITY_POINT_MAPPING = {
+    1 => { key: 'very_low', label: 'Very Low' },
+    2 => { key: 'low', label: 'Low' },
+    3 => { key: 'medium', label: 'Medium' },
+    4 => { key: 'high', label: 'High' }
+  }.freeze
+
+  # Helper method to get impact options for select
+  def self.impact_point_options
+    IMPACT_POINT_MAPPING.map do |score, config|
+      [I18n.t("label_risk_impact_point_#{config[:key]}", default: config[:label]), score]
+    end
+  end
+
+  # Helper method to get probability options for select
+  def self.probability_point_options
+    PROBABILITY_POINT_MAPPING.map do |score, config|
+      [I18n.t("label_risk_probability_point_#{config[:key]}", default: config[:label]), score]
+    end
+  end
+
+  # Get the label for an impact point value
+  def self.impact_point_label(value)
+    return nil unless value && IMPACT_POINT_MAPPING[value]
+    config = IMPACT_POINT_MAPPING[value]
+    I18n.t("label_risk_impact_point_#{config[:key]}", default: config[:label])
+  end
+
+  # Get the label for a probability point value
+  def self.probability_point_label(value)
+    return nil unless value && PROBABILITY_POINT_MAPPING[value]
+    config = PROBABILITY_POINT_MAPPING[value]
+    I18n.t("label_risk_probability_point_#{config[:key]}", default: config[:label])
+  end
+
+  # Get the description for an impact point value
+  def self.impact_point_description(value)
+    return nil unless value && IMPACT_POINT_MAPPING[value]
+    I18n.t("label_risk_impact_point_#{IMPACT_POINT_MAPPING[value][:key]}_desc", default: '')
+  end
+
+  # Get the description for a probability point value
+  def self.probability_point_description(value)
+    return nil unless value && PROBABILITY_POINT_MAPPING[value]
+    I18n.t("label_risk_probability_point_#{PROBABILITY_POINT_MAPPING[value][:key]}_desc", default: '')
+  end
+
+  # Get CIA options based on project setting
+  # Returns array of [label, integer_value] pairs for select options
+  def self.cia_options_for_project(project, cia_type)
+    setting = RiskProjectSetting.for_project(project)
+    if setting.boolean_cia_mode?
+      # Boolean mode: 0 = No, 1 = Yes
+      RISK_CIA_BOOLEAN.each_with_index.map { |v, idx| [I18n.t("label_risk_cia_#{v}"), idx] }
+    else
+      # Levels mode: 0 = low, 1 = medium, 2 = high
+      case cia_type
+      when :confidentiality
+        RISK_CONFIDENTIALITY.each_with_index.map { |c, idx| [I18n.t("label_risk_confidentiality_#{c}"), idx] }
+      when :integrity
+        RISK_INTEGRITY.each_with_index.map { |i, idx| [I18n.t("label_risk_integrity_#{i}"), idx] }
+      when :availability
+        RISK_AVAILABILITY.each_with_index.map { |a, idx| [I18n.t("label_risk_availability_#{a}"), idx] }
+      end
+    end
+  end
+
+  # Get display value for CIA field based on project mode
+  # value is stored as integer index
+  def cia_display_value(field)
+    value = send(field)
+    return nil if value.nil?
+
+    setting = RiskProjectSetting.for_project(project)
+    if setting.boolean_cia_mode?
+      # Boolean mode: 0 = No, 1 = Yes
+      bool_value = RISK_CIA_BOOLEAN[value.to_i]
+      return nil unless bool_value
+      I18n.t("label_risk_cia_#{bool_value}", default: bool_value.to_s.humanize)
+    else
+      # Levels mode: get the level string from index
+      levels = case field
+               when :confidentiality then RISK_CONFIDENTIALITY
+               when :integrity then RISK_INTEGRITY
+               when :availability then RISK_AVAILABILITY
+               end
+      level_value = levels[value.to_i] if levels
+      return nil unless level_value
+      I18n.t("label_risk_#{field}_#{level_value}", default: level_value.to_s.humanize)
+    end
+  end
   
   # Add callback to ensure status is set
   before_validation :ensure_status_set, on: :create

@@ -1,5 +1,6 @@
 # English strings go here for Rails i18n
 en:
+  label_risk_management: Risk Management
   label_risks: Risks
   label_risk: Risk
   label_risk_plural: Risks
@@ -45,7 +46,20 @@ en:
   notice_risk_successful_update: "Risk successfully updated."
   notice_risk_successful_delete: "Risk successfully deleted."
   text_risks_destroy_confirmation: 'Are you sure you want to delete the selected risk(s)?'
-  
+
+  # Form section labels
+  label_risk_basic_info: "Basic Information"
+  label_risk_assessment: "Risk Assessment"
+  label_details: "Details"
+  label_please_select: "--- Please select ---"
+
+  # Form section descriptions
+  text_risk_significance_description: "Assess the risk significance by selecting the probability and impact levels. The level of significance is automatically calculated."
+  text_cia_assessment_description: "Evaluate the potential impact on Confidentiality, Integrity, and Availability of information assets."
+  text_select_to_see_description: "Select an option to see its description"
+  text_risk_owner_info: "Person accountable for managing this risk"
+  text_action_owner_info: "Person responsible for implementing risk response actions"
+
   # Dashboard specific labels
   label_risk_dashboard: Risk Dashboard
   label_risks_overview: Risks Overview
@@ -184,9 +198,27 @@ en:
   label_risk_significance: Risk Significance Assessment
   
   # Help text
-  text_probability_point_info: "Scale from 1 (lowest) to 10 (highest)"
-  text_impact_point_info: "Scale from 1 (lowest) to 10 (highest)"
   text_significance_calculation_info: "Calculated as Probability Point × Impact Point"
+
+  # Impact Point Mapping
+  label_risk_impact_point_low: "Low (1)"
+  label_risk_impact_point_low_desc: "Limited productivity loss, limited delay in delivery."
+  label_risk_impact_point_significant: "Significant (2)"
+  label_risk_impact_point_significant_desc: "General productivity loss, SLA breach, local impact."
+  label_risk_impact_point_critical: "Critical (3)"
+  label_risk_impact_point_critical_desc: "Downgraded operational capability, significant impact on SLA, company image is altered, data breach requiring their replacement."
+  label_risk_impact_point_catastrophic: "Catastrophic (4)"
+  label_risk_impact_point_catastrophic_desc: "Very significant loss of operational capability (production stopped), data breach generating significant financial loss, impacting directly customers."
+
+  # Probability Point Mapping
+  label_risk_probability_point_very_low: "Very Low (1)"
+  label_risk_probability_point_very_low_desc: "Mechanisms preventing or deterring against the incident are in place."
+  label_risk_probability_point_low: "Low (2)"
+  label_risk_probability_point_low_desc: "Mechanisms insuring the detection and/or the limitation of the incident are in place."
+  label_risk_probability_point_medium: "Medium (3)"
+  label_risk_probability_point_medium_desc: "Only procedural counter-measures are in place."
+  label_risk_probability_point_high: "High (4)"
+  label_risk_probability_point_high_desc: "No counter-measures are in place."
 
   # Dashboard labels
   label_average_significance: "Significance average"
@@ -195,3 +227,18 @@ en:
   field_risk_owner: "Risk owner"
   field_action_owner: "Action owner"
   label_risk_status_and_trends: "Risk Status & Trends"
+
+  # Risk Settings
+  label_risk_settings: "Risk Settings"
+  label_cia_assessment_settings: "CIA Assessment Settings"
+  field_cia_assessment_mode: "CIA Assessment Mode"
+  label_cia_mode_levels: "Levels (Low / Medium / High)"
+  label_cia_mode_boolean: "Boolean (Yes / No)"
+  text_cia_mode_levels_info: "Assess each CIA dimension using Low, Medium, or High impact levels"
+  text_cia_mode_boolean_info: "Simple Yes/No selection to indicate whether each CIA dimension is affected"
+  text_cia_boolean_mode_active: "Using Yes/No assessment mode"
+  permission_manage_risk_settings: "Manage risk settings"
+
+  # CIA Boolean Values
+  label_risk_cia_yes: "Yes"
+  label_risk_cia_no: "No"

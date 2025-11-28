@@ -1,3 +1,4 @@
+/* Risk list table styles */
 table.risks td.description,
 table.risks td.treatments,
 table.risks td.lessons,
@@ -7,4 +8,599 @@ table.risks td.last_notes {
   padding: 4px 4px 4px 24px;
   text-align: left;
   white-space: normal;
+}
+
+/* ============================================
+   Risk Form Styles - Collapsible Sections
+   ============================================ */
+
+/* Section fieldset styling */
+fieldset.risk-section {
+  border: 1px solid #d7d7d7;
+  border-radius: 4px;
+  margin: 15px 0;
+  padding: 0;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+fieldset.risk-section legend {
+  font-size: 14px;
+  font-weight: bold;
+  color: #505050;
+  padding: 8px 15px;
+  margin: 0;
+  cursor: pointer;
+  background: #f8f8f8;
+  border-bottom: 1px solid #d7d7d7;
+  width: 100%;
+  box-sizing: border-box;
+  display: block;
+  float: left;
+  border-radius: 3px 3px 0 0;
+}
+
+fieldset.risk-section legend:hover {
+  background: #f0f0f0;
+}
+
+fieldset.risk-section legend:before {
+  content: "\25BC";
+  font-size: 10px;
+  margin-right: 8px;
+  display: inline-block;
+  transition: transform 0.2s;
+}
+
+fieldset.risk-section.collapsed legend:before {
+  transform: rotate(-90deg);
+}
+
+fieldset.risk-section .section-content {
+  padding: 15px;
+  clear: both;
+}
+
+fieldset.risk-section.collapsed .section-content {
+  display: none;
+}
+
+/* Section description text */
+.section-description {
+  color: #666;
+  font-size: 12px;
+  font-style: italic;
+  margin: 0 0 15px 0;
+  padding: 8px 12px;
+  background: #f9f9f9;
+  border-left: 3px solid #628db6;
+  border-radius: 0 3px 3px 0;
+}
+
+/* ============================================
+   CIA Assessment Grid
+   ============================================ */
+
+.cia-grid {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.cia-item {
+  flex: 1;
+  min-width: 200px;
+  max-width: 300px;
+  background: #fafafa;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 15px;
+}
+
+.cia-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #ddd;
+}
+
+.cia-header.confidentiality {
+  border-bottom-color: #e74c3c;
+}
+
+.cia-header.integrity {
+  border-bottom-color: #3498db;
+}
+
+.cia-header.availability {
+  border-bottom-color: #2ecc71;
+}
+
+.cia-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: #fff;
+  font-weight: bold;
+  font-size: 14px;
+  margin-right: 10px;
+}
+
+.cia-header.confidentiality .cia-icon {
+  background: #e74c3c;
+}
+
+.cia-header.integrity .cia-icon {
+  background: #3498db;
+}
+
+.cia-header.availability .cia-icon {
+  background: #2ecc71;
+}
+
+.cia-label {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.cia-item select {
+  width: 100%;
+  margin-top: 0;
+}
+
+/* ============================================
+   Significance Assessment Grid
+   ============================================ */
+
+.significance-grid {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.significance-item {
+  flex: 1;
+  min-width: 250px;
+  max-width: 350px;
+}
+
+.significance-item .field-group {
+  margin-bottom: 5px;
+}
+
+.significance-item .field-group .field-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+  font-size: 13px;
+}
+
+.significance-item .field-group select {
+  width: 100%;
+}
+
+.significance-item .field-description {
+  min-height: 40px;
+  padding: 8px;
+  background: #f5f5f5;
+  border-radius: 3px;
+  margin-top: 5px;
+}
+
+.significance-item .field-description em.info {
+  font-size: 11px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.significance-result {
+  flex: 0 0 auto;
+  min-width: 180px;
+}
+
+.significance-result .result-box {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.significance-result .result-box .result-label {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.9;
+  margin-bottom: 8px;
+}
+
+.significance-value {
+  display: block;
+  font-size: 36px;
+  font-weight: bold;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.significance-value.low {
+  color: #2ecc71;
+}
+
+.significance-value.medium {
+  color: #f1c40f;
+}
+
+.significance-value.high {
+  color: #e67e22;
+}
+
+.significance-value.critical {
+  color: #e74c3c;
+}
+
+.significance-result .result-box em.info {
+  font-size: 10px;
+  opacity: 0.8;
+}
+
+/* ============================================
+   Magnitude Badge
+   ============================================ */
+
+.magnitude-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.magnitude-badge.low {
+  background: #d5f5e3;
+  color: #1e8449;
+}
+
+.magnitude-badge.medium {
+  background: #fef9e7;
+  color: #b7950b;
+}
+
+.magnitude-badge.high {
+  background: #fdebd0;
+  color: #ca6f1e;
+}
+
+.magnitude-badge.extreme {
+  background: #fadbd8;
+  color: #c0392b;
+}
+
+/* ============================================
+   Info text styling
+   ============================================ */
+
+em.info {
+  display: block;
+  font-size: 11px;
+  color: #888;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+/* ============================================
+   Split content improvements
+   ============================================ */
+
+fieldset.risk-section .splitcontent {
+  display: flex;
+  gap: 30px;
+}
+
+fieldset.risk-section .splitcontentleft,
+fieldset.risk-section .splitcontentright {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ============================================
+   Responsive adjustments
+   ============================================ */
+
+@media screen and (max-width: 900px) {
+  .cia-grid,
+  .significance-grid {
+    flex-direction: column;
+  }
+
+  .cia-item,
+  .significance-item {
+    max-width: none;
+  }
+
+  .significance-result {
+    width: 100%;
+  }
+
+  fieldset.risk-section .splitcontent {
+    flex-direction: column;
+    gap: 15px;
+  }
+}
+
+/* ============================================
+   Form field improvements
+   ============================================ */
+
+fieldset.risk-section p {
+  margin: 10px 0;
+}
+
+fieldset.risk-section select {
+  min-width: 200px;
+}
+
+fieldset.risk-section input[type="text"] {
+  width: 100%;
+  max-width: 600px;
+}
+
+/* Text area improvements */
+fieldset.risk-section textarea.wiki-edit {
+  width: 100%;
+  min-height: 100px;
+}
+
+/* ============================================
+   Risk Details Show View
+   ============================================ */
+
+.risk-details {
+  background: #fff;
+  padding: 15px;
+  border: 1px solid #d7d7d7;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.risk-details .subject h3 {
+  margin: 0 0 10px 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.risk-details .author {
+  color: #666;
+  font-size: 12px;
+  margin-bottom: 15px;
+}
+
+/* Attributes Grid for show view */
+.attributes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.attributes-grid.two-columns {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.attribute-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.attribute-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.attribute-value {
+  font-size: 14px;
+  color: #333;
+}
+
+.attribute-value.status.open {
+  color: #3498db;
+  font-weight: 600;
+}
+
+.attribute-value.status.closed {
+  color: #27ae60;
+  font-weight: 600;
+}
+
+.attribute-value.status.rejected {
+  color: #e74c3c;
+  font-weight: 600;
+}
+
+.attribute-description {
+  font-size: 11px;
+  color: #888;
+  font-style: italic;
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+/* Significance Display for show view */
+.significance-display {
+  display: flex;
+  gap: 25px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.significance-item-display {
+  flex: 1;
+  min-width: 220px;
+  max-width: 320px;
+  background: #fafafa;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 15px;
+}
+
+.significance-item-display .attribute-label {
+  margin-bottom: 8px;
+}
+
+.significance-item-display .attribute-value.significance-point {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.significance-result-display {
+  flex: 0 0 auto;
+  min-width: 160px;
+}
+
+.significance-result-display .result-box {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.significance-result-display .result-label {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.9;
+  margin-bottom: 8px;
+}
+
+/* CIA Display for show view */
+.cia-display {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.cia-item-display {
+  flex: 1;
+  min-width: 180px;
+  max-width: 280px;
+  background: #fafafa;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 15px;
+}
+
+.cia-item-display.confidentiality {
+  border-top: 3px solid #e74c3c;
+}
+
+.cia-item-display.integrity {
+  border-top: 3px solid #3498db;
+}
+
+.cia-item-display.availability {
+  border-top: 3px solid #2ecc71;
+}
+
+.cia-header-display {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.cia-item-display.confidentiality .cia-icon {
+  background: #e74c3c;
+}
+
+.cia-item-display.integrity .cia-icon {
+  background: #3498db;
+}
+
+.cia-item-display.availability .cia-icon {
+  background: #2ecc71;
+}
+
+.cia-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  display: block;
+}
+
+/* Detail blocks for description, treatments, lessons */
+.detail-block {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.detail-block:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.detail-header strong {
+  font-size: 13px;
+  color: #505050;
+}
+
+.detail-block .wiki {
+  background: #fafafa;
+  padding: 12px;
+  border-radius: 4px;
+  border: 1px solid #eee;
+}
+
+/* Responsive for show view */
+@media screen and (max-width: 900px) {
+  .attributes-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .attributes-grid.two-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .significance-display,
+  .cia-display {
+    flex-direction: column;
+  }
+
+  .significance-item-display,
+  .cia-item-display {
+    max-width: none;
+  }
+
+  .significance-result-display {
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .attributes-grid {
+    grid-template-columns: 1fr;
+  }
 }

@@ -1,147 +1,306 @@
 <%= labelled_fields_for :risk, @risk do |f| %>
-  <% if @risk.safe_attribute? 'subject' %>
-    <p><%= f.text_field :subject, :size => 80, :maxlength => 255, :required => true %></p>
-  <% end %>
-
-  <% if @risk.safe_attribute? 'description' %>
-    <p>
-      <%= f.label_for_field :description %>
-      <%= link_to_function content_tag(:span, l(:button_edit), :class => 'icon icon-edit'), '$(this).hide(); $("#risk_description_and_toolbar").show()' unless @risk.new_record? %>
-      <%= content_tag 'span', :id => "risk_description_and_toolbar", :style => (@risk.new_record? ? nil : 'display:none') do %>
-        <%= f.text_area :description,
-                        :cols => 60,
-                        :rows => [[10, @risk.description.to_s.length / 50].max, 20].min,
-                        :accesskey => accesskey(:edit),
-                        :class => 'wiki-edit',
-                        :no_label => true %>
+  <%# Section 1: Basic Information - Always visible %>
+  <fieldset class="risk-section collapsible" id="risk-basic-info">
+    <legend onclick="toggleSection('risk-basic-info')"><%= l(:label_risk_basic_info) %></legend>
+    <div class="section-content">
+      <% if @risk.safe_attribute? 'subject' %>
+        <p><%= f.text_field :subject, :size => 80, :maxlength => 255, :required => true %></p>
       <% end %>
-    </p>
 
-    <% if Redmine::VERSION.to_s >= '4.0' %>
-      <%= wikitoolbar_for 'risk_description', preview_new_risk_path(:project_id => @risk.project) %>
-    <% else %>
-      <%= wikitoolbar_for 'risk_description' %>
-    <% end %>
-  <% end %>
+      <% if @risk.safe_attribute? 'description' %>
+        <p>
+          <%= f.label_for_field :description %>
+          <%= link_to_function content_tag(:span, l(:button_edit), :class => 'icon icon-edit'), '$(this).hide(); $("#risk_description_and_toolbar").show()' unless @risk.new_record? %>
+          <%= content_tag 'span', :id => "risk_description_and_toolbar", :style => (@risk.new_record? ? nil : 'display:none') do %>
+            <%= f.text_area :description,
+                            :cols => 60,
+                            :rows => [[10, @risk.description.to_s.length / 50].max, 20].min,
+                            :accesskey => accesskey(:edit),
+                            :class => 'wiki-edit',
+                            :no_label => true %>
+          <% end %>
+        </p>
 
-  <div id="attributes" class="attributes">
-    <%= render :partial => 'risks/attributes' %>
-  </div>
-
-  <% if @risk.safe_attribute?('treatments') && ! @risk.new_record? %>
-    <p>
-      <%= f.label_for_field :treatments %>
-      <%= link_to_function content_tag(:span, l(:button_edit), :class => 'icon icon-edit'), '$(this).hide(); $("#risk_treatments_and_toolbar").show()' unless @risk.new_record? %>
-      <%= content_tag 'span', :id => "risk_treatments_and_toolbar", :style => (@risk.new_record? ? nil : 'display:none') do %>
-        <%= f.text_area :treatments,
-                        :cols => 60,
-                        :rows => [[10, @risk.treatments.to_s.length / 50].max, 20].min,
-                        :accesskey => accesskey(:edit),
-                        :class => 'wiki-edit',
-                        :no_label => true %>
+        <% if Redmine::VERSION.to_s >= '4.0' %>
+          <%= wikitoolbar_for 'risk_description', preview_new_risk_path(:project_id => @risk.project) %>
+        <% else %>
+          <%= wikitoolbar_for 'risk_description' %>
+        <% end %>
       <% end %>
-    </p>
-    <%= wikitoolbar_for 'risk_treatments' %>
-  <% end %>
 
-  <% if @risk.safe_attribute?('lessons') && ! @risk.new_record? %>
-    <p>
-      <%= f.label_for_field :lessons %>
-      <%= link_to_function content_tag(:span, l(:button_edit), :class => 'icon icon-edit'), '$(this).hide(); $("#risk_lessons_and_toolbar").show()' unless @risk.new_record? %>
-      <%= content_tag 'span', :id => "risk_lessons_and_toolbar", :style => (@risk.new_record? ? nil : 'display:none') do %>
-        <%= f.text_area :lessons,
-                        :cols => 60,
-                        :rows => [[10, @risk.lessons.to_s.length / 50].max, 20].min,
-                        :accesskey => accesskey(:edit),
-                        :class => 'wiki-edit',
-                        :no_label => true %>
+      <div class="splitcontent">
+        <div class="splitcontentleft">
+          <% if @risk.safe_attribute? 'status' %>
+            <p><%= f.select :status, Risk::RISK_STATUS.collect {|s| [format_risk_status(s), s]} %></p>
+          <% end %>
+
+          <% if @risk.safe_attribute?('category_id') && RiskCategory.active.any? %>
+            <p><%= f.select :category_id, RiskCategory.active.order('name ASC').collect {|c| [c.name, c.id]}, :include_blank => true %></p>
+          <% end %>
+        </div>
+        <div class="splitcontentright">
+          <% if @risk.safe_attribute? 'assigned_to_id' %>
+            <p><%= f.select :assigned_to_id, principals_options_for_select(@risk.assignable_users, @risk.assigned_to), :include_blank => true %></p>
+          <% end %>
+
+          <% if @risk.safe_attribute? 'owner_id' %>
+            <p><%= f.select :owner_id, principals_options_for_select(@risk.assignable_owners, @risk.owner), :include_blank => true %></p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </fieldset>
+
+  <%# Section 2: Risk Assessment (Probability & Impact) %>
+  <fieldset class="risk-section collapsible" id="risk-assessment">
+    <legend onclick="toggleSection('risk-assessment')"><%= l(:label_risk_assessment) %></legend>
+    <div class="section-content">
+      <div class="splitcontent">
+        <div class="splitcontentleft">
+          <% if @risk.safe_attribute?('probability') %>
+            <p><%= f.select :probability, format_risk_levels(Risk::RISK_PROBABILITY, @risk.probability) {|p| format_risk_probability(p)}, :include_blank => true %></p>
+          <% end %>
+
+          <% if @risk.safe_attribute?('impact') %>
+            <p><%= f.select :impact, format_risk_levels(Risk::RISK_IMPACT, @risk.impact) {|i| format_risk_impact(i)}, :include_blank => true %></p>
+          <% end %>
+        </div>
+        <div class="splitcontentright">
+          <% if @risk.safe_attribute?('strategy') %>
+            <p><%= f.select :strategy, Risk::RISK_STRATEGY.collect {|p| [format_risk_strategy(p), p]}, :include_blank => true %></p>
+          <% end %>
+
+          <% if @risk.probability.present? && @risk.impact.present? %>
+            <p>
+              <label><%= l(:field_magnitude) %></label>
+              <span class="value magnitude-badge <%= @risk.magnitude.to_s.downcase %>"><%= @risk.magnitude %></span>
+            </p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </fieldset>
+
+  <%# Section 3: Risk Significance Assessment %>
+  <fieldset class="risk-section collapsible" id="risk-significance">
+    <legend onclick="toggleSection('risk-significance')"><%= l(:label_risk_significance) %></legend>
+    <div class="section-content">
+      <p class="section-description"><%= l(:text_risk_significance_description) %></p>
+
+      <div class="significance-grid">
+        <div class="significance-item">
+          <% if @risk.safe_attribute?('probability_point') %>
+            <div class="field-group">
+              <span class="field-label"><%= l(:field_probability_point) %></span>
+              <%= select_tag 'risk[probability_point]',
+                             options_for_select([[l(:label_please_select), nil]] + Risk.probability_point_options, @risk.probability_point),
+                             :id => 'risk_probability_point',
+                             :onchange => 'updateLevelOfSignificance()' %>
+            </div>
+            <div class="field-description" id="probability_point_description">
+              <em class="info"><%= @risk.probability_point.present? ? Risk.probability_point_description(@risk.probability_point) : l(:text_select_to_see_description) %></em>
+            </div>
+          <% end %>
+        </div>
+
+        <div class="significance-item">
+          <% if @risk.safe_attribute?('impact_point') %>
+            <div class="field-group">
+              <span class="field-label"><%= l(:field_impact_point) %></span>
+              <%= select_tag 'risk[impact_point]',
+                             options_for_select([[l(:label_please_select), nil]] + Risk.impact_point_options, @risk.impact_point),
+                             :id => 'risk_impact_point',
+                             :onchange => 'updateLevelOfSignificance()' %>
+            </div>
+            <div class="field-description" id="impact_point_description">
+              <em class="info"><%= @risk.impact_point.present? ? Risk.impact_point_description(@risk.impact_point) : l(:text_select_to_see_description) %></em>
+            </div>
+          <% end %>
+        </div>
+
+        <div class="significance-result">
+          <div class="result-box">
+            <span class="result-label"><%= l(:field_level_of_significance) %></span>
+            <span class="significance-value" id="level_of_significance_value"><%= @risk.level_of_significance.present? ? @risk.level_of_significance : '-' %></span>
+            <em class="info"><%= l(:text_significance_calculation_info) %></em>
+          </div>
+        </div>
+      </div>
+    </div>
+  </fieldset>
+
+  <%# Section 4: CIA Assessment %>
+  <% risk_project_setting = RiskProjectSetting.for_project(@risk.project) %>
+  <fieldset class="risk-section collapsible" id="risk-cia">
+    <legend onclick="toggleSection('risk-cia')"><%= l(:label_risk_cia_assessment) %></legend>
+    <div class="section-content">
+      <p class="section-description"><%= l(:text_cia_assessment_description) %></p>
+      <% if risk_project_setting.boolean_cia_mode? %>
+        <p class="cia-mode-indicator"><em class="info"><%= l(:text_cia_boolean_mode_active) %></em></p>
       <% end %>
-    </p>
-    <%= wikitoolbar_for 'risk_lessons' %>
+
+      <div class="cia-grid">
+        <% if @risk.safe_attribute?('confidentiality') %>
+          <div class="cia-item">
+            <div class="cia-header confidentiality">
+              <span class="cia-icon">C</span>
+              <span class="cia-label"><%= l(:field_confidentiality) %></span>
+            </div>
+            <%= select_tag 'risk[confidentiality]',
+                           options_for_select([[l(:label_please_select), nil]] + Risk.cia_options_for_project(@risk.project, :confidentiality), @risk.confidentiality),
+                           :id => 'risk_confidentiality' %>
+          </div>
+        <% end %>
+
+        <% if @risk.safe_attribute?('integrity') %>
+          <div class="cia-item">
+            <div class="cia-header integrity">
+              <span class="cia-icon">I</span>
+              <span class="cia-label"><%= l(:field_integrity) %></span>
+            </div>
+            <%= select_tag 'risk[integrity]',
+                           options_for_select([[l(:label_please_select), nil]] + Risk.cia_options_for_project(@risk.project, :integrity), @risk.integrity),
+                           :id => 'risk_integrity' %>
+          </div>
+        <% end %>
+
+        <% if @risk.safe_attribute?('availability') %>
+          <div class="cia-item">
+            <div class="cia-header availability">
+              <span class="cia-icon">A</span>
+              <span class="cia-label"><%= l(:field_availability) %></span>
+            </div>
+            <%= select_tag 'risk[availability]',
+                           options_for_select([[l(:label_please_select), nil]] + Risk.cia_options_for_project(@risk.project, :availability), @risk.availability),
+                           :id => 'risk_availability' %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </fieldset>
+
+  <%# Section 5: Ownership %>
+  <fieldset class="risk-section collapsible" id="risk-ownership">
+    <legend onclick="toggleSection('risk-ownership')"><%= l(:label_risk_ownership) %></legend>
+    <div class="section-content">
+      <div class="splitcontent">
+        <div class="splitcontentleft">
+          <% if @risk.safe_attribute?('risk_owner_id') %>
+            <p>
+              <%= f.label_for_field :risk_owner_id %>
+              <%= f.select :risk_owner_id, principals_options_for_select(@risk.assignable_users, @risk.risk_owner),
+                           :include_blank => true %>
+              <em class="info"><%= l(:text_risk_owner_info) %></em>
+            </p>
+          <% end %>
+        </div>
+        <div class="splitcontentright">
+          <% if @risk.safe_attribute?('action_owner_id') %>
+            <p>
+              <%= f.label_for_field :action_owner_id %>
+              <%= f.select :action_owner_id, principals_options_for_select(@risk.assignable_users, @risk.action_owner),
+                           :include_blank => true %>
+              <em class="info"><%= l(:text_action_owner_info) %></em>
+            </p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </fieldset>
+
+  <%# Section 6: Treatments & Lessons (only for existing risks) %>
+  <% unless @risk.new_record? %>
+    <fieldset class="risk-section collapsible" id="risk-treatments">
+      <legend onclick="toggleSection('risk-treatments')"><%= l(:label_treatments_and_lessons) %></legend>
+      <div class="section-content">
+        <% if @risk.safe_attribute?('treatments') %>
+          <p>
+            <%= f.label_for_field :treatments %>
+            <%= link_to_function content_tag(:span, l(:button_edit), :class => 'icon icon-edit'), '$(this).hide(); $("#risk_treatments_and_toolbar").show()' %>
+            <%= content_tag 'span', :id => "risk_treatments_and_toolbar", :style => 'display:none' do %>
+              <%= f.text_area :treatments,
+                              :cols => 60,
+                              :rows => [[10, @risk.treatments.to_s.length / 50].max, 20].min,
+                              :accesskey => accesskey(:edit),
+                              :class => 'wiki-edit',
+                              :no_label => true %>
+            <% end %>
+          </p>
+          <%= wikitoolbar_for 'risk_treatments' %>
+        <% end %>
+
+        <% if @risk.safe_attribute?('lessons') %>
+          <p>
+            <%= f.label_for_field :lessons %>
+            <%= link_to_function content_tag(:span, l(:button_edit), :class => 'icon icon-edit'), '$(this).hide(); $("#risk_lessons_and_toolbar").show()' %>
+            <%= content_tag 'span', :id => "risk_lessons_and_toolbar", :style => 'display:none' do %>
+              <%= f.text_area :lessons,
+                              :cols => 60,
+                              :rows => [[10, @risk.lessons.to_s.length / 50].max, 20].min,
+                              :accesskey => accesskey(:edit),
+                              :class => 'wiki-edit',
+                              :no_label => true %>
+            <% end %>
+          </p>
+          <%= wikitoolbar_for 'risk_lessons' %>
+        <% end %>
+      </div>
+    </fieldset>
   <% end %>
 
   <%= call_hook(:view_risks_form_details_bottom, { :risk => @risk, :form => f }) %>
-
-  <div class="splitcontent">
-  <div class="splitcontentleft">
-    <h3><%= l(:label_risk_cia_assessment) %></h3>
-    
-    <% if @risk.safe_attribute?('confidentiality') %>
-      <p>
-        <%= f.label_for_field :confidentiality %>
-        <%= f.select :confidentiality, 
-                     Risk::RISK_CONFIDENTIALITY.map { |c| [l("label_risk_confidentiality_#{c}"), Risk::RISK_CONFIDENTIALITY.index(c)] }, 
-                     :include_blank => true %>
-      </p>
-    <% end %>
-    
-    <% if @risk.safe_attribute?('integrity') %>
-      <p>
-        <%= f.label_for_field :integrity %>
-        <%= f.select :integrity, 
-                     Risk::RISK_INTEGRITY.map { |i| [l("label_risk_integrity_#{i}"), Risk::RISK_INTEGRITY.index(i)] }, 
-                     :include_blank => true %>
-      </p>
-    <% end %>
-    
-    <% if @risk.safe_attribute?('availability') %>
-      <p>
-        <%= f.label_for_field :availability %>
-        <%= f.select :availability, 
-                     Risk::RISK_AVAILABILITY.map { |a| [l("label_risk_availability_#{a}"), Risk::RISK_AVAILABILITY.index(a)] }, 
-                     :include_blank => true %>
-      </p>
-    <% end %>
-  </div>
-  
-  <div class="splitcontentright">
-    <h3><%= l(:label_risk_ownership) %></h3>
-    
-    <% if @risk.safe_attribute?('risk_owner_id') %>
-      <p>
-        <%= f.label_for_field :risk_owner_id %>
-        <%= f.select :risk_owner_id, principals_options_for_select(@risk.assignable_users, @risk.risk_owner), 
-                     :include_blank => true %>
-      </p>
-    <% end %>
-    
-    <% if @risk.safe_attribute?('action_owner_id') %>
-      <p>
-        <%= f.label_for_field :action_owner_id %>
-        <%= f.select :action_owner_id, principals_options_for_select(@risk.assignable_users, @risk.action_owner), 
-                     :include_blank => true %>
-      </p>
-    <% end %>
-  </div>
-</div>
-
-<div class="splitcontent">
-  <div class="splitcontentleft">
-    <h3><%= l(:label_risk_significance) %></h3>
-    
-    <% if @risk.safe_attribute?('probability_point') %>
-      <p>
-        <%= f.label_for_field :probability_point %>
-        <%= f.select :probability_point, (1..10).map { |p| [p, p] }, :include_blank => true %>
-        <em class="info"><%= l(:text_probability_point_info) %></em>
-      </p>
-    <% end %>
-    
-    <% if @risk.safe_attribute?('impact_point') %>
-      <p>
-        <%= f.label_for_field :impact_point %>
-        <%= f.select :impact_point, (1..10).map { |i| [i, i] }, :include_blank => true %>
-        <em class="info"><%= l(:text_impact_point_info) %></em>
-      </p>
-    <% end %>
-    
-    <% if @risk.level_of_significance.present? %>
-      <p>
-        <label><%= l(:field_level_of_significance) %></label>
-        <span class="value"><%= @risk.level_of_significance %></span>
-        <em class="info"><%= l(:text_significance_calculation_info) %></em>
-      </p>
-    <% end %>
-  </div>
-</div>
 <% end %>
+
+<script type="text/javascript">
+  var probabilityDescriptions = <%= raw Risk::PROBABILITY_POINT_MAPPING.transform_values { |v| I18n.t("label_risk_probability_point_#{v[:key]}_desc", default: '') }.to_json %>;
+  var impactDescriptions = <%= raw Risk::IMPACT_POINT_MAPPING.transform_values { |v| I18n.t("label_risk_impact_point_#{v[:key]}_desc", default: '') }.to_json %>;
+
+  function updateLevelOfSignificance() {
+    var probabilitySelect = document.getElementById('risk_probability_point');
+    var impactSelect = document.getElementById('risk_impact_point');
+    var significanceSpan = document.getElementById('level_of_significance_value');
+    var probabilityDescSpan = document.getElementById('probability_point_description');
+    var impactDescSpan = document.getElementById('impact_point_description');
+
+    var probability = probabilitySelect ? parseInt(probabilitySelect.value) : null;
+    var impact = impactSelect ? parseInt(impactSelect.value) : null;
+
+    // Update probability description
+    if (probabilityDescSpan && probability) {
+      probabilityDescSpan.innerHTML = '<em class="info">' + (probabilityDescriptions[probability] || '') + '</em>';
+    } else if (probabilityDescSpan) {
+      probabilityDescSpan.innerHTML = '<em class="info"><%= l(:text_select_to_see_description) %></em>';
+    }
+
+    // Update impact description
+    if (impactDescSpan && impact) {
+      impactDescSpan.innerHTML = '<em class="info">' + (impactDescriptions[impact] || '') + '</em>';
+    } else if (impactDescSpan) {
+      impactDescSpan.innerHTML = '<em class="info"><%= l(:text_select_to_see_description) %></em>';
+    }
+
+    // Calculate and update level of significance
+    if (probability && impact && !isNaN(probability) && !isNaN(impact)) {
+      var result = probability * impact;
+      significanceSpan.textContent = result;
+      significanceSpan.className = 'significance-value ' + getSignificanceClass(result);
+    } else {
+      significanceSpan.textContent = '-';
+      significanceSpan.className = 'significance-value';
+    }
+  }
+
+  function getSignificanceClass(value) {
+    if (value >= 12) return 'critical';
+    if (value >= 8) return 'high';
+    if (value >= 4) return 'medium';
+    return 'low';
+  }
+
+  function toggleSection(sectionId) {
+    var section = document.getElementById(sectionId);
+    if (section) {
+      section.classList.toggle('collapsed');
+    }
+  }
+</script>

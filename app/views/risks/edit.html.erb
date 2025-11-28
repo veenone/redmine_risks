@@ -3,5 +3,6 @@
 <%= render :partial => 'edit' %>
 
 <% content_for :header_tags do %>
-    <%= robot_exclusion_tag %>
+  <%= robot_exclusion_tag %>
+  <%= stylesheet_link_tag 'risks', :plugin => 'redmine_risks' %>
 <% end %>

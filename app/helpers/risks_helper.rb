@@ -110,19 +110,42 @@ module RisksHelper
     details_to_strings(details, no_html, options)
   end
 
-  def format_risk_confidentiality(level)
-    return unless level.present? && level.to_i < Risk::RISK_CONFIDENTIALITY.length
-    l("label_risk_confidentiality_#{Risk::RISK_CONFIDENTIALITY[level.to_i]}")
+  def format_risk_confidentiality(level, project = nil)
+    return unless level.present?
+    format_cia_value(level, :confidentiality, project)
   end
-  
-  def format_risk_integrity(level)
-    return unless level.present? && level.to_i < Risk::RISK_INTEGRITY.length
-    l("label_risk_integrity_#{Risk::RISK_INTEGRITY[level.to_i]}")
+
+  def format_risk_integrity(level, project = nil)
+    return unless level.present?
+    format_cia_value(level, :integrity, project)
   end
-  
-  def format_risk_availability(level)
-    return unless level.present? && level.to_i < Risk::RISK_AVAILABILITY.length
-    l("label_risk_availability_#{Risk::RISK_AVAILABILITY[level.to_i]}")
+
+  def format_risk_availability(level, project = nil)
+    return unless level.present?
+    format_cia_value(level, :availability, project)
+  end
+
+  # Format CIA value based on project setting (levels vs boolean mode)
+  def format_cia_value(level, field, project)
+    return nil if level.nil?
+
+    setting = project ? RiskProjectSetting.for_project(project) : nil
+
+    if setting&.boolean_cia_mode?
+      # Boolean mode: 0 = No, 1 = Yes
+      bool_value = Risk::RISK_CIA_BOOLEAN[level.to_i]
+      return nil unless bool_value
+      l("label_risk_cia_#{bool_value}")
+    else
+      # Levels mode: 0 = low, 1 = medium, 2 = high
+      levels = case field
+               when :confidentiality then Risk::RISK_CONFIDENTIALITY
+               when :integrity then Risk::RISK_INTEGRITY
+               when :availability then Risk::RISK_AVAILABILITY
+               end
+      return nil unless levels && level.to_i < levels.length
+      l("label_risk_#{field}_#{levels[level.to_i]}")
+    end
   end
 
   def column_value_with_risks(column, item, value)
@@ -144,11 +167,11 @@ module RisksHelper
     when :owner
       value ? link_to_user(value) : ''
     when :confidentiality
-      format_risk_confidentiality(value)
+      format_risk_confidentiality(value, item.project)
     when :integrity
-      format_risk_integrity(value)
+      format_risk_integrity(value, item.project)
     when :availability
-      format_risk_availability(value)
+      format_risk_availability(value, item.project)
     when :risk_owner
       item.risk_owner ? link_to_user(item.risk_owner) : ''
     when :action_owner
@@ -174,6 +197,19 @@ module RisksHelper
       'rgba(255, 99, 132, 0.8)'  # Red
     else
       'rgba(201, 203, 207, 0.8)' # Grey
+    end
+  end
+
+  def get_significance_class(value)
+    return '' unless value.present?
+    if value >= 12
+      'critical'
+    elsif value >= 8
+      'high'
+    elsif value >= 4
+      'medium'
+    else
+      'low'
     end
   end
   

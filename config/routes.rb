@@ -11,6 +11,10 @@ match '/risks/context_menu', :to => 'context_menus#risks', :as => 'risks_context
 get '/risk_dashboard', :to => 'risk_dashboard#index', :as => 'risk_dashboard'
 get '/projects/:project_id/risk_dashboard', :to => 'risk_dashboard#project', :as => 'project_risk_dashboard'
 
+# Risk project settings routes
+get '/projects/:project_id/risk_settings', :to => 'risk_project_settings#show', :as => 'project_risk_settings'
+patch '/projects/:project_id/risk_settings', :to => 'risk_project_settings#update'
+
 resources :projects do
   resources :risks, :only => [:index, :new, :create]
 end
