@@ -13,6 +13,7 @@ class Risk < ActiveRecord::Base
   belongs_to :category, :class_name => 'RiskCategory'
   belongs_to :action_owner, :class_name => 'Principal'
   belongs_to :risk_owner, :class_name => 'Principal'
+  belongs_to :risk_treatment_owner, :class_name => 'Principal'
 
   has_many :journals, :as => :journalized, :dependent => :destroy, :inverse_of => :journalized
   has_many :activities, :class_name => 'RiskActivity', :dependent => :destroy
@@ -42,6 +43,9 @@ class Risk < ActiveRecord::Base
   RISK_CONFIDENTIALITY = %w(low medium high)
   RISK_INTEGRITY = %w(low medium high)
   RISK_AVAILABILITY = %w(low medium high)
+
+  # Risk Treatment Plan options
+  RISK_TREATMENT_PLAN = %w(mitigation prevention)
 
   # Boolean CIA values (Yes/No mode) - stored as integers: 0 = no, 1 = yes
   RISK_CIA_BOOLEAN = %w(no yes)
@@ -158,6 +162,7 @@ class Risk < ActiveRecord::Base
   validates_inclusion_of :impact, :in => 0..100, :allow_nil => true
   validates_inclusion_of :strategy, :in => RISK_STRATEGY, :allow_nil => true
   validates_inclusion_of :status, :in => RISK_STATUS
+  validates_inclusion_of :risk_treatment_plan, :in => RISK_TREATMENT_PLAN, :allow_nil => true, :allow_blank => true
 
   # Remove attr_protected as it's deprecated
   # attr_protected :id if ActiveRecord::VERSION::MAJOR <= 4
@@ -328,6 +333,13 @@ class Risk < ActiveRecord::Base
                   'risk_owner_id',
                   'probability_point',
                   'impact_point',
+                  'impacted_assets',
+                  'vulnerabilities',
+                  'consequences',
+                  'counter_measures',
+                  'risk_treatment',
+                  'risk_treatment_owner_id',
+                  'risk_treatment_plan',
                   :if => lambda {|risk, user| risk.new_record? || risk.attributes_editable?(user) }
 
   # Safely sets attributes

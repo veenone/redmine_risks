@@ -604,3 +604,35 @@ fieldset.risk-section textarea.wiki-edit {
     grid-template-columns: 1fr;
   }
 }
+
+/* Risk Treatment Plan Badge */
+.treatment-plan-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 3px;
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+.treatment-plan-badge.mitigation {
+  background-color: #e3f2fd;
+  color: #1565c0;
+  border: 1px solid #90caf9;
+}
+
+.treatment-plan-badge.prevention {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+
+/* Treatment Plan Description */
+.treatment-plan-descriptions {
+  margin-top: 5px;
+  margin-bottom: 10px;
+}
+
+.treatment-plan-descriptions .info {
+  font-size: 0.9em;
+  color: #666;
+}

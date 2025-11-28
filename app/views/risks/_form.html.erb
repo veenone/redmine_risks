@@ -179,7 +179,123 @@
     </div>
   </fieldset>
 
-  <%# Section 5: Ownership %>
+  <%# Section 5: Risk Context %>
+  <fieldset class="risk-section collapsible" id="risk-context">
+    <legend onclick="toggleSection('risk-context')"><%= l(:label_risk_context) %></legend>
+    <div class="section-content">
+      <p class="section-description"><%= l(:text_risk_context_description) %></p>
+
+      <% if @risk.safe_attribute?('impacted_assets') %>
+        <p>
+          <%= f.label_for_field :impacted_assets %>
+          <%= f.text_area :impacted_assets,
+                          :cols => 60,
+                          :rows => 4,
+                          :class => 'wiki-edit' %>
+          <em class="info"><%= l(:text_impacted_assets_info) %></em>
+        </p>
+      <% end %>
+
+      <% if @risk.safe_attribute?('vulnerabilities') %>
+        <p>
+          <%= f.label_for_field :vulnerabilities %>
+          <%= f.text_area :vulnerabilities,
+                          :cols => 60,
+                          :rows => 4,
+                          :class => 'wiki-edit' %>
+          <em class="info"><%= l(:text_vulnerabilities_info) %></em>
+        </p>
+      <% end %>
+
+      <% if @risk.safe_attribute?('consequences') %>
+        <p>
+          <%= f.label_for_field :consequences %>
+          <%= f.text_area :consequences,
+                          :cols => 60,
+                          :rows => 4,
+                          :class => 'wiki-edit' %>
+          <em class="info"><%= l(:text_consequences_info) %></em>
+        </p>
+      <% end %>
+
+      <% if @risk.safe_attribute?('counter_measures') %>
+        <p>
+          <%= f.label_for_field :counter_measures %>
+          <%= f.text_area :counter_measures,
+                          :cols => 60,
+                          :rows => 4,
+                          :class => 'wiki-edit' %>
+          <em class="info"><%= l(:text_counter_measures_info) %></em>
+        </p>
+      <% end %>
+    </div>
+  </fieldset>
+
+  <%# Section 6: Risk Treatment %>
+  <fieldset class="risk-section collapsible" id="risk-treatment-section">
+    <legend onclick="toggleSection('risk-treatment-section')"><%= l(:label_risk_treatment) %></legend>
+    <div class="section-content">
+      <p class="section-description"><%= l(:text_risk_treatment_description) %></p>
+
+      <div class="splitcontent">
+        <div class="splitcontentleft">
+          <% if @risk.safe_attribute?('risk_treatment_plan') %>
+            <p>
+              <%= f.label_for_field :risk_treatment_plan %>
+              <%= f.select :risk_treatment_plan,
+                           Risk::RISK_TREATMENT_PLAN.collect {|p| [l("label_risk_treatment_plan_#{p}"), p]},
+                           :include_blank => true %>
+            </p>
+            <div class="treatment-plan-descriptions">
+              <em class="info" id="treatment_plan_info">
+                <% if @risk.risk_treatment_plan.present? %>
+                  <%= l("text_risk_treatment_plan_#{@risk.risk_treatment_plan}_info") %>
+                <% else %>
+                  <%= l(:text_select_treatment_plan) %>
+                <% end %>
+              </em>
+            </div>
+          <% end %>
+        </div>
+        <div class="splitcontentright">
+          <% if @risk.safe_attribute?('risk_treatment_owner_id') %>
+            <p>
+              <%= f.label_for_field :risk_treatment_owner_id %>
+              <%= f.select :risk_treatment_owner_id, principals_options_for_select(@risk.assignable_users, @risk.risk_treatment_owner),
+                           :include_blank => true %>
+              <em class="info"><%= l(:text_risk_treatment_owner_info) %></em>
+            </p>
+          <% end %>
+        </div>
+      </div>
+
+      <% if @risk.safe_attribute?('risk_treatment') %>
+        <p>
+          <%= f.label_for_field :risk_treatment %>
+          <%= f.text_area :risk_treatment,
+                          :cols => 60,
+                          :rows => 6,
+                          :class => 'wiki-edit' %>
+          <em class="info"><%= l(:text_risk_treatment_info) %></em>
+        </p>
+        <%= wikitoolbar_for 'risk_risk_treatment' %>
+      <% end %>
+
+      <% if @risk.safe_attribute?('lessons') %>
+        <p>
+          <%= f.label_for_field :lessons %>
+          <%= f.text_area :lessons,
+                          :cols => 60,
+                          :rows => 4,
+                          :class => 'wiki-edit' %>
+          <em class="info"><%= l(:text_lessons_info) %></em>
+        </p>
+        <%= wikitoolbar_for 'risk_lessons' %>
+      <% end %>
+    </div>
+  </fieldset>
+
+  <%# Section 7: Ownership %>
   <fieldset class="risk-section collapsible" id="risk-ownership">
     <legend onclick="toggleSection('risk-ownership')"><%= l(:label_risk_ownership) %></legend>
     <div class="section-content">
@@ -208,52 +324,34 @@
     </div>
   </fieldset>
 
-  <%# Section 6: Treatments & Lessons (only for existing risks) %>
-  <% unless @risk.new_record? %>
-    <fieldset class="risk-section collapsible" id="risk-treatments">
-      <legend onclick="toggleSection('risk-treatments')"><%= l(:label_treatments_and_lessons) %></legend>
-      <div class="section-content">
-        <% if @risk.safe_attribute?('treatments') %>
-          <p>
-            <%= f.label_for_field :treatments %>
-            <%= link_to_function content_tag(:span, l(:button_edit), :class => 'icon icon-edit'), '$(this).hide(); $("#risk_treatments_and_toolbar").show()' %>
-            <%= content_tag 'span', :id => "risk_treatments_and_toolbar", :style => 'display:none' do %>
-              <%= f.text_area :treatments,
-                              :cols => 60,
-                              :rows => [[10, @risk.treatments.to_s.length / 50].max, 20].min,
-                              :accesskey => accesskey(:edit),
-                              :class => 'wiki-edit',
-                              :no_label => true %>
-            <% end %>
-          </p>
-          <%= wikitoolbar_for 'risk_treatments' %>
-        <% end %>
-
-        <% if @risk.safe_attribute?('lessons') %>
-          <p>
-            <%= f.label_for_field :lessons %>
-            <%= link_to_function content_tag(:span, l(:button_edit), :class => 'icon icon-edit'), '$(this).hide(); $("#risk_lessons_and_toolbar").show()' %>
-            <%= content_tag 'span', :id => "risk_lessons_and_toolbar", :style => 'display:none' do %>
-              <%= f.text_area :lessons,
-                              :cols => 60,
-                              :rows => [[10, @risk.lessons.to_s.length / 50].max, 20].min,
-                              :accesskey => accesskey(:edit),
-                              :class => 'wiki-edit',
-                              :no_label => true %>
-            <% end %>
-          </p>
-          <%= wikitoolbar_for 'risk_lessons' %>
-        <% end %>
-      </div>
-    </fieldset>
-  <% end %>
-
   <%= call_hook(:view_risks_form_details_bottom, { :risk => @risk, :form => f }) %>
 <% end %>
 
 <script type="text/javascript">
   var probabilityDescriptions = <%= raw Risk::PROBABILITY_POINT_MAPPING.transform_values { |v| I18n.t("label_risk_probability_point_#{v[:key]}_desc", default: '') }.to_json %>;
   var impactDescriptions = <%= raw Risk::IMPACT_POINT_MAPPING.transform_values { |v| I18n.t("label_risk_impact_point_#{v[:key]}_desc", default: '') }.to_json %>;
+  var treatmentPlanDescriptions = {
+    'mitigation': '<%= j l(:text_risk_treatment_plan_mitigation_info) %>',
+    'prevention': '<%= j l(:text_risk_treatment_plan_prevention_info) %>'
+  };
+
+  // Update treatment plan description on change
+  document.addEventListener('DOMContentLoaded', function() {
+    var treatmentPlanSelect = document.getElementById('risk_risk_treatment_plan');
+    if (treatmentPlanSelect) {
+      treatmentPlanSelect.addEventListener('change', function() {
+        var infoSpan = document.getElementById('treatment_plan_info');
+        if (infoSpan) {
+          var value = this.value;
+          if (value && treatmentPlanDescriptions[value]) {
+            infoSpan.textContent = treatmentPlanDescriptions[value];
+          } else {
+            infoSpan.textContent = '<%= j l(:text_select_treatment_plan) %>';
+          }
+        }
+      });
+    }
+  });
 
   function updateLevelOfSignificance() {
     var probabilitySelect = document.getElementById('risk_probability_point');

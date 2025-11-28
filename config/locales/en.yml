@@ -242,3 +242,33 @@ en:
   # CIA Boolean Values
   label_risk_cia_yes: "Yes"
   label_risk_cia_no: "No"
+
+  # Risk Context fields
+  label_risk_context: "Risk Context"
+  text_risk_context_description: "Define the context of the risk including affected assets, vulnerabilities, and potential consequences."
+  field_impacted_assets: "Impacted Assets"
+  field_vulnerabilities: "Vulnerabilities"
+  field_consequences: "Consequences"
+  field_counter_measures: "Counter-measures"
+  text_impacted_assets_info: "List the assets (systems, data, processes) that could be affected by this risk"
+  text_vulnerabilities_info: "Describe known vulnerabilities that could be exploited"
+  text_consequences_info: "Describe the potential consequences if this risk materializes"
+  text_counter_measures_info: "Describe existing counter-measures already in place"
+
+  # Risk Treatment fields
+  label_risk_treatment: "Risk Treatment"
+  text_risk_treatment_description: "Define the treatment approach and actions to address this risk."
+  field_risk_treatment: "Treatment Description"
+  field_risk_treatment_plan: "Treatment Plan"
+  field_risk_treatment_owner: "Treatment Owner"
+  field_risk_treatment_owner_id: "Treatment Owner"
+  text_risk_treatment_info: "Describe the detailed treatment actions to be taken"
+  text_risk_treatment_owner_info: "Person responsible for implementing the risk treatment"
+  text_lessons_info: "Document lessons learned from managing this risk"
+  text_select_treatment_plan: "Select a treatment plan to see its description"
+
+  # Risk Treatment Plan options
+  label_risk_treatment_plan_mitigation: "Mitigation"
+  label_risk_treatment_plan_prevention: "Prevention"
+  text_risk_treatment_plan_mitigation_info: "Actions to reduce the impact or probability after the risk occurs"
+  text_risk_treatment_plan_prevention_info: "Actions to prevent the risk from occurring in the first place"
