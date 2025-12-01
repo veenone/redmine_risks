@@ -1033,3 +1033,48 @@ fieldset.risk-section textarea.wiki-edit {
   margin: 5px 0;
   font-size: 12px;
 }
+
+/* ============================================
+   Risk List Actions Column
+   ============================================ */
+
+table.risks th.actions,
+table.risks td.actions {
+  width: 60px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+table.risks td.actions a {
+  margin: 0 2px;
+  opacity: 0.6;
+}
+
+table.risks td.actions a:hover {
+  opacity: 1;
+}
+
+table.risks tr:hover td.actions a {
+  opacity: 0.8;
+}
+
+/* Bulk Actions */
+.bulk-actions {
+  margin-top: 15px;
+  padding: 10px 0;
+  border-top: 1px solid #e0e0e0;
+}
+
+.bulk-actions input[type="submit"] {
+  background-color: #d9534f;
+  color: #fff;
+  border: 1px solid #d43f3a;
+  padding: 6px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.bulk-actions input[type="submit"]:hover {
+  background-color: #c9302c;
+  border-color: #ac2925;
+}

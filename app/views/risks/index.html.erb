@@ -8,6 +8,12 @@
   <% if User.current.allowed_to?(:view_risk_dashboard, @project) %>
     <%= link_to l(:label_risk_dashboard), project_risk_dashboard_path(@project), :class => 'icon icon-stats' %>
   <% end %>
+  <% if User.current.allowed_to?(:delete_risks, @project) && @query.valid? && @risk_count.to_i > 0 %>
+    <%= link_to l(:label_delete_all_risks), destroy_all_project_risks_path(@project),
+                :method => :delete,
+                :data => { :confirm => l(:text_confirm_delete_all_risks, :count => @risk_count) },
+                :class => 'icon icon-del' %>
+  <% end %>
 </div>
 
 <h2><%= l(:label_risks) %></h2>

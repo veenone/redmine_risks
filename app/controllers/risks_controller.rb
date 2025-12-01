@@ -134,6 +134,33 @@ class RisksController < ApplicationController
     end
   end
 
+  def destroy_all
+    @project = Project.find(params[:project_id])
+    raise Unauthorized unless User.current.allowed_to?(:delete_risks, @project)
+
+    @risks = Risk.where(project_id: @project.id)
+    deleted_count = 0
+
+    @risks.each do |risk|
+      if risk.deletable?
+        begin
+          risk.destroy
+          deleted_count += 1
+        rescue => e
+          Rails.logger.error "Failed to delete risk #{risk.id}: #{e.message}"
+        end
+      end
+    end
+
+    if deleted_count > 0
+      flash[:notice] = l(:notice_risks_deleted_all, count: deleted_count)
+    else
+      flash[:warning] = l(:warning_no_risks_deleted)
+    end
+
+    redirect_to project_risks_path(@project)
+  end
+
   def preview
     @risk        = Risk.find_by_id(params[:id]) unless params[:id].blank?
     @description = params[:risk] && params[:risk][:description]

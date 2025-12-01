@@ -27,7 +27,8 @@ module RedmineRisks
             @safe_attributes = @risks.map(&:safe_attribute_names).reduce(:&)
 
             edit_allowed = @risks.all? {|t| t.editable?(User.current)}
-            @can = {:edit => edit_allowed, :delete => edit_allowed}
+            delete_allowed = @risks.all? {|t| t.deletable?(User.current)}
+            @can = {:edit => edit_allowed, :delete => delete_allowed}
             @back = back_url
 
             render :layout => false

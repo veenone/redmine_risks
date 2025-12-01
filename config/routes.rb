@@ -16,7 +16,11 @@ get '/projects/:project_id/risk_settings', :to => 'risk_project_settings#show', 
 patch '/projects/:project_id/risk_settings', :to => 'risk_project_settings#update'
 
 resources :projects do
-  resources :risks, :only => [:index, :new, :create]
+  resources :risks, :only => [:index, :new, :create] do
+    collection do
+      delete 'destroy_all'
+    end
+  end
   resources :risk_imports, :only => [:new, :create] do
     collection do
       get 'template'
