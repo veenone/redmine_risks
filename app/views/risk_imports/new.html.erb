@@ -1,0 +1,83 @@
+<h2><%= l(:label_import_risks) %></h2>
+
+<div class="risk-import-container">
+  <div class="import-instructions">
+    <h3><%= l(:label_import_instructions) %></h3>
+    <p><%= l(:text_import_instructions) %></p>
+
+    <div class="import-columns-info">
+      <h4><%= l(:label_supported_columns) %></h4>
+      <table class="list">
+        <thead>
+          <tr>
+            <th><%= l(:label_column_name) %></th>
+            <th><%= l(:label_description) %></th>
+            <th><%= l(:label_required) %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>No.</td><td><%= l(:text_column_row_number) %></td><td></td></tr>
+          <tr><td>Category</td><td><%= l(:text_column_category) %></td><td></td></tr>
+          <tr class="required"><td>Risk</td><td><%= l(:text_column_risk) %></td><td>*</td></tr>
+          <tr><td>Threat Event</td><td><%= l(:text_column_threat_event) %></td><td></td></tr>
+          <tr><td>Risk Id</td><td><%= l(:text_column_risk_id) %></td><td></td></tr>
+          <tr><td>Areas/Assets</td><td><%= l(:text_column_areas_assets) %></td><td></td></tr>
+          <tr><td>Risk Owner</td><td><%= l(:text_column_risk_owner) %></td><td></td></tr>
+          <tr><td>Impacted Assets</td><td><%= l(:text_column_impacted_assets) %></td><td></td></tr>
+          <tr><td>Vulnerabilities</td><td><%= l(:text_column_vulnerabilities) %></td><td></td></tr>
+          <tr><td>Consequences</td><td><%= l(:text_column_consequences) %></td><td></td></tr>
+          <tr><td>Counter-Measures</td><td><%= l(:text_column_counter_measures) %></td><td></td></tr>
+          <tr><td>C</td><td><%= l(:text_column_confidentiality) %></td><td></td></tr>
+          <tr><td>I</td><td><%= l(:text_column_integrity) %></td><td></td></tr>
+          <tr><td>A</td><td><%= l(:text_column_availability) %></td><td></td></tr>
+          <tr><td>Impact</td><td><%= l(:text_column_impact) %></td><td></td></tr>
+          <tr><td>Probability</td><td><%= l(:text_column_probability) %></td><td></td></tr>
+          <tr><td>Risk Treatment</td><td><%= l(:text_column_risk_treatment) %></td><td></td></tr>
+          <tr><td>Risk Treatment Owner</td><td><%= l(:text_column_risk_treatment_owner) %></td><td></td></tr>
+          <tr><td>Mitigation</td><td><%= l(:text_column_mitigation) %></td><td></td></tr>
+          <tr><td>Prevention</td><td><%= l(:text_column_prevention) %></td><td></td></tr>
+          <tr><td>Remark</td><td><%= l(:text_column_remark) %></td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="download-template">
+      <%= link_to l(:label_download_template), template_project_risk_imports_path(@project), class: 'icon icon-download' %>
+    </p>
+  </div>
+
+  <div class="import-form-section">
+    <%= form_tag(project_risk_imports_path(@project), multipart: true, class: 'import-form') do %>
+      <div class="box">
+        <h3><%= l(:label_select_file) %></h3>
+
+        <p class="file-field">
+          <label><%= l(:label_csv_file) %></label>
+          <%= file_field_tag :file, accept: '.csv' %>
+        </p>
+
+        <p class="hint"><%= l(:text_csv_file_hint) %></p>
+
+        <% if @import && @import.errors.any? %>
+          <div class="import-errors">
+            <h4><%= l(:label_import_errors) %></h4>
+            <ul>
+              <% @import.errors.each do |error| %>
+                <li><%= error %></li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+      </div>
+
+      <p class="buttons">
+        <%= submit_tag l(:button_import), class: 'icon icon-import' %>
+        <%= link_to l(:button_cancel), project_risks_path(@project), class: 'icon icon-cancel' %>
+      </p>
+    <% end %>
+  </div>
+</div>
+
+<% content_for :header_tags do %>
+  <%= stylesheet_link_tag 'risks', :plugin => 'redmine_risks' %>
+<% end %>

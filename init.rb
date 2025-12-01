@@ -40,6 +40,9 @@ Redmine::Plugin.register :redmine_risks do
 
     # Risk settings
     permission :manage_risk_settings, { :risk_project_settings => [:show, :update] }
+
+    # Risk import
+    permission :import_risks, { :risk_imports => [:new, :create, :template] }
   end
 
   # Pulls are added to the activity view

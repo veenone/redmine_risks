@@ -2,6 +2,9 @@
   <% if User.current.allowed_to?(:add_risks, @project) %>
     <%= link_to l(:label_new_risk), new_project_risk_path(@project), :class => 'icon icon-add' %>
   <% end %>
+  <% if User.current.allowed_to?(:import_risks, @project) %>
+    <%= link_to l(:label_import_risks), new_project_risk_import_path(@project), :class => 'icon icon-import' %>
+  <% end %>
   <% if User.current.allowed_to?(:view_risk_dashboard, @project) %>
     <%= link_to l(:label_risk_dashboard), project_risk_dashboard_path(@project), :class => 'icon icon-stats' %>
   <% end %>

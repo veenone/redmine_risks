@@ -17,6 +17,11 @@ patch '/projects/:project_id/risk_settings', :to => 'risk_project_settings#updat
 
 resources :projects do
   resources :risks, :only => [:index, :new, :create]
+  resources :risk_imports, :only => [:new, :create] do
+    collection do
+      get 'template'
+    end
+  end
 end
 
 resources :risks, :except => [:index, :new, :create] do
