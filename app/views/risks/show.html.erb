@@ -1,6 +1,6 @@
 <%= render :partial => 'action_menu' %>
 
-<h2><%= l(:label_risk) %> #<%= @risk.id %></h2>
+<h2><%= l(:label_risk) %> <%= @risk.risk_id_code.present? ? @risk.risk_id_code : "##{@risk.id}" %></h2>
 
 <div class="<%= @risk.css_classes %> risk-details">
   <div class="subject">
@@ -14,100 +14,178 @@
     <% end %>
   </p>
 
-  <%# Section 1: Basic Information %>
-  <fieldset class="risk-section collapsible" id="show-basic-info">
-    <legend onclick="toggleSection('show-basic-info')"><%= l(:label_risk_basic_info) %></legend>
+  <%# Section 1: Risk Identification %>
+  <fieldset class="risk-section collapsible" id="show-identification">
+    <legend onclick="toggleSection('show-identification')"><%= l(:label_risk_identification) %></legend>
     <div class="section-content">
       <div class="attributes-grid">
         <div class="attribute-item">
+          <span class="attribute-label"><%= l(:field_risk_id_code) %></span>
+          <span class="attribute-value"><%= @risk.risk_id_code.present? ? @risk.risk_id_code : "-" %></span>
+        </div>
+        <div class="attribute-item">
           <span class="attribute-label"><%= l(:field_status) %></span>
           <span class="attribute-value status <%= @risk.status %>"><%= format_risk_status(@risk.status) %></span>
+        </div>
+        <div class="attribute-item">
+          <span class="attribute-label"><%= l(:field_risk_category_entry) %></span>
+          <span class="attribute-value"><%= @risk.risk_category_entry ? @risk.risk_category_entry.name : "-" %></span>
+        </div>
+        <div class="attribute-item">
+          <span class="attribute-label"><%= l(:field_risk_registry) %></span>
+          <span class="attribute-value"><%= @risk.risk_registry ? @risk.risk_registry.name : "-" %></span>
+        </div>
+        <div class="attribute-item">
+          <span class="attribute-label"><%= l(:field_risk_area) %></span>
+          <span class="attribute-value"><%= @risk.risk_area ? @risk.risk_area.name : "-" %></span>
+        </div>
+        <% if @risk.category.present? %>
+          <div class="attribute-item">
+            <span class="attribute-label"><%= l(:field_category) %> (Legacy)</span>
+            <span class="attribute-value"><%= @risk.category.name %></span>
+          </div>
+        <% end %>
+      </div>
+
+      <% if @risk.threat_event.present? %>
+        <div class="detail-block">
+          <div class="detail-header">
+            <strong><%= l(:field_threat_event) %></strong>
+          </div>
+          <div class="wiki">
+            <%= textilizable @risk, :threat_event %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </fieldset>
+
+  <%# Section 2: Risk Ownership %>
+  <fieldset class="risk-section collapsible" id="show-ownership">
+    <legend onclick="toggleSection('show-ownership')"><%= l(:label_risk_ownership) %></legend>
+    <div class="section-content">
+      <div class="attributes-grid two-columns">
+        <div class="attribute-item">
+          <span class="attribute-label"><%= l(:field_risk_owner) %></span>
+          <span class="attribute-value"><%= @risk.risk_owner ? link_to_user(@risk.risk_owner) : "-" %></span>
         </div>
         <div class="attribute-item">
           <span class="attribute-label"><%= l(:field_assigned_to) %></span>
           <span class="attribute-value"><%= @risk.assigned_to ? link_to_user(@risk.assigned_to) : "-" %></span>
         </div>
         <div class="attribute-item">
+          <span class="attribute-label"><%= l(:field_action_owner) %></span>
+          <span class="attribute-value"><%= @risk.action_owner ? link_to_user(@risk.action_owner) : "-" %></span>
+        </div>
+        <div class="attribute-item">
           <span class="attribute-label"><%= l(:field_owner) %></span>
           <span class="attribute-value"><%= @risk.owner ? link_to_user(@risk.owner) : "-" %></span>
         </div>
-        <div class="attribute-item">
-          <span class="attribute-label"><%= l(:field_category) %></span>
-          <span class="attribute-value"><%= @risk.category ? @risk.category.name : "-" %></span>
-        </div>
       </div>
     </div>
   </fieldset>
 
-  <%# Section 2: Risk Assessment %>
-  <fieldset class="risk-section collapsible" id="show-risk-assessment">
-    <legend onclick="toggleSection('show-risk-assessment')"><%= l(:label_risk_assessment) %></legend>
-    <div class="section-content">
-      <div class="attributes-grid">
-        <div class="attribute-item">
-          <span class="attribute-label"><%= l(:field_probability) %></span>
-          <span class="attribute-value"><%= @risk.probability.present? ? format_risk_probability(@risk.probability) : "-" %></span>
-        </div>
-        <div class="attribute-item">
-          <span class="attribute-label"><%= l(:field_impact) %></span>
-          <span class="attribute-value"><%= @risk.impact.present? ? format_risk_impact(@risk.impact) : "-" %></span>
-        </div>
-        <div class="attribute-item">
-          <span class="attribute-label"><%= l(:field_magnitude) %></span>
-          <span class="attribute-value">
-            <% if @risk.probability.present? && @risk.impact.present? %>
-              <span class="magnitude-badge <%= @risk.magnitude.to_s.downcase %>"><%= @risk.magnitude %></span>
-            <% else %>
-              -
+  <%# Section 3: Impacted Assets (Multi-entry) %>
+  <% if @risk.risk_assets.any? %>
+    <fieldset class="risk-section collapsible" id="show-assets">
+      <legend onclick="toggleSection('show-assets')"><%= l(:label_impacted_assets) %> (<%= @risk.risk_assets.count %>)</legend>
+      <div class="section-content">
+        <table class="list multi-entry-list">
+          <thead>
+            <tr>
+              <th><%= l(:field_name) %></th>
+              <th><%= l(:field_description) %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @risk.risk_assets.sorted.each do |asset| %>
+              <tr class="<%= cycle('odd', 'even') %>">
+                <td><%= asset.name %></td>
+                <td><%= asset.description %></td>
+              </tr>
             <% end %>
-          </span>
-        </div>
-        <div class="attribute-item">
-          <span class="attribute-label"><%= l(:field_strategy) %></span>
-          <span class="attribute-value"><%= @risk.strategy.present? ? format_risk_strategy(@risk.strategy) : "-" %></span>
-        </div>
+          </tbody>
+        </table>
       </div>
-    </div>
-  </fieldset>
+    </fieldset>
+  <% end %>
 
-  <%# Section 3: Risk Significance Assessment %>
-  <fieldset class="risk-section collapsible" id="show-risk-significance">
-    <legend onclick="toggleSection('show-risk-significance')"><%= l(:label_risk_significance) %></legend>
-    <div class="section-content">
-      <div class="significance-display">
-        <div class="significance-item-display">
-          <span class="attribute-label"><%= l(:field_probability_point) %></span>
-          <span class="attribute-value significance-point">
-            <%= @risk.probability_point.present? ? Risk.probability_point_label(@risk.probability_point) : "-" %>
-          </span>
-          <% if @risk.probability_point.present? %>
-            <span class="attribute-description"><%= Risk.probability_point_description(@risk.probability_point) %></span>
-          <% end %>
-        </div>
-
-        <div class="significance-item-display">
-          <span class="attribute-label"><%= l(:field_impact_point) %></span>
-          <span class="attribute-value significance-point">
-            <%= @risk.impact_point.present? ? Risk.impact_point_label(@risk.impact_point) : "-" %>
-          </span>
-          <% if @risk.impact_point.present? %>
-            <span class="attribute-description"><%= Risk.impact_point_description(@risk.impact_point) %></span>
-          <% end %>
-        </div>
-
-        <div class="significance-result-display">
-          <div class="result-box">
-            <span class="result-label"><%= l(:field_level_of_significance) %></span>
-            <span class="significance-value <%= get_significance_class(@risk.level_of_significance) %>">
-              <%= @risk.level_of_significance.present? ? @risk.level_of_significance : "-" %>
-            </span>
-          </div>
-        </div>
+  <%# Section 4: Vulnerabilities (Multi-entry) %>
+  <% if @risk.risk_vulnerabilities.any? %>
+    <fieldset class="risk-section collapsible" id="show-vulnerabilities">
+      <legend onclick="toggleSection('show-vulnerabilities')"><%= l(:label_vulnerabilities) %> (<%= @risk.risk_vulnerabilities.count %>)</legend>
+      <div class="section-content">
+        <table class="list multi-entry-list">
+          <thead>
+            <tr>
+              <th><%= l(:field_name) %></th>
+              <th><%= l(:field_description) %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @risk.risk_vulnerabilities.sorted.each do |vuln| %>
+              <tr class="<%= cycle('odd', 'even') %>">
+                <td><%= vuln.name %></td>
+                <td><%= vuln.description %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
       </div>
-    </div>
-  </fieldset>
+    </fieldset>
+  <% end %>
 
-  <%# Section 4: CIA Assessment %>
+  <%# Section 5: Consequences (Multi-entry) %>
+  <% if @risk.risk_consequences.any? %>
+    <fieldset class="risk-section collapsible" id="show-consequences">
+      <legend onclick="toggleSection('show-consequences')"><%= l(:label_consequences) %> (<%= @risk.risk_consequences.count %>)</legend>
+      <div class="section-content">
+        <table class="list multi-entry-list">
+          <thead>
+            <tr>
+              <th><%= l(:field_name) %></th>
+              <th><%= l(:field_description) %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @risk.risk_consequences.sorted.each do |consequence| %>
+              <tr class="<%= cycle('odd', 'even') %>">
+                <td><%= consequence.name %></td>
+                <td><%= consequence.description %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </fieldset>
+  <% end %>
+
+  <%# Section 6: Counter-measures (Multi-entry) %>
+  <% if @risk.risk_counter_measures.any? %>
+    <fieldset class="risk-section collapsible" id="show-counter-measures">
+      <legend onclick="toggleSection('show-counter-measures')"><%= l(:label_counter_measures) %> (<%= @risk.risk_counter_measures.count %>)</legend>
+      <div class="section-content">
+        <table class="list multi-entry-list">
+          <thead>
+            <tr>
+              <th><%= l(:field_name) %></th>
+              <th><%= l(:field_description) %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @risk.risk_counter_measures.sorted.each do |measure| %>
+              <tr class="<%= cycle('odd', 'even') %>">
+                <td><%= measure.name %></td>
+                <td><%= measure.description %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </fieldset>
+  <% end %>
+
+  <%# Section 7: CIA Assessment %>
   <% risk_project_setting = RiskProjectSetting.for_project(@risk.project) %>
   <fieldset class="risk-section collapsible" id="show-cia-assessment">
     <legend onclick="toggleSection('show-cia-assessment')"><%= l(:label_risk_cia_assessment) %></legend>
@@ -149,89 +227,166 @@
     </div>
   </fieldset>
 
-  <%# Section 5: Risk Context %>
-  <% if @risk.impacted_assets.present? || @risk.vulnerabilities.present? || @risk.consequences.present? || @risk.counter_measures.present? %>
-    <fieldset class="risk-section collapsible" id="show-risk-context">
-      <legend onclick="toggleSection('show-risk-context')"><%= l(:label_risk_context) %></legend>
+  <%# Section 8: Risk Assessment (Impact & Probability) %>
+  <fieldset class="risk-section collapsible" id="show-risk-assessment">
+    <legend onclick="toggleSection('show-risk-assessment')"><%= l(:label_risk_assessment) %></legend>
+    <div class="section-content">
+      <div class="significance-display">
+        <div class="significance-item-display">
+          <span class="attribute-label"><%= l(:field_impact_point) %></span>
+          <span class="attribute-value significance-point">
+            <%= @risk.impact_point.present? ? Risk.impact_point_label(@risk.impact_point) : "-" %>
+          </span>
+          <% if @risk.impact_point.present? %>
+            <span class="attribute-description"><%= Risk.impact_point_description(@risk.impact_point) %></span>
+          <% end %>
+        </div>
+
+        <div class="significance-item-display">
+          <span class="attribute-label"><%= l(:field_probability_point) %></span>
+          <span class="attribute-value significance-point">
+            <%= @risk.probability_point.present? ? Risk.probability_point_label(@risk.probability_point) : "-" %>
+          </span>
+          <% if @risk.probability_point.present? %>
+            <span class="attribute-description"><%= Risk.probability_point_description(@risk.probability_point) %></span>
+          <% end %>
+        </div>
+
+        <div class="significance-result-display">
+          <div class="result-box">
+            <span class="result-label"><%= l(:field_level_of_significance) %></span>
+            <span class="significance-value <%= get_significance_class(@risk.level_of_significance) %>">
+              <%= @risk.level_of_significance.present? ? @risk.level_of_significance : "-" %>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="attributes-grid" style="margin-top: 15px;">
+        <div class="attribute-item">
+          <span class="attribute-label"><%= l(:field_probability) %></span>
+          <span class="attribute-value"><%= @risk.probability.present? ? format_risk_probability(@risk.probability) : "-" %></span>
+        </div>
+        <div class="attribute-item">
+          <span class="attribute-label"><%= l(:field_impact) %></span>
+          <span class="attribute-value"><%= @risk.impact.present? ? format_risk_impact(@risk.impact) : "-" %></span>
+        </div>
+        <div class="attribute-item">
+          <span class="attribute-label"><%= l(:field_magnitude) %></span>
+          <span class="attribute-value">
+            <% if @risk.probability.present? && @risk.impact.present? %>
+              <span class="magnitude-badge <%= @risk.magnitude.to_s.downcase %>"><%= @risk.magnitude %></span>
+            <% else %>
+              -
+            <% end %>
+          </span>
+        </div>
+        <div class="attribute-item">
+          <span class="attribute-label"><%= l(:field_strategy) %></span>
+          <span class="attribute-value"><%= @risk.strategy.present? ? format_risk_strategy(@risk.strategy) : "-" %></span>
+        </div>
+      </div>
+    </div>
+  </fieldset>
+
+  <%# Section 9: Risk Treatment %>
+  <fieldset class="risk-section collapsible" id="show-risk-treatment">
+    <legend onclick="toggleSection('show-risk-treatment')"><%= l(:label_risk_treatment) %></legend>
+    <div class="section-content">
+      <div class="attributes-grid two-columns">
+        <div class="attribute-item">
+          <span class="attribute-label"><%= l(:field_risk_treatment_plan) %></span>
+          <span class="attribute-value">
+            <% if @risk.risk_treatment_plan.present? %>
+              <span class="treatment-plan-badge <%= @risk.risk_treatment_plan %>">
+                <%= l("label_risk_treatment_plan_#{@risk.risk_treatment_plan}") %>
+              </span>
+            <% else %>
+              -
+            <% end %>
+          </span>
+        </div>
+        <div class="attribute-item">
+          <span class="attribute-label"><%= l(:field_risk_treatment_owner) %></span>
+          <span class="attribute-value"><%= @risk.risk_treatment_owner ? link_to_user(@risk.risk_treatment_owner) : "-" %></span>
+        </div>
+      </div>
+
+      <% if @risk.risk_treatment.present? %>
+        <div class="detail-block">
+          <div class="detail-header">
+            <strong><%= l(:field_risk_treatment) %></strong>
+          </div>
+          <div class="wiki">
+            <%= textilizable @risk, :risk_treatment %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </fieldset>
+
+  <%# Section 10: Mitigations (Multi-entry) %>
+  <% if @risk.risk_mitigations.any? %>
+    <fieldset class="risk-section collapsible" id="show-mitigations">
+      <legend onclick="toggleSection('show-mitigations')"><%= l(:label_mitigations) %> (<%= @risk.risk_mitigations.count %>)</legend>
       <div class="section-content">
-        <% if @risk.impacted_assets.present? %>
-          <div class="detail-block">
-            <div class="detail-header">
-              <strong><%= l(:field_impacted_assets) %></strong>
-            </div>
-            <div class="wiki">
-              <%= textilizable @risk, :impacted_assets %>
-            </div>
-          </div>
-        <% end %>
-
-        <% if @risk.vulnerabilities.present? %>
-          <div class="detail-block">
-            <div class="detail-header">
-              <strong><%= l(:field_vulnerabilities) %></strong>
-            </div>
-            <div class="wiki">
-              <%= textilizable @risk, :vulnerabilities %>
-            </div>
-          </div>
-        <% end %>
-
-        <% if @risk.consequences.present? %>
-          <div class="detail-block">
-            <div class="detail-header">
-              <strong><%= l(:field_consequences) %></strong>
-            </div>
-            <div class="wiki">
-              <%= textilizable @risk, :consequences %>
-            </div>
-          </div>
-        <% end %>
-
-        <% if @risk.counter_measures.present? %>
-          <div class="detail-block">
-            <div class="detail-header">
-              <strong><%= l(:field_counter_measures) %></strong>
-            </div>
-            <div class="wiki">
-              <%= textilizable @risk, :counter_measures %>
-            </div>
-          </div>
-        <% end %>
+        <table class="list multi-entry-list">
+          <thead>
+            <tr>
+              <th><%= l(:field_name) %></th>
+              <th><%= l(:field_description) %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @risk.risk_mitigations.sorted.each do |mitigation| %>
+              <tr class="<%= cycle('odd', 'even') %>">
+                <td><%= mitigation.name %></td>
+                <td><%= mitigation.description %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
       </div>
     </fieldset>
   <% end %>
 
-  <%# Section 6: Risk Treatment %>
-  <% if @risk.risk_treatment_plan.present? || @risk.risk_treatment.present? || @risk.risk_treatment_owner.present? || @risk.lessons.present? %>
-    <fieldset class="risk-section collapsible" id="show-risk-treatment">
-      <legend onclick="toggleSection('show-risk-treatment')"><%= l(:label_risk_treatment) %></legend>
+  <%# Section 11: Preventions (Multi-entry) %>
+  <% if @risk.risk_preventions.any? %>
+    <fieldset class="risk-section collapsible" id="show-preventions">
+      <legend onclick="toggleSection('show-preventions')"><%= l(:label_preventions) %> (<%= @risk.risk_preventions.count %>)</legend>
       <div class="section-content">
-        <div class="attributes-grid two-columns">
-          <div class="attribute-item">
-            <span class="attribute-label"><%= l(:field_risk_treatment_plan) %></span>
-            <span class="attribute-value">
-              <% if @risk.risk_treatment_plan.present? %>
-                <span class="treatment-plan-badge <%= @risk.risk_treatment_plan %>">
-                  <%= l("label_risk_treatment_plan_#{@risk.risk_treatment_plan}") %>
-                </span>
-              <% else %>
-                -
-              <% end %>
-            </span>
-          </div>
-          <div class="attribute-item">
-            <span class="attribute-label"><%= l(:field_risk_treatment_owner) %></span>
-            <span class="attribute-value"><%= @risk.risk_treatment_owner ? link_to_user(@risk.risk_treatment_owner) : "-" %></span>
-          </div>
-        </div>
+        <table class="list multi-entry-list">
+          <thead>
+            <tr>
+              <th><%= l(:field_name) %></th>
+              <th><%= l(:field_description) %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @risk.risk_preventions.sorted.each do |prevention| %>
+              <tr class="<%= cycle('odd', 'even') %>">
+                <td><%= prevention.name %></td>
+                <td><%= prevention.description %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </fieldset>
+  <% end %>
 
-        <% if @risk.risk_treatment.present? %>
+  <%# Section 12: Remark %>
+  <% if @risk.remark.present? || @risk.lessons.present? %>
+    <fieldset class="risk-section collapsible" id="show-remark">
+      <legend onclick="toggleSection('show-remark')"><%= l(:label_remark) %></legend>
+      <div class="section-content">
+        <% if @risk.remark.present? %>
           <div class="detail-block">
             <div class="detail-header">
-              <strong><%= l(:field_risk_treatment) %></strong>
+              <strong><%= l(:field_remark) %></strong>
             </div>
             <div class="wiki">
-              <%= textilizable @risk, :risk_treatment %>
+              <%= textilizable @risk, :remark %>
             </div>
           </div>
         <% end %>
@@ -249,23 +404,6 @@
       </div>
     </fieldset>
   <% end %>
-
-  <%# Section 7: Ownership %>
-  <fieldset class="risk-section collapsible" id="show-ownership">
-    <legend onclick="toggleSection('show-ownership')"><%= l(:label_risk_ownership) %></legend>
-    <div class="section-content">
-      <div class="attributes-grid two-columns">
-        <div class="attribute-item">
-          <span class="attribute-label"><%= l(:field_risk_owner) %></span>
-          <span class="attribute-value"><%= @risk.risk_owner ? link_to_user(@risk.risk_owner) : "-" %></span>
-        </div>
-        <div class="attribute-item">
-          <span class="attribute-label"><%= l(:field_action_owner) %></span>
-          <span class="attribute-value"><%= @risk.action_owner ? link_to_user(@risk.action_owner) : "-" %></span>
-        </div>
-      </div>
-    </div>
-  </fieldset>
 
   <%# Description %>
   <% if @risk.description? %>

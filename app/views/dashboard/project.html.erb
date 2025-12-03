@@ -2,11 +2,53 @@
 <div class="contextual">
   <%= link_to l(:label_new_risk), new_project_risk_path(@project), class: 'icon icon-add' if User.current.allowed_to?(:add_risks, @project) %>
   <%= link_to l(:label_risk_list), project_risks_path(@project), class: 'icon icon-list' %>
+  <% if User.current.allowed_to?(:manage_risk_registries, @project) %>
+    <%= link_to l(:label_risk_category_entries), project_risk_category_entries_path(@project), class: 'icon icon-folder' %>
+  <% end %>
 </div>
 
 <h2><%= l(:label_risk_dashboard) %>: <%= @project.name %></h2>
 
 <div class="dashboard">
+  <%# Registry Summary Row %>
+  <div class="dashboard-row">
+    <div class="dashboard-card registry-summary">
+      <h3><%= l(:label_registry_overview) %></h3>
+      <div class="registry-stats">
+        <div class="registry-stat-item">
+          <div class="registry-stat-icon categories"><span>C</span></div>
+          <div class="registry-stat-content">
+            <div class="registry-stat-value"><%= @total_categories %></div>
+            <div class="registry-stat-label"><%= l(:label_risk_category_entries) %></div>
+          </div>
+          <% if User.current.allowed_to?(:manage_risk_registries, @project) %>
+            <%= link_to '', project_risk_category_entries_path(@project), class: 'icon icon-zoom-in registry-link' %>
+          <% end %>
+        </div>
+        <div class="registry-stat-item">
+          <div class="registry-stat-icon registries"><span>R</span></div>
+          <div class="registry-stat-content">
+            <div class="registry-stat-value"><%= @total_registries %></div>
+            <div class="registry-stat-label"><%= l(:label_risk_registries) %></div>
+          </div>
+          <% if User.current.allowed_to?(:manage_risk_registries, @project) %>
+            <%= link_to '', project_risk_registries_path(@project), class: 'icon icon-zoom-in registry-link' %>
+          <% end %>
+        </div>
+        <div class="registry-stat-item">
+          <div class="registry-stat-icon areas"><span>A</span></div>
+          <div class="registry-stat-content">
+            <div class="registry-stat-value"><%= @total_areas %></div>
+            <div class="registry-stat-label"><%= l(:label_risk_areas) %></div>
+          </div>
+          <% if User.current.allowed_to?(:manage_risk_registries, @project) %>
+            <%= link_to '', project_risk_areas_path(@project), class: 'icon icon-zoom-in registry-link' %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="dashboard-row">
     <div class="dashboard-card wide">
       <h3><%= l(:label_risk_status_and_trends) %></h3>
@@ -53,11 +95,35 @@
         <canvas id="risksStrategyChart"></canvas>
       </div>
     </div>
-    
+
+    <div class="dashboard-card">
+      <h3><%= l(:label_risks_by_category) %></h3>
+      <div class="chart-container">
+        <% if @risks_by_category.any? %>
+          <canvas id="risksCategoryChart"></canvas>
+        <% else %>
+          <p class="nodata"><%= l(:label_no_data) %></p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="dashboard-row">
     <div class="dashboard-card">
       <h3><%= l(:label_risk_cia_assessment) %></h3>
       <div class="chart-container">
         <canvas id="riskCiaChart"></canvas>
+      </div>
+    </div>
+
+    <div class="dashboard-card">
+      <h3><%= l(:label_risks_by_treatment_plan) %></h3>
+      <div class="chart-container">
+        <% if @risks_by_treatment_plan.any? %>
+          <canvas id="risksTreatmentPlanChart"></canvas>
+        <% else %>
+          <p class="nodata"><%= l(:label_no_data) %></p>
+        <% end %>
       </div>
     </div>
   </div>
@@ -399,9 +465,92 @@
       .dashboard-flex-container {
         flex-direction: column;
       }
-      
+
       .dashboard-chart-container {
         min-height: 250px;
+      }
+    }
+
+    /* Registry Stats Styles */
+    .dashboard-card.registry-summary {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+
+    .registry-stats {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .registry-stat-item {
+      flex: 1;
+      min-width: 200px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 15px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      border: 1px solid #e0e0e0;
+    }
+
+    .registry-stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .registry-stat-icon span {
+      font-size: 20px;
+      font-weight: bold;
+      color: #fff;
+    }
+
+    .registry-stat-icon.categories {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .registry-stat-icon.registries {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+
+    .registry-stat-icon.areas {
+      background: linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%);
+    }
+
+    .registry-stat-content {
+      flex: 1;
+    }
+
+    .registry-stat-value {
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+      line-height: 1;
+    }
+
+    .registry-stat-label {
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    .registry-link {
+      opacity: 0.6;
+    }
+
+    .registry-link:hover {
+      opacity: 1;
+    }
+
+    @media (max-width: 600px) {
+      .registry-stats {
+        flex-direction: column;
       }
     }
   </style>
@@ -581,7 +730,7 @@
           <%= @risks_by_integrity[2] || 0 %>,
           <%= @risks_by_availability[2] || 0 %>
         ];
-        
+
         new Chart(ciaCtx, {
           type: 'bar',
           data: {
@@ -620,6 +769,70 @@
                   beginAtZero: true
                 }
               }]
+            }
+          }
+        });
+      }
+
+      // 5. CATEGORY CHART
+      var categoryCtx = document.getElementById('risksCategoryChart');
+      if (categoryCtx) {
+        var categoryLabels = <%= @risks_by_category.keys.to_json.html_safe %>;
+        var categoryData = <%= @risks_by_category.values.to_json.html_safe %>;
+        var categoryColors = [
+          chartColors.blue, chartColors.green, chartColors.orange,
+          chartColors.purple, chartColors.red, chartColors.yellow,
+          chartColors.grey
+        ];
+
+        new Chart(categoryCtx, {
+          type: 'pie',
+          data: {
+            labels: categoryLabels,
+            datasets: [{
+              data: categoryData,
+              backgroundColor: categoryColors.slice(0, categoryLabels.length),
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            legend: {
+              position: 'right',
+              labels: {
+                boxWidth: 12
+              }
+            }
+          }
+        });
+      }
+
+      // 6. TREATMENT PLAN CHART
+      var treatmentPlanCtx = document.getElementById('risksTreatmentPlanChart');
+      if (treatmentPlanCtx) {
+        var treatmentPlanLabels = <%= @risks_by_treatment_plan.keys.map { |k| l("label_risk_treatment_plan_#{k}") }.to_json.html_safe %>;
+        var treatmentPlanData = <%= @risks_by_treatment_plan.values.to_json.html_safe %>;
+        var treatmentPlanColors = [chartColors.blue, chartColors.green];
+
+        new Chart(treatmentPlanCtx, {
+          type: 'doughnut',
+          data: {
+            labels: treatmentPlanLabels,
+            datasets: [{
+              data: treatmentPlanData,
+              backgroundColor: treatmentPlanColors,
+              borderWidth: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            legend: {
+              position: 'right',
+              labels: {
+                boxWidth: 12
+              }
             }
           }
         });

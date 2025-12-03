@@ -1,10 +1,71 @@
 <%= labelled_fields_for :risk, @risk do |f| %>
-  <%# Section 1: Basic Information - Always visible %>
-  <fieldset class="risk-section collapsible" id="risk-basic-info">
-    <legend onclick="toggleSection('risk-basic-info')"><%= l(:label_risk_basic_info) %></legend>
+  <%# Section 1: Risk Identification %>
+  <fieldset class="risk-section collapsible" id="risk-identification">
+    <legend onclick="toggleSection('risk-identification')"><%= l(:label_risk_identification) %></legend>
     <div class="section-content">
+      <div class="splitcontent">
+        <div class="splitcontentleft">
+          <% if @risk.safe_attribute?('risk_category_entry_id') %>
+            <p>
+              <% category_options = @risk.project.risk_category_entries.active.sorted.collect { |c|
+                   [c.name, c.id, { 'data-code' => c.code.present? ? c.code : c.name.first.upcase }]
+                 } %>
+              <%= f.select :risk_category_entry_id,
+                           options_for_select(category_options, @risk.risk_category_entry_id),
+                           { :include_blank => true },
+                           { :label => l(:field_risk_category_entry), :id => 'risk_risk_category_entry_id', :onchange => 'updateRiskIdPrefix()' } %>
+            </p>
+          <% end %>
+
+          <% if @risk.safe_attribute?('risk_id_code') %>
+            <p>
+              <label for="risk_risk_id_code"><%= l(:field_risk_id_code) %></label>
+              <span class="risk-id-input-wrapper">
+                <span id="risk_id_prefix" class="risk-id-prefix"><%= @risk.risk_category_entry&.code.presence || @risk.risk_category_entry&.name&.first&.upcase || '' %></span>
+                <%= text_field_tag 'risk[risk_id_code]', @risk.risk_id_code, :size => 16, :maxlength => 20, :id => 'risk_risk_id_code', :placeholder => l(:text_risk_id_placeholder) %>
+              </span>
+              <em class="info"><%= l(:text_risk_id_code_info) %></em>
+            </p>
+          <% end %>
+
+          <% if @risk.safe_attribute?('risk_registry_id') %>
+            <p>
+              <%= f.select :risk_registry_id,
+                           @risk.project.risk_registries.active.sorted.collect { |r| [r.name, r.id] },
+                           { :include_blank => true },
+                           { :label => l(:field_risk_registry) } %>
+            </p>
+          <% end %>
+        </div>
+        <div class="splitcontentright">
+          <% if @risk.safe_attribute?('risk_area_id') %>
+            <p>
+              <%= f.select :risk_area_id,
+                           @risk.project.risk_areas.active.sorted.collect { |a| [a.name, a.id] },
+                           { :include_blank => true },
+                           { :label => l(:field_risk_area) } %>
+            </p>
+          <% end %>
+
+          <% if @risk.safe_attribute? 'status' %>
+            <p><%= f.select :status, Risk::RISK_STATUS.collect {|s| [format_risk_status(s), s]} %></p>
+          <% end %>
+        </div>
+      </div>
+
       <% if @risk.safe_attribute? 'subject' %>
         <p><%= f.text_field :subject, :size => 80, :maxlength => 255, :required => true %></p>
+      <% end %>
+
+      <% if @risk.safe_attribute?('threat_event') %>
+        <p>
+          <%= f.label_for_field :threat_event %>
+          <%= f.text_area :threat_event,
+                          :cols => 60,
+                          :rows => 3,
+                          :class => 'wiki-edit' %>
+          <em class="info"><%= l(:text_threat_event_info) %></em>
+        </p>
       <% end %>
 
       <% if @risk.safe_attribute? 'description' %>
@@ -27,20 +88,36 @@
           <%= wikitoolbar_for 'risk_description' %>
         <% end %>
       <% end %>
+    </div>
+  </fieldset>
 
+  <%# Section 2: Risk Ownership %>
+  <fieldset class="risk-section collapsible" id="risk-ownership">
+    <legend onclick="toggleSection('risk-ownership')"><%= l(:label_risk_ownership) %></legend>
+    <div class="section-content">
       <div class="splitcontent">
         <div class="splitcontentleft">
-          <% if @risk.safe_attribute? 'status' %>
-            <p><%= f.select :status, Risk::RISK_STATUS.collect {|s| [format_risk_status(s), s]} %></p>
+          <% if @risk.safe_attribute?('risk_owner_id') %>
+            <p>
+              <%= f.label_for_field :risk_owner_id %>
+              <%= f.select :risk_owner_id, principals_options_for_select(@risk.assignable_users, @risk.risk_owner),
+                           :include_blank => true %>
+              <em class="info"><%= l(:text_risk_owner_info) %></em>
+            </p>
           <% end %>
 
-          <% if @risk.safe_attribute?('category_id') && RiskCategory.active.any? %>
-            <p><%= f.select :category_id, RiskCategory.active.order('name ASC').collect {|c| [c.name, c.id]}, :include_blank => true %></p>
+          <% if @risk.safe_attribute? 'assigned_to_id' %>
+            <p><%= f.select :assigned_to_id, principals_options_for_select(@risk.assignable_users, @risk.assigned_to), :include_blank => true %></p>
           <% end %>
         </div>
         <div class="splitcontentright">
-          <% if @risk.safe_attribute? 'assigned_to_id' %>
-            <p><%= f.select :assigned_to_id, principals_options_for_select(@risk.assignable_users, @risk.assigned_to), :include_blank => true %></p>
+          <% if @risk.safe_attribute?('action_owner_id') %>
+            <p>
+              <%= f.label_for_field :action_owner_id %>
+              <%= f.select :action_owner_id, principals_options_for_select(@risk.assignable_users, @risk.action_owner),
+                           :include_blank => true %>
+              <em class="info"><%= l(:text_action_owner_info) %></em>
+            </p>
           <% end %>
 
           <% if @risk.safe_attribute? 'owner_id' %>
@@ -51,85 +128,71 @@
     </div>
   </fieldset>
 
-  <%# Section 2: Risk Assessment (Probability & Impact) %>
-  <fieldset class="risk-section collapsible" id="risk-assessment">
-    <legend onclick="toggleSection('risk-assessment')"><%= l(:label_risk_assessment) %></legend>
+  <%# Section 3: Impacted Assets (Multi-entry) %>
+  <fieldset class="risk-section collapsible" id="risk-assets">
+    <legend onclick="toggleSection('risk-assets')"><%= l(:label_impacted_assets) %></legend>
     <div class="section-content">
-      <div class="splitcontent">
-        <div class="splitcontentleft">
-          <% if @risk.safe_attribute?('probability') %>
-            <p><%= f.select :probability, format_risk_levels(Risk::RISK_PROBABILITY, @risk.probability) {|p| format_risk_probability(p)}, :include_blank => true %></p>
-          <% end %>
-
-          <% if @risk.safe_attribute?('impact') %>
-            <p><%= f.select :impact, format_risk_levels(Risk::RISK_IMPACT, @risk.impact) {|i| format_risk_impact(i)}, :include_blank => true %></p>
-          <% end %>
-        </div>
-        <div class="splitcontentright">
-          <% if @risk.safe_attribute?('strategy') %>
-            <p><%= f.select :strategy, Risk::RISK_STRATEGY.collect {|p| [format_risk_strategy(p), p]}, :include_blank => true %></p>
-          <% end %>
-
-          <% if @risk.probability.present? && @risk.impact.present? %>
-            <p>
-              <label><%= l(:field_magnitude) %></label>
-              <span class="value magnitude-badge <%= @risk.magnitude.to_s.downcase %>"><%= @risk.magnitude %></span>
-            </p>
-          <% end %>
-        </div>
+      <p class="section-description"><%= l(:text_impacted_assets_multi_info) %></p>
+      <div id="risk_assets_container" class="multi-entry-container">
+        <%= render partial: 'risks/multi_entry_fields', locals: { f: f, association: :risk_assets, field_name: 'risk_assets' } %>
       </div>
+      <p>
+        <a href="#" class="icon icon-add add-multi-entry" data-container="risk_assets_container" data-template="risk_asset_template">
+          <%= l(:button_add_asset) %>
+        </a>
+      </p>
     </div>
   </fieldset>
 
-  <%# Section 3: Risk Significance Assessment %>
-  <fieldset class="risk-section collapsible" id="risk-significance">
-    <legend onclick="toggleSection('risk-significance')"><%= l(:label_risk_significance) %></legend>
+  <%# Section 4: Vulnerabilities (Multi-entry) %>
+  <fieldset class="risk-section collapsible" id="risk-vulnerabilities">
+    <legend onclick="toggleSection('risk-vulnerabilities')"><%= l(:label_vulnerabilities) %></legend>
     <div class="section-content">
-      <p class="section-description"><%= l(:text_risk_significance_description) %></p>
-
-      <div class="significance-grid">
-        <div class="significance-item">
-          <% if @risk.safe_attribute?('probability_point') %>
-            <div class="field-group">
-              <span class="field-label"><%= l(:field_probability_point) %></span>
-              <%= select_tag 'risk[probability_point]',
-                             options_for_select([[l(:label_please_select), nil]] + Risk.probability_point_options, @risk.probability_point),
-                             :id => 'risk_probability_point',
-                             :onchange => 'updateLevelOfSignificance()' %>
-            </div>
-            <div class="field-description" id="probability_point_description">
-              <em class="info"><%= @risk.probability_point.present? ? Risk.probability_point_description(@risk.probability_point) : l(:text_select_to_see_description) %></em>
-            </div>
-          <% end %>
-        </div>
-
-        <div class="significance-item">
-          <% if @risk.safe_attribute?('impact_point') %>
-            <div class="field-group">
-              <span class="field-label"><%= l(:field_impact_point) %></span>
-              <%= select_tag 'risk[impact_point]',
-                             options_for_select([[l(:label_please_select), nil]] + Risk.impact_point_options, @risk.impact_point),
-                             :id => 'risk_impact_point',
-                             :onchange => 'updateLevelOfSignificance()' %>
-            </div>
-            <div class="field-description" id="impact_point_description">
-              <em class="info"><%= @risk.impact_point.present? ? Risk.impact_point_description(@risk.impact_point) : l(:text_select_to_see_description) %></em>
-            </div>
-          <% end %>
-        </div>
-
-        <div class="significance-result">
-          <div class="result-box">
-            <span class="result-label"><%= l(:field_level_of_significance) %></span>
-            <span class="significance-value" id="level_of_significance_value"><%= @risk.level_of_significance.present? ? @risk.level_of_significance : '-' %></span>
-            <em class="info"><%= l(:text_significance_calculation_info) %></em>
-          </div>
-        </div>
+      <p class="section-description"><%= l(:text_vulnerabilities_multi_info) %></p>
+      <div id="risk_vulnerabilities_container" class="multi-entry-container">
+        <%= render partial: 'risks/multi_entry_fields', locals: { f: f, association: :risk_vulnerabilities, field_name: 'risk_vulnerabilities' } %>
       </div>
+      <p>
+        <a href="#" class="icon icon-add add-multi-entry" data-container="risk_vulnerabilities_container" data-template="risk_vulnerability_template">
+          <%= l(:button_add_vulnerability) %>
+        </a>
+      </p>
     </div>
   </fieldset>
 
-  <%# Section 4: CIA Assessment %>
+  <%# Section 5: Consequences (Multi-entry) %>
+  <fieldset class="risk-section collapsible" id="risk-consequences">
+    <legend onclick="toggleSection('risk-consequences')"><%= l(:label_consequences) %></legend>
+    <div class="section-content">
+      <p class="section-description"><%= l(:text_consequences_multi_info) %></p>
+      <div id="risk_consequences_container" class="multi-entry-container">
+        <%= render partial: 'risks/multi_entry_fields', locals: { f: f, association: :risk_consequences, field_name: 'risk_consequences' } %>
+      </div>
+      <p>
+        <a href="#" class="icon icon-add add-multi-entry" data-container="risk_consequences_container" data-template="risk_consequence_template">
+          <%= l(:button_add_consequence) %>
+        </a>
+      </p>
+    </div>
+  </fieldset>
+
+  <%# Section 6: Counter-measures (Multi-entry) %>
+  <fieldset class="risk-section collapsible" id="risk-counter-measures">
+    <legend onclick="toggleSection('risk-counter-measures')"><%= l(:label_counter_measures) %></legend>
+    <div class="section-content">
+      <p class="section-description"><%= l(:text_counter_measures_multi_info) %></p>
+      <div id="risk_counter_measures_container" class="multi-entry-container">
+        <%= render partial: 'risks/multi_entry_fields', locals: { f: f, association: :risk_counter_measures, field_name: 'risk_counter_measures' } %>
+      </div>
+      <p>
+        <a href="#" class="icon icon-add add-multi-entry" data-container="risk_counter_measures_container" data-template="risk_counter_measure_template">
+          <%= l(:button_add_counter_measure) %>
+        </a>
+      </p>
+    </div>
+  </fieldset>
+
+  <%# Section 7: CIA Assessment %>
   <% risk_project_setting = RiskProjectSetting.for_project(@risk.project) %>
   <fieldset class="risk-section collapsible" id="risk-cia">
     <legend onclick="toggleSection('risk-cia')"><%= l(:label_risk_cia_assessment) %></legend>
@@ -179,59 +242,79 @@
     </div>
   </fieldset>
 
-  <%# Section 5: Risk Context %>
-  <fieldset class="risk-section collapsible" id="risk-context">
-    <legend onclick="toggleSection('risk-context')"><%= l(:label_risk_context) %></legend>
+  <%# Section 8: Risk Assessment (Impact & Probability) %>
+  <fieldset class="risk-section collapsible" id="risk-assessment">
+    <legend onclick="toggleSection('risk-assessment')"><%= l(:label_risk_assessment) %></legend>
     <div class="section-content">
-      <p class="section-description"><%= l(:text_risk_context_description) %></p>
+      <p class="section-description"><%= l(:text_risk_significance_description) %></p>
 
-      <% if @risk.safe_attribute?('impacted_assets') %>
-        <p>
-          <%= f.label_for_field :impacted_assets %>
-          <%= f.text_area :impacted_assets,
-                          :cols => 60,
-                          :rows => 4,
-                          :class => 'wiki-edit' %>
-          <em class="info"><%= l(:text_impacted_assets_info) %></em>
-        </p>
-      <% end %>
+      <div class="significance-grid">
+        <div class="significance-item">
+          <% if @risk.safe_attribute?('impact_point') %>
+            <div class="field-group">
+              <span class="field-label"><%= l(:field_impact_point) %></span>
+              <%= select_tag 'risk[impact_point]',
+                             options_for_select([[l(:label_please_select), nil]] + Risk.impact_point_options, @risk.impact_point),
+                             :id => 'risk_impact_point',
+                             :onchange => 'updateLevelOfSignificance()' %>
+            </div>
+            <div class="field-description" id="impact_point_description">
+              <em class="info"><%= @risk.impact_point.present? ? Risk.impact_point_description(@risk.impact_point) : l(:text_select_to_see_description) %></em>
+            </div>
+          <% end %>
+        </div>
 
-      <% if @risk.safe_attribute?('vulnerabilities') %>
-        <p>
-          <%= f.label_for_field :vulnerabilities %>
-          <%= f.text_area :vulnerabilities,
-                          :cols => 60,
-                          :rows => 4,
-                          :class => 'wiki-edit' %>
-          <em class="info"><%= l(:text_vulnerabilities_info) %></em>
-        </p>
-      <% end %>
+        <div class="significance-item">
+          <% if @risk.safe_attribute?('probability_point') %>
+            <div class="field-group">
+              <span class="field-label"><%= l(:field_probability_point) %></span>
+              <%= select_tag 'risk[probability_point]',
+                             options_for_select([[l(:label_please_select), nil]] + Risk.probability_point_options, @risk.probability_point),
+                             :id => 'risk_probability_point',
+                             :onchange => 'updateLevelOfSignificance()' %>
+            </div>
+            <div class="field-description" id="probability_point_description">
+              <em class="info"><%= @risk.probability_point.present? ? Risk.probability_point_description(@risk.probability_point) : l(:text_select_to_see_description) %></em>
+            </div>
+          <% end %>
+        </div>
 
-      <% if @risk.safe_attribute?('consequences') %>
-        <p>
-          <%= f.label_for_field :consequences %>
-          <%= f.text_area :consequences,
-                          :cols => 60,
-                          :rows => 4,
-                          :class => 'wiki-edit' %>
-          <em class="info"><%= l(:text_consequences_info) %></em>
-        </p>
-      <% end %>
+        <div class="significance-result">
+          <div class="result-box">
+            <span class="result-label"><%= l(:field_level_of_significance) %></span>
+            <span class="significance-value" id="level_of_significance_value"><%= @risk.level_of_significance.present? ? @risk.level_of_significance : '-' %></span>
+            <em class="info"><%= l(:text_significance_calculation_info) %></em>
+          </div>
+        </div>
+      </div>
 
-      <% if @risk.safe_attribute?('counter_measures') %>
-        <p>
-          <%= f.label_for_field :counter_measures %>
-          <%= f.text_area :counter_measures,
-                          :cols => 60,
-                          :rows => 4,
-                          :class => 'wiki-edit' %>
-          <em class="info"><%= l(:text_counter_measures_info) %></em>
-        </p>
-      <% end %>
+      <div class="splitcontent" style="margin-top: 15px;">
+        <div class="splitcontentleft">
+          <% if @risk.safe_attribute?('probability') %>
+            <p><%= f.select :probability, format_risk_levels(Risk::RISK_PROBABILITY, @risk.probability) {|p| format_risk_probability(p)}, :include_blank => true %></p>
+          <% end %>
+
+          <% if @risk.safe_attribute?('impact') %>
+            <p><%= f.select :impact, format_risk_levels(Risk::RISK_IMPACT, @risk.impact) {|i| format_risk_impact(i)}, :include_blank => true %></p>
+          <% end %>
+        </div>
+        <div class="splitcontentright">
+          <% if @risk.safe_attribute?('strategy') %>
+            <p><%= f.select :strategy, Risk::RISK_STRATEGY.collect {|p| [format_risk_strategy(p), p]}, :include_blank => true %></p>
+          <% end %>
+
+          <% if @risk.probability.present? && @risk.impact.present? %>
+            <p>
+              <label><%= l(:field_magnitude) %></label>
+              <span class="value magnitude-badge <%= @risk.magnitude.to_s.downcase %>"><%= @risk.magnitude %></span>
+            </p>
+          <% end %>
+        </div>
+      </div>
     </div>
   </fieldset>
 
-  <%# Section 6: Risk Treatment %>
+  <%# Section 9: Risk Treatment %>
   <fieldset class="risk-section collapsible" id="risk-treatment-section">
     <legend onclick="toggleSection('risk-treatment-section')"><%= l(:label_risk_treatment) %></legend>
     <div class="section-content">
@@ -246,15 +329,6 @@
                            Risk::RISK_TREATMENT_PLAN.collect {|p| [l("label_risk_treatment_plan_#{p}"), p]},
                            :include_blank => true %>
             </p>
-            <div class="treatment-plan-descriptions">
-              <em class="info" id="treatment_plan_info">
-                <% if @risk.risk_treatment_plan.present? %>
-                  <%= l("text_risk_treatment_plan_#{@risk.risk_treatment_plan}_info") %>
-                <% else %>
-                  <%= l(:text_select_treatment_plan) %>
-                <% end %>
-              </em>
-            </div>
           <% end %>
         </div>
         <div class="splitcontentright">
@@ -280,6 +354,54 @@
         </p>
         <%= wikitoolbar_for 'risk_risk_treatment' %>
       <% end %>
+    </div>
+  </fieldset>
+
+  <%# Section 10: Risk Treatment Plan - Mitigation (Multi-entry) %>
+  <fieldset class="risk-section collapsible" id="risk-mitigations">
+    <legend onclick="toggleSection('risk-mitigations')"><%= l(:label_mitigations) %></legend>
+    <div class="section-content">
+      <p class="section-description"><%= l(:text_mitigations_info) %></p>
+      <div id="risk_mitigations_container" class="multi-entry-container">
+        <%= render partial: 'risks/multi_entry_fields', locals: { f: f, association: :risk_mitigations, field_name: 'risk_mitigations' } %>
+      </div>
+      <p>
+        <a href="#" class="icon icon-add add-multi-entry" data-container="risk_mitigations_container" data-template="risk_mitigation_template">
+          <%= l(:button_add_mitigation) %>
+        </a>
+      </p>
+    </div>
+  </fieldset>
+
+  <%# Section 11: Risk Treatment Plan - Prevention (Multi-entry) %>
+  <fieldset class="risk-section collapsible" id="risk-preventions">
+    <legend onclick="toggleSection('risk-preventions')"><%= l(:label_preventions) %></legend>
+    <div class="section-content">
+      <p class="section-description"><%= l(:text_preventions_info) %></p>
+      <div id="risk_preventions_container" class="multi-entry-container">
+        <%= render partial: 'risks/multi_entry_fields', locals: { f: f, association: :risk_preventions, field_name: 'risk_preventions' } %>
+      </div>
+      <p>
+        <a href="#" class="icon icon-add add-multi-entry" data-container="risk_preventions_container" data-template="risk_prevention_template">
+          <%= l(:button_add_prevention) %>
+        </a>
+      </p>
+    </div>
+  </fieldset>
+
+  <%# Section 12: Remark %>
+  <fieldset class="risk-section collapsible" id="risk-remark">
+    <legend onclick="toggleSection('risk-remark')"><%= l(:label_remark) %></legend>
+    <div class="section-content">
+      <% if @risk.safe_attribute?('remark') %>
+        <p>
+          <%= f.text_area :remark,
+                          :cols => 60,
+                          :rows => 4,
+                          :class => 'wiki-edit' %>
+        </p>
+        <%= wikitoolbar_for 'risk_remark' %>
+      <% end %>
 
       <% if @risk.safe_attribute?('lessons') %>
         <p>
@@ -295,63 +417,106 @@
     </div>
   </fieldset>
 
-  <%# Section 7: Ownership %>
-  <fieldset class="risk-section collapsible" id="risk-ownership">
-    <legend onclick="toggleSection('risk-ownership')"><%= l(:label_risk_ownership) %></legend>
-    <div class="section-content">
-      <div class="splitcontent">
-        <div class="splitcontentleft">
-          <% if @risk.safe_attribute?('risk_owner_id') %>
-            <p>
-              <%= f.label_for_field :risk_owner_id %>
-              <%= f.select :risk_owner_id, principals_options_for_select(@risk.assignable_users, @risk.risk_owner),
-                           :include_blank => true %>
-              <em class="info"><%= l(:text_risk_owner_info) %></em>
-            </p>
-          <% end %>
-        </div>
-        <div class="splitcontentright">
-          <% if @risk.safe_attribute?('action_owner_id') %>
-            <p>
-              <%= f.label_for_field :action_owner_id %>
-              <%= f.select :action_owner_id, principals_options_for_select(@risk.assignable_users, @risk.action_owner),
-                           :include_blank => true %>
-              <em class="info"><%= l(:text_action_owner_info) %></em>
-            </p>
-          <% end %>
-        </div>
-      </div>
-    </div>
-  </fieldset>
-
   <%= call_hook(:view_risks_form_details_bottom, { :risk => @risk, :form => f }) %>
 <% end %>
+
+<%# Templates for multi-entry fields %>
+<script type="text/html" id="risk_asset_template">
+  <div class="multi-entry-row">
+    <input type="text" name="risk[risk_assets_attributes][NEW_INDEX][name]" placeholder="<%= l(:field_name) %>" class="multi-entry-name" />
+    <input type="text" name="risk[risk_assets_attributes][NEW_INDEX][description]" placeholder="<%= l(:field_description) %>" class="multi-entry-description" />
+    <a href="#" class="icon icon-del remove-multi-entry"><%= l(:button_delete) %></a>
+  </div>
+</script>
+
+<script type="text/html" id="risk_vulnerability_template">
+  <div class="multi-entry-row">
+    <input type="text" name="risk[risk_vulnerabilities_attributes][NEW_INDEX][name]" placeholder="<%= l(:field_name) %>" class="multi-entry-name" />
+    <input type="text" name="risk[risk_vulnerabilities_attributes][NEW_INDEX][description]" placeholder="<%= l(:field_description) %>" class="multi-entry-description" />
+    <a href="#" class="icon icon-del remove-multi-entry"><%= l(:button_delete) %></a>
+  </div>
+</script>
+
+<script type="text/html" id="risk_consequence_template">
+  <div class="multi-entry-row">
+    <input type="text" name="risk[risk_consequences_attributes][NEW_INDEX][name]" placeholder="<%= l(:field_name) %>" class="multi-entry-name" />
+    <input type="text" name="risk[risk_consequences_attributes][NEW_INDEX][description]" placeholder="<%= l(:field_description) %>" class="multi-entry-description" />
+    <a href="#" class="icon icon-del remove-multi-entry"><%= l(:button_delete) %></a>
+  </div>
+</script>
+
+<script type="text/html" id="risk_counter_measure_template">
+  <div class="multi-entry-row">
+    <input type="text" name="risk[risk_counter_measures_attributes][NEW_INDEX][name]" placeholder="<%= l(:field_name) %>" class="multi-entry-name" />
+    <input type="text" name="risk[risk_counter_measures_attributes][NEW_INDEX][description]" placeholder="<%= l(:field_description) %>" class="multi-entry-description" />
+    <a href="#" class="icon icon-del remove-multi-entry"><%= l(:button_delete) %></a>
+  </div>
+</script>
+
+<script type="text/html" id="risk_mitigation_template">
+  <div class="multi-entry-row">
+    <input type="text" name="risk[risk_mitigations_attributes][NEW_INDEX][name]" placeholder="<%= l(:field_name) %>" class="multi-entry-name" />
+    <input type="text" name="risk[risk_mitigations_attributes][NEW_INDEX][description]" placeholder="<%= l(:field_description) %>" class="multi-entry-description" />
+    <a href="#" class="icon icon-del remove-multi-entry"><%= l(:button_delete) %></a>
+  </div>
+</script>
+
+<script type="text/html" id="risk_prevention_template">
+  <div class="multi-entry-row">
+    <input type="text" name="risk[risk_preventions_attributes][NEW_INDEX][name]" placeholder="<%= l(:field_name) %>" class="multi-entry-name" />
+    <input type="text" name="risk[risk_preventions_attributes][NEW_INDEX][description]" placeholder="<%= l(:field_description) %>" class="multi-entry-description" />
+    <a href="#" class="icon icon-del remove-multi-entry"><%= l(:button_delete) %></a>
+  </div>
+</script>
 
 <script type="text/javascript">
   var probabilityDescriptions = <%= raw Risk::PROBABILITY_POINT_MAPPING.transform_values { |v| I18n.t("label_risk_probability_point_#{v[:key]}_desc", default: '') }.to_json %>;
   var impactDescriptions = <%= raw Risk::IMPACT_POINT_MAPPING.transform_values { |v| I18n.t("label_risk_impact_point_#{v[:key]}_desc", default: '') }.to_json %>;
-  var treatmentPlanDescriptions = {
-    'mitigation': '<%= j l(:text_risk_treatment_plan_mitigation_info) %>',
-    'prevention': '<%= j l(:text_risk_treatment_plan_prevention_info) %>'
-  };
+  var multiEntryIndex = <%= Time.now.to_i %>;
 
-  // Update treatment plan description on change
   document.addEventListener('DOMContentLoaded', function() {
-    var treatmentPlanSelect = document.getElementById('risk_risk_treatment_plan');
-    if (treatmentPlanSelect) {
-      treatmentPlanSelect.addEventListener('change', function() {
-        var infoSpan = document.getElementById('treatment_plan_info');
-        if (infoSpan) {
-          var value = this.value;
-          if (value && treatmentPlanDescriptions[value]) {
-            infoSpan.textContent = treatmentPlanDescriptions[value];
-          } else {
-            infoSpan.textContent = '<%= j l(:text_select_treatment_plan) %>';
-          }
+    // Add multi-entry row
+    document.querySelectorAll('.add-multi-entry').forEach(function(link) {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        var containerId = this.getAttribute('data-container');
+        var templateId = this.getAttribute('data-template');
+        var container = document.getElementById(containerId);
+        var template = document.getElementById(templateId);
+
+        if (container && template) {
+          var html = template.innerHTML.replace(/NEW_INDEX/g, multiEntryIndex++);
+          var div = document.createElement('div');
+          div.innerHTML = html;
+          container.appendChild(div.firstElementChild);
+          attachRemoveHandlers();
         }
       });
-    }
+    });
+
+    attachRemoveHandlers();
   });
+
+  function attachRemoveHandlers() {
+    document.querySelectorAll('.remove-multi-entry').forEach(function(link) {
+      link.removeEventListener('click', removeMultiEntry);
+      link.addEventListener('click', removeMultiEntry);
+    });
+  }
+
+  function removeMultiEntry(e) {
+    e.preventDefault();
+    var row = this.closest('.multi-entry-row');
+    if (row) {
+      var destroyInput = row.querySelector('input[name*="_destroy"]');
+      if (destroyInput) {
+        destroyInput.value = '1';
+        row.style.display = 'none';
+      } else {
+        row.remove();
+      }
+    }
+  }
 
   function updateLevelOfSignificance() {
     var probabilitySelect = document.getElementById('risk_probability_point');
@@ -401,4 +566,26 @@
       section.classList.toggle('collapsed');
     }
   }
+
+  function updateRiskIdPrefix() {
+    var categorySelect = document.getElementById('risk_risk_category_entry_id');
+    var prefixSpan = document.getElementById('risk_id_prefix');
+
+    if (categorySelect && prefixSpan) {
+      var selectedOption = categorySelect.options[categorySelect.selectedIndex];
+      if (selectedOption && selectedOption.value) {
+        var code = selectedOption.getAttribute('data-code');
+        prefixSpan.textContent = code || '';
+        prefixSpan.style.display = code ? 'inline-block' : 'none';
+      } else {
+        prefixSpan.textContent = '';
+        prefixSpan.style.display = 'none';
+      }
+    }
+  }
+
+  // Initialize prefix display on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    updateRiskIdPrefix();
+  });
 </script>

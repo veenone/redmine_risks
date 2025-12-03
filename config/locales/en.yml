@@ -331,3 +331,80 @@ en:
   text_column_mitigation: "Mitigation actions"
   text_column_prevention: "Prevention actions"
   text_column_remark: "Additional remarks"
+
+  # New registry labels
+  label_risk_category_entries: "Risk Categories"
+  label_risk_category_entry: "Risk Category"
+  label_new_risk_category_entry: "New Risk Category"
+  label_edit_risk_category_entry: "Edit Risk Category"
+  label_risk_registries: "Risk Registry"
+  label_risk_registry: "Risk"
+  label_new_risk_registry: "New Risk"
+  label_edit_risk_registry: "Edit Risk"
+  label_risk_areas: "Areas"
+  label_risk_area: "Area"
+  label_new_risk_area: "New Area"
+  label_edit_risk_area: "Edit Area"
+  label_risk_count: "Risks"
+  label_risk_identification: "Risk Identification"
+
+  # New field labels
+  field_risk_category_entry: "Category"
+  field_risk_category_entry_id: "Category"
+  field_risk_registry: "Risk"
+  field_risk_registry_id: "Risk"
+  field_risk_area: "Area"
+  field_risk_area_id: "Area"
+  field_risk_id_code: "Risk ID"
+  field_code: "Code"
+  field_active: "Active"
+  field_remark: "Remark"
+
+  # Multi-entry labels
+  label_impacted_assets: "Impacted Assets"
+  label_vulnerabilities: "Vulnerabilities"
+  label_consequences: "Consequences"
+  label_counter_measures: "Counter-measures"
+  label_mitigations: "Mitigations"
+  label_preventions: "Preventions"
+  label_remark: "Remark"
+
+  # Multi-entry buttons
+  button_add_asset: "Add Asset"
+  button_add_vulnerability: "Add Vulnerability"
+  button_add_consequence: "Add Consequence"
+  button_add_counter_measure: "Add Counter-measure"
+  button_add_mitigation: "Add Mitigation"
+  button_add_prevention: "Add Prevention"
+
+  # Multi-entry descriptions
+  text_impacted_assets_multi_info: "List the assets (systems, data, processes) that could be affected by this risk"
+  text_vulnerabilities_multi_info: "Describe known vulnerabilities that could be exploited"
+  text_consequences_multi_info: "Describe the potential consequences if this risk materializes"
+  text_counter_measures_multi_info: "Describe existing counter-measures already in place"
+  text_mitigations_info: "Actions to reduce the impact or probability after the risk occurs"
+  text_preventions_info: "Actions to prevent the risk from occurring in the first place"
+
+  # Info texts
+  text_risk_id_code_info: "Risk ID codification (e.g., 000001 for Technical category)"
+  text_threat_event_info: "Describe the threat event that could trigger this risk"
+  text_category_code_info: "Short code for Risk ID prefix (e.g., T for Technical)"
+  text_risk_id_placeholder: "000001"
+
+  # Error messages
+  error_can_not_delete_category_in_use: "Cannot delete category because it is assigned to one or more risks"
+  error_can_not_delete_registry_in_use: "Cannot delete risk from registry because it is assigned to one or more risk entries"
+  error_can_not_delete_area_in_use: "Cannot delete area because it is assigned to one or more risks"
+
+  # Permission labels
+  permission_manage_risk_registries: "Manage risk registries"
+
+  # Additional labels for registry views
+  label_total: "Total"
+  label_active: "Active"
+  label_inactive: "Inactive"
+
+  # Dashboard additional labels
+  label_registry_overview: "Registry Overview"
+  label_risks_by_category: "Risks by Category"
+  label_risks_by_treatment_plan: "Risks by Treatment Plan"

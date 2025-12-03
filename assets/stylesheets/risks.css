@@ -1078,3 +1078,268 @@ table.risks tr:hover td.actions a {
   background-color: #c9302c;
   border-color: #ac2925;
 }
+
+/* ============================================
+   Multi-Entry Fields Styles
+   ============================================ */
+
+.multi-entry-container {
+  margin: 10px 0;
+}
+
+.multi-entry-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 8px;
+  padding: 8px;
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+}
+
+.multi-entry-row input.multi-entry-name {
+  flex: 1;
+  min-width: 200px;
+  padding: 6px 10px;
+  border: 1px solid #d7d7d7;
+  border-radius: 3px;
+}
+
+.multi-entry-row input.multi-entry-description {
+  flex: 2;
+  padding: 6px 10px;
+  border: 1px solid #d7d7d7;
+  border-radius: 3px;
+}
+
+.multi-entry-row .remove-multi-entry {
+  flex-shrink: 0;
+  color: #d9534f;
+  text-decoration: none;
+  padding: 4px 8px;
+}
+
+.multi-entry-row .remove-multi-entry:hover {
+  color: #c9302c;
+  background: #fff;
+  border-radius: 3px;
+}
+
+.add-multi-entry {
+  display: inline-block;
+  padding: 6px 12px;
+  margin-top: 5px;
+}
+
+/* Multi-entry list in show view */
+table.multi-entry-list {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+table.multi-entry-list th,
+table.multi-entry-list td {
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+table.multi-entry-list th {
+  background: #f4f4f4;
+  font-weight: bold;
+}
+
+table.multi-entry-list tr:hover {
+  background: #f9f9f9;
+}
+
+/* ============================================
+   Registry Management Styles
+   ============================================ */
+
+table.list tr.inactive td {
+  color: #999;
+  font-style: italic;
+}
+
+table.list tr.inactive td a {
+  color: #999;
+}
+
+/* ============================================
+   Risk Identification Section
+   ============================================ */
+
+#risk-identification .splitcontent {
+  margin-bottom: 15px;
+}
+
+/* ============================================
+   Registry List Styles
+   ============================================ */
+
+table.risk-registry-list {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table.risk-registry-list th {
+  background: #f4f4f4;
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid #d7d7d7;
+}
+
+table.risk-registry-list td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #e0e0e0;
+  vertical-align: middle;
+}
+
+table.risk-registry-list tr:hover {
+  background: #f9f9f9;
+}
+
+table.risk-registry-list tr.inactive td {
+  color: #999;
+  background: #fafafa;
+}
+
+table.risk-registry-list td.name {
+  min-width: 150px;
+}
+
+table.risk-registry-list td.center {
+  text-align: center;
+}
+
+table.risk-registry-list td.buttons {
+  text-align: right;
+  white-space: nowrap;
+  width: 80px;
+}
+
+table.risk-registry-list td.buttons a {
+  margin-left: 5px;
+  opacity: 0.6;
+}
+
+table.risk-registry-list tr:hover td.buttons a {
+  opacity: 1;
+}
+
+/* Badge Styles */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.badge.count-badge {
+  background: #628db6;
+  color: #fff;
+  min-width: 24px;
+  text-align: center;
+}
+
+.badge.category-badge {
+  background: #e8f4fd;
+  color: #2980b9;
+  border: 1px solid #bdd9f0;
+}
+
+/* Muted text */
+.muted {
+  color: #999;
+}
+
+/* Form Actions */
+.form-actions {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.form-actions .btn {
+  margin-right: 10px;
+}
+
+.form-actions .btn-link {
+  color: #666;
+  text-decoration: none;
+}
+
+.form-actions .btn-link:hover {
+  color: #333;
+  text-decoration: underline;
+}
+
+/* Icon-only buttons */
+a.icon-only {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  text-align: center;
+  opacity: 0.7;
+}
+
+a.icon-only:hover {
+  opacity: 1;
+}
+
+/* Checked/Not-Checked icons */
+.icon-checked::before {
+  content: "✓";
+  color: #27ae60;
+  font-weight: bold;
+}
+
+.icon-not-checked::before {
+  content: "✗";
+  color: #999;
+}
+
+/* ============================================
+   Risk ID with Category Prefix
+   ============================================ */
+
+.risk-id-input-wrapper {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #d7d7d7;
+  border-radius: 3px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.risk-id-prefix {
+  display: inline-block;
+  padding: 4px 10px;
+  background: #628db6;
+  color: #fff;
+  font-weight: 600;
+  font-size: 13px;
+  min-width: 30px;
+  text-align: center;
+}
+
+.risk-id-prefix:empty {
+  display: none;
+}
+
+.risk-id-input-wrapper input[type="text"] {
+  border: none;
+  padding: 4px 10px;
+  font-size: 13px;
+  min-width: 150px;
+  outline: none;
+}
+
+.risk-id-input-wrapper input[type="text"]:focus {
+  box-shadow: none;
+}

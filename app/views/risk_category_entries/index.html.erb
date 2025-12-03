@@ -1,0 +1,75 @@
+<div class="contextual">
+  <%= link_to l(:label_new_risk_category_entry), new_project_risk_category_entry_path(@project), :class => 'icon icon-add' %>
+</div>
+
+<h2><%= l(:label_risk_category_entries) %></h2>
+
+<div class="risk-index-summary">
+  <div class="summary-cards">
+    <div class="summary-card total">
+      <span class="card-value"><%= @categories.count %></span>
+      <span class="card-label"><%= l(:label_total) %></span>
+    </div>
+    <div class="summary-card open">
+      <span class="card-value"><%= @categories.count { |c| c.active? } %></span>
+      <span class="card-label"><%= l(:label_active) %></span>
+    </div>
+    <div class="summary-card closed">
+      <span class="card-value"><%= @categories.count { |c| !c.active? } %></span>
+      <span class="card-label"><%= l(:label_inactive) %></span>
+    </div>
+  </div>
+</div>
+
+<div class="risk-index-content">
+  <% if @categories.any? %>
+    <table class="list risk-registry-list">
+      <thead>
+        <tr>
+          <th><%= l(:field_name) %></th>
+          <th><%= l(:field_code) %></th>
+          <th><%= l(:field_description) %></th>
+          <th class="center"><%= l(:field_active) %></th>
+          <th class="center"><%= l(:label_risk_count) %></th>
+          <th class="buttons"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @categories.each do |category| %>
+          <tr class="<%= cycle('odd', 'even') %> <%= 'inactive' unless category.active? %>">
+            <td class="name"><strong><%= category.name %></strong></td>
+            <td class="code"><%= category.code.present? ? content_tag(:span, category.code, :class => 'badge') : '-' %></td>
+            <td class="description"><%= truncate(category.description, length: 60) %></td>
+            <td class="center status">
+              <% if category.active? %>
+                <span class="icon icon-checked" title="<%= l(:label_active) %>"></span>
+              <% else %>
+                <span class="icon icon-not-checked" title="<%= l(:label_inactive) %>"></span>
+              <% end %>
+            </td>
+            <td class="center count"><span class="badge count-badge"><%= category.risks.count %></span></td>
+            <td class="buttons">
+              <%= link_to '', edit_project_risk_category_entry_path(@project, category),
+                          :class => 'icon-only icon-edit',
+                          :title => l(:button_edit) %>
+              <%= link_to '', project_risk_category_entry_path(@project, category),
+                          :method => :delete,
+                          :data => { :confirm => l(:text_are_you_sure) },
+                          :class => 'icon-only icon-del',
+                          :title => l(:button_delete) %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <div class="nodata-container">
+      <p class="nodata"><%= l(:label_no_data) %></p>
+      <p><%= link_to l(:label_new_risk_category_entry), new_project_risk_category_entry_path(@project), :class => 'icon icon-add' %></p>
+    </div>
+  <% end %>
+</div>
+
+<% content_for :header_tags do %>
+  <%= stylesheet_link_tag 'risks', :plugin => 'redmine_risks' %>
+<% end %>

@@ -26,6 +26,11 @@ resources :projects do
       get 'template'
     end
   end
+
+  # Registry management routes (project-scoped)
+  resources :risk_category_entries, :except => [:show]
+  resources :risk_registries, :except => [:show]
+  resources :risk_areas, :except => [:show]
 end
 
 resources :risks, :except => [:index, :new, :create] do

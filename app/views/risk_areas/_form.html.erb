@@ -1,0 +1,13 @@
+<div class="box tabular">
+  <%= labelled_fields_for :risk_area, @area do |f| %>
+    <p>
+      <%= f.text_field :name, :size => 50, :maxlength => 255, :required => true %>
+    </p>
+    <p>
+      <%= f.text_area :description, :cols => 60, :rows => 5 %>
+    </p>
+    <p>
+      <%= f.check_box :active %>
+    </p>
+  <% end %>
+</div>

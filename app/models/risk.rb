@@ -15,8 +15,29 @@ class Risk < ActiveRecord::Base
   belongs_to :risk_owner, :class_name => 'Principal'
   belongs_to :risk_treatment_owner, :class_name => 'Principal'
 
+  # New registry associations (project-scoped)
+  belongs_to :risk_category_entry, optional: true
+  belongs_to :risk_registry, optional: true
+  belongs_to :risk_area, optional: true
+
   has_many :journals, :as => :journalized, :dependent => :destroy, :inverse_of => :journalized
   has_many :activities, :class_name => 'RiskActivity', :dependent => :destroy
+
+  # Multi-entry associations
+  has_many :risk_assets, dependent: :destroy
+  has_many :risk_vulnerabilities, dependent: :destroy
+  has_many :risk_consequences, dependent: :destroy
+  has_many :risk_counter_measures, dependent: :destroy
+  has_many :risk_mitigations, dependent: :destroy
+  has_many :risk_preventions, dependent: :destroy
+
+  # Nested attributes for multi-entry fields
+  accepts_nested_attributes_for :risk_assets, allow_destroy: true, reject_if: :all_blank
+  accepts_nested_attributes_for :risk_vulnerabilities, allow_destroy: true, reject_if: :all_blank
+  accepts_nested_attributes_for :risk_consequences, allow_destroy: true, reject_if: :all_blank
+  accepts_nested_attributes_for :risk_counter_measures, allow_destroy: true, reject_if: :all_blank
+  accepts_nested_attributes_for :risk_mitigations, allow_destroy: true, reject_if: :all_blank
+  accepts_nested_attributes_for :risk_preventions, allow_destroy: true, reject_if: :all_blank
 
   has_and_belongs_to_many :issues, :join_table => 'risk_issues', :after_add => :relation_added, :after_remove => :relation_removed
 
@@ -340,6 +361,20 @@ class Risk < ActiveRecord::Base
                   'risk_treatment',
                   'risk_treatment_owner_id',
                   'risk_treatment_plan',
+                  # New registry fields
+                  'risk_category_entry_id',
+                  'risk_registry_id',
+                  'risk_area_id',
+                  'threat_event',
+                  'risk_id_code',
+                  'remark',
+                  # Multi-entry nested attributes
+                  'risk_assets_attributes',
+                  'risk_vulnerabilities_attributes',
+                  'risk_consequences_attributes',
+                  'risk_counter_measures_attributes',
+                  'risk_mitigations_attributes',
+                  'risk_preventions_attributes',
                   :if => lambda {|risk, user| risk.new_record? || risk.attributes_editable?(user) }
 
   # Safely sets attributes

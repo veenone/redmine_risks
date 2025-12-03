@@ -18,6 +18,9 @@ Redmine::Plugin.register :redmine_risks do
   # Child menus under Risk Management
   menu :project_menu, :risks, { :controller => 'risks', :action => 'index' }, :caption => :label_risks, :param => :project_id, :parent => :risk_management
   menu :project_menu, :risk_dashboard, { :controller => 'risk_dashboard', :action => 'project' }, :caption => :label_risk_dashboard, :param => :project_id, :parent => :risk_management
+  menu :project_menu, :risk_categories, { :controller => 'risk_category_entries', :action => 'index' }, :caption => :label_risk_category_entries, :param => :project_id, :parent => :risk_management, :if => Proc.new { |p| User.current.allowed_to?(:manage_risk_registries, p) }
+  menu :project_menu, :risk_registries, { :controller => 'risk_registries', :action => 'index' }, :caption => :label_risk_registries, :param => :project_id, :parent => :risk_management, :if => Proc.new { |p| User.current.allowed_to?(:manage_risk_registries, p) }
+  menu :project_menu, :risk_areas, { :controller => 'risk_areas', :action => 'index' }, :caption => :label_risk_areas, :param => :project_id, :parent => :risk_management, :if => Proc.new { |p| User.current.allowed_to?(:manage_risk_registries, p) }
   menu :project_menu, :risk_settings, { :controller => 'risk_project_settings', :action => 'show' }, :caption => :label_risk_settings, :param => :project_id, :parent => :risk_management, :if => Proc.new { |p| User.current.allowed_to?(:manage_risk_settings, p) }
 
   # New risk in the "+" menu
@@ -43,6 +46,13 @@ Redmine::Plugin.register :redmine_risks do
 
     # Risk import
     permission :import_risks, { :risk_imports => [:new, :create, :template] }
+
+    # Risk registries management
+    permission :manage_risk_registries, {
+      :risk_category_entries => [:index, :new, :create, :edit, :update, :destroy],
+      :risk_registries => [:index, :new, :create, :edit, :update, :destroy],
+      :risk_areas => [:index, :new, :create, :edit, :update, :destroy]
+    }
   end
 
   # Pulls are added to the activity view

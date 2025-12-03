@@ -103,6 +103,14 @@ class RiskQuery < Query
     add_available_filter "level_of_significance",
       :type => :integer
 
+    add_available_filter "probability",
+      :type => :list,
+      :values => Risk::RISK_PROBABILITY.each_with_index.map { |p, i| [l("label_risk_probability_#{p}"), (i * 25).to_s] }
+
+    add_available_filter "impact",
+      :type => :list,
+      :values => Risk::RISK_IMPACT.each_with_index.map { |im, i| [l("label_risk_impact_#{im}"), (i * 25).to_s] }
+
     add_available_filter "risk_treatment_plan",
       :type => :list,
       :values => Risk::RISK_TREATMENT_PLAN.map { |p| [l("label_risk_treatment_plan_#{p}"), p] }

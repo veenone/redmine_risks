@@ -8,8 +8,11 @@ module RedmineRisks
 
         base.class_eval do
           # unloadable # Send unloadable so it will not be unloaded in development
-          
+
           has_many :risks, :dependent => :destroy
+          has_many :risk_category_entries, :dependent => :destroy
+          has_many :risk_registries, :dependent => :destroy
+          has_many :risk_areas, :dependent => :destroy
         end
       end
 

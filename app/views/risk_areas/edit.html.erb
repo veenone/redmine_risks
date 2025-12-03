@@ -1,0 +1,18 @@
+<div class="contextual">
+  <%= link_to l(:button_cancel), project_risk_areas_path(@project), :class => 'icon icon-cancel' %>
+</div>
+
+<h2><%= l(:label_edit_risk_area) %>: <%= @area.name %></h2>
+
+<%= form_tag(project_risk_area_path(@project, @area), :method => :patch, :id => 'risk-area-form', :class => 'tabular') do %>
+  <%= render :partial => 'form' %>
+
+  <div class="form-actions">
+    <%= submit_tag l(:button_save), :class => 'btn btn-primary' %>
+    <%= link_to l(:button_cancel), project_risk_areas_path(@project), :class => 'btn btn-link' %>
+  </div>
+<% end %>
+
+<% content_for :header_tags do %>
+  <%= stylesheet_link_tag 'risks', :plugin => 'redmine_risks' %>
+<% end %>

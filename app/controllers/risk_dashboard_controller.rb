@@ -59,6 +59,19 @@ class RiskDashboardController < ApplicationController
     @open_risks = project_risks.where(closed_on: nil).count
     @closed_risks = project_risks.where.not(closed_on: nil).count
 
+    # Registry data
+    @total_categories = @project.risk_category_entries.count rescue 0
+    @total_registries = @project.risk_registries.count rescue 0
+    @total_areas = @project.risk_areas.count rescue 0
+
+    # Risks by category
+    @risks_by_category = project_risks.joins(:risk_category_entry)
+                                      .group('risk_category_entries.name')
+                                      .count rescue {}
+
+    # Risks by treatment plan
+    @risks_by_treatment_plan = project_risks.group(:risk_treatment_plan).count.reject { |k, _| k.nil? || k.blank? }
+
     # Risk Activities data
     risk_ids = project_risks.pluck(:id)
     @all_activities = RiskActivity.where(risk_id: risk_ids)

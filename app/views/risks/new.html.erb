@@ -1,3 +1,7 @@
+<div class="contextual">
+  <%= link_to l(:button_cancel), project_risks_path(@project), :class => 'icon icon-cancel' %>
+</div>
+
 <%= title l(:label_new_risk) %>
 
 <%= call_hook(:view_risk_new_top, {:risk => @risk}) %>
@@ -10,11 +14,14 @@
     </div>
   </div>
 
-  <%= submit_tag l(:button_create) %>
-  <%= submit_tag l(:button_create_and_continue), :name => 'continue' %>
-  <% if Redmine::VERSION.to_s < '4.0' %>
-    <%= preview_link preview_new_risk_path(:project_id => @risk.project), 'risk-form' %>
-  <% end %>
+  <div class="form-actions">
+    <%= submit_tag l(:button_create), :class => 'btn btn-primary' %>
+    <%= submit_tag l(:button_create_and_continue), :name => 'continue', :class => 'btn' %>
+    <% if Redmine::VERSION.to_s < '4.0' %>
+      <%= preview_link preview_new_risk_path(:project_id => @risk.project), 'risk-form' %>
+    <% end %>
+    <%= link_to l(:button_cancel), project_risks_path(@project), :class => 'btn btn-link' %>
+  </div>
 <% end %>
 
 <% if Redmine::VERSION.to_s < '4.0' %>

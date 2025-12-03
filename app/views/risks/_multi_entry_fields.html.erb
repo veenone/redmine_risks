@@ -1,0 +1,9 @@
+<% @risk.send(association).each_with_index do |item, index| %>
+  <div class="multi-entry-row">
+    <input type="hidden" name="risk[<%= field_name %>_attributes][<%= index %>][id]" value="<%= item.id %>" />
+    <input type="hidden" name="risk[<%= field_name %>_attributes][<%= index %>][_destroy]" value="0" />
+    <input type="text" name="risk[<%= field_name %>_attributes][<%= index %>][name]" value="<%= item.name %>" placeholder="<%= l(:field_name) %>" class="multi-entry-name" />
+    <input type="text" name="risk[<%= field_name %>_attributes][<%= index %>][description]" value="<%= item.description %>" placeholder="<%= l(:field_description) %>" class="multi-entry-description" />
+    <a href="#" class="icon icon-del remove-multi-entry"><%= l(:button_delete) %></a>
+  </div>
+<% end %>

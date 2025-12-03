@@ -1,0 +1,19 @@
+<div class="box tabular">
+  <%= labelled_fields_for :risk_registry, @registry do |f| %>
+    <p>
+      <%= f.text_field :name, :size => 50, :maxlength => 255, :required => true %>
+    </p>
+    <p>
+      <%= f.select :risk_category_entry_id,
+                   @project.risk_category_entries.active.sorted.collect { |c| [c.name, c.id] },
+                   { :include_blank => true },
+                   { :label => l(:field_category) } %>
+    </p>
+    <p>
+      <%= f.text_area :description, :cols => 60, :rows => 5 %>
+    </p>
+    <p>
+      <%= f.check_box :active %>
+    </p>
+  <% end %>
+</div>
