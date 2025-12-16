@@ -100,7 +100,7 @@
           <% if @risk.safe_attribute?('risk_owner_id') %>
             <p>
               <%= f.label_for_field :risk_owner_id %>
-              <%= f.select :risk_owner_id, principals_options_for_select(@risk.assignable_users, @risk.risk_owner),
+              <%= f.select :risk_owner_id, principals_options_for_select(@risk.assignable_risk_owners, @risk.risk_owner),
                            :include_blank => true %>
               <em class="info"><%= l(:text_risk_owner_info) %></em>
             </p>
@@ -243,6 +243,8 @@
   </fieldset>
 
   <%# Section 8: Risk Assessment (Impact & Probability) %>
+  <% impact_point_settings = RiskImpactPointSetting.for_project(@risk.project) %>
+  <% probability_point_settings = RiskProbabilityPointSetting.for_project(@risk.project) %>
   <fieldset class="risk-section collapsible" id="risk-assessment">
     <legend onclick="toggleSection('risk-assessment')"><%= l(:label_risk_assessment) %></legend>
     <div class="section-content">
@@ -254,12 +256,12 @@
             <div class="field-group">
               <span class="field-label"><%= l(:field_impact_point) %></span>
               <%= select_tag 'risk[impact_point]',
-                             options_for_select([[l(:label_please_select), nil]] + Risk.impact_point_options, @risk.impact_point),
+                             options_for_select([[l(:label_please_select), nil]] + Risk.impact_point_options(@risk.project), @risk.impact_point),
                              :id => 'risk_impact_point',
                              :onchange => 'updateLevelOfSignificance()' %>
             </div>
             <div class="field-description" id="impact_point_description">
-              <em class="info"><%= @risk.impact_point.present? ? Risk.impact_point_description(@risk.impact_point) : l(:text_select_to_see_description) %></em>
+              <em class="info"><%= @risk.impact_point.present? ? Risk.impact_point_description(@risk.impact_point, @risk.project) : l(:text_select_to_see_description) %></em>
             </div>
           <% end %>
         </div>
@@ -269,12 +271,12 @@
             <div class="field-group">
               <span class="field-label"><%= l(:field_probability_point) %></span>
               <%= select_tag 'risk[probability_point]',
-                             options_for_select([[l(:label_please_select), nil]] + Risk.probability_point_options, @risk.probability_point),
+                             options_for_select([[l(:label_please_select), nil]] + Risk.probability_point_options(@risk.project), @risk.probability_point),
                              :id => 'risk_probability_point',
                              :onchange => 'updateLevelOfSignificance()' %>
             </div>
             <div class="field-description" id="probability_point_description">
-              <em class="info"><%= @risk.probability_point.present? ? Risk.probability_point_description(@risk.probability_point) : l(:text_select_to_see_description) %></em>
+              <em class="info"><%= @risk.probability_point.present? ? Risk.probability_point_description(@risk.probability_point, @risk.project) : l(:text_select_to_see_description) %></em>
             </div>
           <% end %>
         </div>
@@ -335,7 +337,7 @@
           <% if @risk.safe_attribute?('risk_treatment_owner_id') %>
             <p>
               <%= f.label_for_field :risk_treatment_owner_id %>
-              <%= f.select :risk_treatment_owner_id, principals_options_for_select(@risk.assignable_users, @risk.risk_treatment_owner),
+              <%= f.select :risk_treatment_owner_id, principals_options_for_select(@risk.assignable_treatment_owners, @risk.risk_treatment_owner),
                            :include_blank => true %>
               <em class="info"><%= l(:text_risk_treatment_owner_info) %></em>
             </p>
@@ -470,8 +472,8 @@
 </script>
 
 <script type="text/javascript">
-  var probabilityDescriptions = <%= raw Risk::PROBABILITY_POINT_MAPPING.transform_values { |v| I18n.t("label_risk_probability_point_#{v[:key]}_desc", default: '') }.to_json %>;
-  var impactDescriptions = <%= raw Risk::IMPACT_POINT_MAPPING.transform_values { |v| I18n.t("label_risk_impact_point_#{v[:key]}_desc", default: '') }.to_json %>;
+  var probabilityDescriptions = <%= raw probability_point_settings.each_with_object({}) { |s, h| h[s.score] = s.description.to_s }.to_json %>;
+  var impactDescriptions = <%= raw impact_point_settings.each_with_object({}) { |s, h| h[s.score] = s.description.to_s }.to_json %>;
   var multiEntryIndex = <%= Time.now.to_i %>;
 
   document.addEventListener('DOMContentLoaded', function() {

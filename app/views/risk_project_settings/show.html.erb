@@ -33,3 +33,200 @@
     <%= submit_tag l(:button_save) %>
   </p>
 <% end %>
+
+<% has_custom_impact_settings = @impact_point_settings.any? { |s| s.persisted? } %>
+<% has_custom_probability_settings = @probability_point_settings.any? { |s| s.persisted? } %>
+
+<fieldset class="box">
+  <legend><%= l(:label_impact_point_settings) %></legend>
+
+  <p class="info"><%= l(:text_impact_point_settings_info) %></p>
+
+  <% if has_custom_impact_settings %>
+    <%= form_tag update_risk_impact_points_path(@project), method: :patch do %>
+      <table class="list point-settings-table">
+        <thead>
+          <tr>
+            <th><%= l(:field_score) %></th>
+            <th><%= l(:field_label) %></th>
+            <th><%= l(:field_description) %></th>
+            <th><%= l(:field_position) %></th>
+            <th><%= l(:field_active) %></th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @impact_point_settings.each do |setting| %>
+            <tr class="<%= cycle('odd', 'even') %>">
+              <td>
+                <%= text_field_tag "impact_point_settings[#{setting.id}][score]", setting.score, size: 5, class: 'point-score' %>
+              </td>
+              <td>
+                <%= text_field_tag "impact_point_settings[#{setting.id}][label]", setting.label, size: 20 %>
+              </td>
+              <td>
+                <%= text_field_tag "impact_point_settings[#{setting.id}][description]", setting.description, size: 50 %>
+              </td>
+              <td>
+                <%= text_field_tag "impact_point_settings[#{setting.id}][position]", setting.position, size: 5 %>
+              </td>
+              <td>
+                <%= check_box_tag "impact_point_settings[#{setting.id}][active]", '1', setting.active %>
+                <%= hidden_field_tag "impact_point_settings[#{setting.id}][active]", '0', id: nil %>
+              </td>
+              <td>
+                <%= link_to l(:button_delete),
+                            delete_risk_impact_point_path(@project, setting_id: setting.id),
+                            method: :delete,
+                            data: { confirm: l(:text_are_you_sure) },
+                            class: 'icon icon-del' %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+      <p><%= submit_tag l(:button_save) %></p>
+    <% end %>
+
+    <h4><%= l(:label_add_impact_point) %></h4>
+    <%= form_tag add_risk_impact_point_path(@project), method: :post do %>
+      <p>
+        <label><%= l(:field_score) %></label>
+        <%= text_field_tag 'impact_point_setting[score]', '', size: 5 %>
+        <label><%= l(:field_label) %></label>
+        <%= text_field_tag 'impact_point_setting[label]', '', size: 20 %>
+        <label><%= l(:field_description) %></label>
+        <%= text_field_tag 'impact_point_setting[description]', '', size: 40 %>
+        <%= submit_tag l(:button_add), class: 'small' %>
+      </p>
+    <% end %>
+  <% else %>
+    <p><em><%= l(:text_using_default_impact_settings) %></em></p>
+    <table class="list point-settings-table">
+      <thead>
+        <tr>
+          <th><%= l(:field_score) %></th>
+          <th><%= l(:field_label) %></th>
+          <th><%= l(:field_description) %></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @impact_point_settings.each do |setting| %>
+          <tr class="<%= cycle('odd', 'even') %>">
+            <td><%= setting.score %></td>
+            <td><%= setting.label %></td>
+            <td><%= setting.description %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <p>
+      <%= link_to l(:button_customize_impact_points),
+                  initialize_risk_point_settings_path(@project),
+                  method: :post,
+                  class: 'icon icon-add' %>
+      <em class="info"><%= l(:text_customize_points_info) %></em>
+    </p>
+  <% end %>
+</fieldset>
+
+<fieldset class="box">
+  <legend><%= l(:label_probability_point_settings) %></legend>
+
+  <p class="info"><%= l(:text_probability_point_settings_info) %></p>
+
+  <% if has_custom_probability_settings %>
+    <%= form_tag update_risk_probability_points_path(@project), method: :patch do %>
+      <table class="list point-settings-table">
+        <thead>
+          <tr>
+            <th><%= l(:field_score) %></th>
+            <th><%= l(:field_label) %></th>
+            <th><%= l(:field_description) %></th>
+            <th><%= l(:field_position) %></th>
+            <th><%= l(:field_active) %></th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @probability_point_settings.each do |setting| %>
+            <tr class="<%= cycle('odd', 'even') %>">
+              <td>
+                <%= text_field_tag "probability_point_settings[#{setting.id}][score]", setting.score, size: 5, class: 'point-score' %>
+              </td>
+              <td>
+                <%= text_field_tag "probability_point_settings[#{setting.id}][label]", setting.label, size: 20 %>
+              </td>
+              <td>
+                <%= text_field_tag "probability_point_settings[#{setting.id}][description]", setting.description, size: 50 %>
+              </td>
+              <td>
+                <%= text_field_tag "probability_point_settings[#{setting.id}][position]", setting.position, size: 5 %>
+              </td>
+              <td>
+                <%= check_box_tag "probability_point_settings[#{setting.id}][active]", '1', setting.active %>
+                <%= hidden_field_tag "probability_point_settings[#{setting.id}][active]", '0', id: nil %>
+              </td>
+              <td>
+                <%= link_to l(:button_delete),
+                            delete_risk_probability_point_path(@project, setting_id: setting.id),
+                            method: :delete,
+                            data: { confirm: l(:text_are_you_sure) },
+                            class: 'icon icon-del' %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+      <p><%= submit_tag l(:button_save) %></p>
+    <% end %>
+
+    <h4><%= l(:label_add_probability_point) %></h4>
+    <%= form_tag add_risk_probability_point_path(@project), method: :post do %>
+      <p>
+        <label><%= l(:field_score) %></label>
+        <%= text_field_tag 'probability_point_setting[score]', '', size: 5 %>
+        <label><%= l(:field_label) %></label>
+        <%= text_field_tag 'probability_point_setting[label]', '', size: 20 %>
+        <label><%= l(:field_description) %></label>
+        <%= text_field_tag 'probability_point_setting[description]', '', size: 40 %>
+        <%= submit_tag l(:button_add), class: 'small' %>
+      </p>
+    <% end %>
+  <% else %>
+    <p><em><%= l(:text_using_default_probability_settings) %></em></p>
+    <table class="list point-settings-table">
+      <thead>
+        <tr>
+          <th><%= l(:field_score) %></th>
+          <th><%= l(:field_label) %></th>
+          <th><%= l(:field_description) %></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @probability_point_settings.each do |setting| %>
+          <tr class="<%= cycle('odd', 'even') %>">
+            <td><%= setting.score %></td>
+            <td><%= setting.label %></td>
+            <td><%= setting.description %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <p>
+      <%= link_to l(:button_customize_probability_points),
+                  initialize_risk_point_settings_path(@project),
+                  method: :post,
+                  class: 'icon icon-add' %>
+      <em class="info"><%= l(:text_customize_points_info) %></em>
+    </p>
+  <% end %>
+</fieldset>
+
+<style>
+  .point-settings-table { margin: 10px 0; }
+  .point-settings-table th { text-align: left; padding: 6px 8px; }
+  .point-settings-table td { padding: 4px 8px; }
+  .point-settings-table input[type="text"] { margin: 0; }
+  .point-settings-table .point-score { width: 50px; }
+</style>

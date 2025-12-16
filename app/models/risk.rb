@@ -88,44 +88,91 @@ class Risk < ActiveRecord::Base
     4 => { key: 'high', label: 'High' }
   }.freeze
 
-  # Helper method to get impact options for select
-  def self.impact_point_options
-    IMPACT_POINT_MAPPING.map do |score, config|
-      [I18n.t("label_risk_impact_point_#{config[:key]}", default: config[:label]), score]
+  # Helper method to get impact options for select (project-aware, uses configurable settings)
+  def self.impact_point_options(project = nil)
+    if project
+      RiskImpactPointSetting.options_for_project(project)
+    else
+      # Fallback to default mapping for backward compatibility
+      IMPACT_POINT_MAPPING.map do |score, config|
+        [I18n.t("label_risk_impact_point_#{config[:key]}", default: config[:label]), score]
+      end
     end
   end
 
-  # Helper method to get probability options for select
-  def self.probability_point_options
-    PROBABILITY_POINT_MAPPING.map do |score, config|
-      [I18n.t("label_risk_probability_point_#{config[:key]}", default: config[:label]), score]
+  # Helper method to get probability options for select (project-aware, uses configurable settings)
+  def self.probability_point_options(project = nil)
+    if project
+      RiskProbabilityPointSetting.options_for_project(project)
+    else
+      # Fallback to default mapping for backward compatibility
+      PROBABILITY_POINT_MAPPING.map do |score, config|
+        [I18n.t("label_risk_probability_point_#{config[:key]}", default: config[:label]), score]
+      end
     end
   end
 
-  # Get the label for an impact point value
-  def self.impact_point_label(value)
-    return nil unless value && IMPACT_POINT_MAPPING[value]
-    config = IMPACT_POINT_MAPPING[value]
-    I18n.t("label_risk_impact_point_#{config[:key]}", default: config[:label])
+  # Get the label for an impact point value (project-aware)
+  def self.impact_point_label(value, project = nil)
+    return nil unless value
+    if project
+      RiskImpactPointSetting.label_for_score(project, value)
+    else
+      return nil unless IMPACT_POINT_MAPPING[value]
+      config = IMPACT_POINT_MAPPING[value]
+      I18n.t("label_risk_impact_point_#{config[:key]}", default: config[:label])
+    end
   end
 
-  # Get the label for a probability point value
-  def self.probability_point_label(value)
-    return nil unless value && PROBABILITY_POINT_MAPPING[value]
-    config = PROBABILITY_POINT_MAPPING[value]
-    I18n.t("label_risk_probability_point_#{config[:key]}", default: config[:label])
+  # Get the label for a probability point value (project-aware)
+  def self.probability_point_label(value, project = nil)
+    return nil unless value
+    if project
+      RiskProbabilityPointSetting.label_for_score(project, value)
+    else
+      return nil unless PROBABILITY_POINT_MAPPING[value]
+      config = PROBABILITY_POINT_MAPPING[value]
+      I18n.t("label_risk_probability_point_#{config[:key]}", default: config[:label])
+    end
   end
 
-  # Get the description for an impact point value
-  def self.impact_point_description(value)
-    return nil unless value && IMPACT_POINT_MAPPING[value]
-    I18n.t("label_risk_impact_point_#{IMPACT_POINT_MAPPING[value][:key]}_desc", default: '')
+  # Get the description for an impact point value (project-aware)
+  def self.impact_point_description(value, project = nil)
+    return nil unless value
+    if project
+      RiskImpactPointSetting.description_for_score(project, value)
+    else
+      return nil unless IMPACT_POINT_MAPPING[value]
+      I18n.t("label_risk_impact_point_#{IMPACT_POINT_MAPPING[value][:key]}_desc", default: '')
+    end
   end
 
-  # Get the description for a probability point value
-  def self.probability_point_description(value)
-    return nil unless value && PROBABILITY_POINT_MAPPING[value]
-    I18n.t("label_risk_probability_point_#{PROBABILITY_POINT_MAPPING[value][:key]}_desc", default: '')
+  # Get the description for a probability point value (project-aware)
+  def self.probability_point_description(value, project = nil)
+    return nil unless value
+    if project
+      RiskProbabilityPointSetting.description_for_score(project, value)
+    else
+      return nil unless PROBABILITY_POINT_MAPPING[value]
+      I18n.t("label_risk_probability_point_#{PROBABILITY_POINT_MAPPING[value][:key]}_desc", default: '')
+    end
+  end
+
+  # Instance methods for getting point labels and descriptions using this risk's project
+  def impact_point_label
+    Risk.impact_point_label(impact_point, project)
+  end
+
+  def probability_point_label
+    Risk.probability_point_label(probability_point, project)
+  end
+
+  def impact_point_description
+    Risk.impact_point_description(impact_point, project)
+  end
+
+  def probability_point_description
+    Risk.probability_point_description(probability_point, project)
   end
 
   # Get CIA options based on project setting
@@ -513,6 +560,35 @@ class Risk < ActiveRecord::Base
     users << author if author && author.active?
     users << owner if owner && owner.active?
     users.uniq.sort
+  end
+
+  # Principals (users and groups) that can be set as risk owner or treatment owner
+  def assignable_principals
+    principals = project.assignable_users.to_a
+    # Add groups from the project (Groups use status == Principal::STATUS_ACTIVE)
+    principals += project.memberships.map(&:principal).select { |p| p.is_a?(Group) && p.status == Principal::STATUS_ACTIVE }
+    principals << author if author && author.active?
+    principals.uniq.sort
+  end
+
+  # Get principals for risk_owner field (includes both users and groups)
+  def assignable_risk_owners
+    principals = assignable_principals
+    if risk_owner && !principals.include?(risk_owner)
+      is_active = risk_owner.respond_to?(:active?) ? risk_owner.active? : risk_owner.status == Principal::STATUS_ACTIVE
+      principals << risk_owner if is_active
+    end
+    principals.uniq.sort
+  end
+
+  # Get principals for risk_treatment_owner field (includes both users and groups)
+  def assignable_treatment_owners
+    principals = assignable_principals
+    if risk_treatment_owner && !principals.include?(risk_treatment_owner)
+      is_active = risk_treatment_owner.respond_to?(:active?) ? risk_treatment_owner.active? : risk_treatment_owner.status == Principal::STATUS_ACTIVE
+      principals << risk_treatment_owner if is_active
+    end
+    principals.uniq.sort
   end
 
   def assigned_to_users

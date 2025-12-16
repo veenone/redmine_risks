@@ -408,3 +408,23 @@ en:
   label_registry_overview: "Registry Overview"
   label_risks_by_category: "Risks by Category"
   label_risks_by_treatment_plan: "Risks by Treatment Plan"
+
+  # Impact/Probability Point Settings
+  label_impact_point_settings: "Impact Point Settings"
+  label_probability_point_settings: "Probability Point Settings"
+  text_impact_point_settings_info: "Configure the impact point scale used for risk assessment in this project."
+  text_probability_point_settings_info: "Configure the probability point scale used for risk assessment in this project."
+  text_using_default_impact_settings: "Using default impact point settings. Click below to customize."
+  text_using_default_probability_settings: "Using default probability point settings. Click below to customize."
+  text_customize_points_info: "Creates a copy of the default settings that you can customize for this project."
+  button_customize_impact_points: "Customize Impact Points"
+  button_customize_probability_points: "Customize Probability Points"
+  label_add_impact_point: "Add Impact Point"
+  label_add_probability_point: "Add Probability Point"
+  field_score: "Score"
+  field_label: "Label"
+  notice_point_settings_initialized: "Point settings have been initialized. You can now customize them."
+
+  # Group assignment
+  text_risk_owner_supports_groups: "Can be assigned to individual users or groups"
+  text_treatment_owner_supports_groups: "Can be assigned to individual users or groups"

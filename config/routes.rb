@@ -15,6 +15,15 @@ get '/projects/:project_id/risk_dashboard', :to => 'risk_dashboard#project', :as
 get '/projects/:project_id/risk_settings', :to => 'risk_project_settings#show', :as => 'project_risk_settings'
 patch '/projects/:project_id/risk_settings', :to => 'risk_project_settings#update'
 
+# Impact/Probability point settings routes
+post '/projects/:project_id/risk_settings/initialize_point_settings', :to => 'risk_project_settings#initialize_point_settings', :as => 'initialize_risk_point_settings'
+patch '/projects/:project_id/risk_settings/update_impact_points', :to => 'risk_project_settings#update_impact_points', :as => 'update_risk_impact_points'
+patch '/projects/:project_id/risk_settings/update_probability_points', :to => 'risk_project_settings#update_probability_points', :as => 'update_risk_probability_points'
+post '/projects/:project_id/risk_settings/add_impact_point', :to => 'risk_project_settings#add_impact_point', :as => 'add_risk_impact_point'
+post '/projects/:project_id/risk_settings/add_probability_point', :to => 'risk_project_settings#add_probability_point', :as => 'add_risk_probability_point'
+delete '/projects/:project_id/risk_settings/delete_impact_point/:setting_id', :to => 'risk_project_settings#delete_impact_point', :as => 'delete_risk_impact_point'
+delete '/projects/:project_id/risk_settings/delete_probability_point/:setting_id', :to => 'risk_project_settings#delete_probability_point', :as => 'delete_risk_probability_point'
+
 resources :projects do
   resources :risks, :only => [:index, :new, :create] do
     collection do

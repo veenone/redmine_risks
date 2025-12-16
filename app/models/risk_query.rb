@@ -94,11 +94,13 @@ class RiskQuery < Query
       :type => :list_optional, 
       :values => lambda { assignable_values_options(:action_owner_id) }
 
-    add_available_filter "probability_point", 
-      :type => :integer
+    add_available_filter "probability_point",
+      :type => :list_optional,
+      :values => lambda { probability_point_values }
 
-    add_available_filter "impact_point", 
-      :type => :integer
+    add_available_filter "impact_point",
+      :type => :list_optional,
+      :values => lambda { impact_point_values }
 
     add_available_filter "level_of_significance",
       :type => :integer
@@ -314,5 +316,39 @@ class RiskQuery < Query
     end
 
     joins.any? ? joins.join(' ') : nil
+  end
+
+  private
+
+  # Get impact point values for filter
+  # When project is set, use project-specific settings; otherwise use defaults from all projects
+  def impact_point_values
+    if project
+      RiskImpactPointSetting.for_project(project).map { |s| ["#{s.label} (#{s.score})", s.score.to_s] }
+    else
+      # Get unique scores from all projects with custom settings, plus defaults
+      scores = RiskImpactPointSetting.active.pluck(:score, :label).uniq { |s| s[0] }
+      if scores.empty?
+        RiskImpactPointSetting::DEFAULT_SETTINGS.map { |s| ["#{s[:label]} (#{s[:score]})", s[:score].to_s] }
+      else
+        scores.sort_by { |s| s[0] }.map { |score, label| ["#{label} (#{score})", score.to_s] }
+      end
+    end
+  end
+
+  # Get probability point values for filter
+  # When project is set, use project-specific settings; otherwise use defaults from all projects
+  def probability_point_values
+    if project
+      RiskProbabilityPointSetting.for_project(project).map { |s| ["#{s.label} (#{s.score})", s.score.to_s] }
+    else
+      # Get unique scores from all projects with custom settings, plus defaults
+      scores = RiskProbabilityPointSetting.active.pluck(:score, :label).uniq { |s| s[0] }
+      if scores.empty?
+        RiskProbabilityPointSetting::DEFAULT_SETTINGS.map { |s| ["#{s[:label]} (#{s[:score]})", s[:score].to_s] }
+      else
+        scores.sort_by { |s| s[0] }.map { |score, label| ["#{label} (#{score})", score.to_s] }
+      end
+    end
   end
 end

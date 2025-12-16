@@ -1,10 +1,10 @@
 require 'redmine'
 
-RISKS_VERSION_NUMBER = '2.0.0'
+RISKS_VERSION_NUMBER = '2.1.0'
 
 Redmine::Plugin.register :redmine_risks do
   name 'Risks'
-  author 'eXolnet'
+  author 'Mun Mun Das'
   description 'Manage the results of the qualitative risk analysis, quantitative risk analysis, and risk response planning.'
   version RISKS_VERSION_NUMBER
   url 'https://github.com/eXolnet/redmine_risks'
@@ -41,8 +41,13 @@ Redmine::Plugin.register :redmine_risks do
     # Risk activities
     permission :manage_risk_activities, { :risk_activities => [:new, :create, :edit, :update, :destroy] }
 
-    # Risk settings
-    permission :manage_risk_settings, { :risk_project_settings => [:show, :update] }
+    # Risk settings (includes point settings management)
+    permission :manage_risk_settings, {
+      :risk_project_settings => [:show, :update, :initialize_point_settings,
+                                  :update_impact_points, :update_probability_points,
+                                  :add_impact_point, :add_probability_point,
+                                  :delete_impact_point, :delete_probability_point]
+    }
 
     # Risk import
     permission :import_risks, { :risk_imports => [:new, :create, :template] }
