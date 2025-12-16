@@ -1,3 +1,6 @@
+<% impact_point_settings = RiskImpactPointSetting.for_project(@risk.project) %>
+<% probability_point_settings = RiskProbabilityPointSetting.for_project(@risk.project) %>
+
 <%= labelled_fields_for :risk, @risk do |f| %>
   <%# Section 1: Risk Identification %>
   <fieldset class="risk-section collapsible" id="risk-identification">
@@ -243,8 +246,6 @@
   </fieldset>
 
   <%# Section 8: Risk Assessment (Impact & Probability) %>
-  <% impact_point_settings = RiskImpactPointSetting.for_project(@risk.project) %>
-  <% probability_point_settings = RiskProbabilityPointSetting.for_project(@risk.project) %>
   <fieldset class="risk-section collapsible" id="risk-assessment">
     <legend onclick="toggleSection('risk-assessment')"><%= l(:label_risk_assessment) %></legend>
     <div class="section-content">
