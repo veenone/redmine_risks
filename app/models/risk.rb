@@ -31,6 +31,10 @@ class Risk < ActiveRecord::Base
   has_many :risk_mitigations, dependent: :destroy
   has_many :risk_preventions, dependent: :destroy
 
+  # Multi-selectable treatment plan association
+  has_many :risk_treatment_plan_selections, dependent: :destroy
+  has_many :treatment_plan_settings, through: :risk_treatment_plan_selections, source: :risk_treatment_plan_setting
+
   # Nested attributes for multi-entry fields
   accepts_nested_attributes_for :risk_assets, allow_destroy: true, reject_if: :all_blank
   accepts_nested_attributes_for :risk_vulnerabilities, allow_destroy: true, reject_if: :all_blank
@@ -173,6 +177,78 @@ class Risk < ActiveRecord::Base
 
   def probability_point_description
     Risk.probability_point_description(probability_point, project)
+  end
+
+  # Get configurable strategy options for this risk's project
+  def self.strategy_options_for_project(project)
+    RiskStrategySetting.options_for_project(project)
+  end
+
+  # Get configurable probability entry options for this risk's project
+  def self.probability_entry_options_for_project(project)
+    RiskProbabilityEntrySetting.options_for_project(project)
+  end
+
+  # Get configurable impact entry options for this risk's project
+  def self.impact_entry_options_for_project(project)
+    RiskImpactEntrySetting.options_for_project(project)
+  end
+
+  # Get strategy label from project settings
+  def strategy_label
+    return nil unless strategy
+    RiskStrategySetting.label_for_key(project, strategy) || I18n.t("label_risk_strategy_#{strategy}", default: strategy.humanize)
+  end
+
+  # Get probability label from project settings
+  def probability_entry_label
+    return nil unless probability
+    # Convert probability (0-100) to key lookup
+    RiskProbabilityEntrySetting.label_for_key(project, probability.to_s) || probability.to_s
+  end
+
+  # Get impact label from project settings
+  def impact_entry_label
+    return nil unless impact
+    # Convert impact (0-100) to key lookup
+    RiskImpactEntrySetting.label_for_key(project, impact.to_s) || impact.to_s
+  end
+
+  # Get display name for risk owner (includes custom name fallback)
+  def risk_owner_display_name
+    if risk_owner.present?
+      risk_owner.name
+    elsif custom_risk_owner_name.present?
+      custom_risk_owner_name
+    else
+      nil
+    end
+  end
+
+  # Get display name for treatment owner (includes custom name fallback)
+  def treatment_owner_display_name
+    if risk_treatment_owner.present?
+      risk_treatment_owner.name
+    elsif custom_treatment_owner_name.present?
+      custom_treatment_owner_name
+    else
+      nil
+    end
+  end
+
+  # Get selected treatment plans as labels
+  def treatment_plan_labels
+    treatment_plan_settings.map(&:label)
+  end
+
+  # Get treatment plan setting IDs for form
+  def treatment_plan_setting_ids
+    treatment_plan_settings.pluck(:id)
+  end
+
+  # Set treatment plan settings by IDs
+  def treatment_plan_setting_ids=(ids)
+    self.treatment_plan_settings = RiskTreatmentPlanSetting.where(id: ids.reject(&:blank?))
   end
 
   # Get CIA options based on project setting
@@ -422,6 +498,11 @@ class Risk < ActiveRecord::Base
                   'risk_counter_measures_attributes',
                   'risk_mitigations_attributes',
                   'risk_preventions_attributes',
+                  # Custom owner names
+                  'custom_risk_owner_name',
+                  'custom_treatment_owner_name',
+                  # Multi-select treatment plan
+                  'treatment_plan_setting_ids',
                   :if => lambda {|risk, user| risk.new_record? || risk.attributes_editable?(user) }
 
   # Safely sets attributes

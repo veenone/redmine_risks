@@ -1,0 +1,89 @@
+<h2><%= l(:label_risk_reports) %></h2>
+
+<div class="risk-reports-menu">
+  <div class="report-card">
+    <h3><%= link_to l(:label_risk_list_report), project_risk_list_report_path(@project) %></h3>
+    <p class="description"><%= l(:text_risk_list_report_description) %></p>
+    <div class="formats">
+      <span class="label"><%= l(:label_export_formats) %>:</span>
+      <%= link_to 'HTML', project_risk_list_report_path(@project), class: 'icon icon-list' %>
+      <%= link_to 'CSV', project_risk_list_report_path(@project, format: :csv), class: 'icon icon-export' %>
+      <%= link_to 'PDF', project_risk_list_report_path(@project, format: :pdf), class: 'icon icon-pdf' %>
+    </div>
+  </div>
+
+  <div class="report-card">
+    <h3><%= link_to l(:label_risk_dashboard_report), project_risk_dashboard_report_path(@project) %></h3>
+    <p class="description"><%= l(:text_risk_dashboard_report_description) %></p>
+    <div class="formats">
+      <span class="label"><%= l(:label_export_formats) %>:</span>
+      <%= link_to 'HTML', project_risk_dashboard_report_path(@project), class: 'icon icon-stats' %>
+      <%= link_to 'PDF', project_risk_dashboard_report_path(@project, format: :pdf), class: 'icon icon-pdf' %>
+    </div>
+  </div>
+
+  <div class="report-card">
+    <h3><%= link_to l(:label_risk_registry_report), project_risk_registry_report_path(@project) %></h3>
+    <p class="description"><%= l(:text_risk_registry_report_description) %></p>
+    <div class="formats">
+      <span class="label"><%= l(:label_export_formats) %>:</span>
+      <%= link_to 'HTML', project_risk_registry_report_path(@project), class: 'icon icon-list' %>
+      <%= link_to 'CSV', project_risk_registry_report_path(@project, format: :csv), class: 'icon icon-export' %>
+      <%= link_to 'PDF', project_risk_registry_report_path(@project, format: :pdf), class: 'icon icon-pdf' %>
+    </div>
+  </div>
+</div>
+
+<style>
+.risk-reports-menu {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.report-card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.report-card h3 {
+  margin: 0 0 10px 0;
+  padding: 0;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.report-card h3 a {
+  color: #333;
+  text-decoration: none;
+}
+
+.report-card h3 a:hover {
+  color: #169;
+}
+
+.report-card .description {
+  color: #666;
+  font-size: 0.9em;
+  margin-bottom: 15px;
+}
+
+.report-card .formats {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+}
+
+.report-card .formats .label {
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.report-card .formats a {
+  margin-right: 15px;
+}
+</style>

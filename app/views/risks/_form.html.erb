@@ -104,9 +104,15 @@
             <p>
               <%= f.label_for_field :risk_owner_id %>
               <%= f.select :risk_owner_id, principals_options_for_select(@risk.assignable_risk_owners, @risk.risk_owner),
-                           :include_blank => true %>
+                           :include_blank => true, id: 'risk_risk_owner_id' %>
               <em class="info"><%= l(:text_risk_owner_info) %></em>
             </p>
+            <% if @risk.safe_attribute?('custom_risk_owner_name') %>
+              <div class="custom-owner-field" id="custom_risk_owner_wrapper">
+                <span class="custom-owner-label"><%= l(:label_or_enter_custom) %></span>
+                <%= text_field_tag 'risk[custom_risk_owner_name]', @risk.custom_risk_owner_name, size: 30, placeholder: l(:text_custom_owner_info) %>
+              </div>
+            <% end %>
           <% end %>
 
           <% if @risk.safe_attribute? 'assigned_to_id' %>
@@ -148,10 +154,25 @@
   </fieldset>
 
   <%# Section 4: Vulnerabilities (Multi-entry) %>
+  <% vulnerability_library = RiskVulnerabilityEntry.for_project(@risk.project) %>
   <fieldset class="risk-section collapsible" id="risk-vulnerabilities">
     <legend onclick="toggleSection('risk-vulnerabilities')"><%= l(:label_vulnerabilities) %></legend>
     <div class="section-content">
       <p class="section-description"><%= l(:text_vulnerabilities_multi_info) %></p>
+
+      <% if vulnerability_library.any? %>
+        <div class="entry-library-select">
+          <p><strong><%= l(:label_select_from_library) %>:</strong></p>
+          <div class="library-entries">
+            <% vulnerability_library.each do |entry| %>
+              <span class="library-entry" data-name="<%= entry.name %>" data-description="<%= entry.description %>" data-container="risk_vulnerabilities_container" data-template="risk_vulnerability_template">
+                <a href="#" class="icon icon-add add-from-library"><%= entry.name %></a>
+              </span>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
       <div id="risk_vulnerabilities_container" class="multi-entry-container">
         <%= render partial: 'risks/multi_entry_fields', locals: { f: f, association: :risk_vulnerabilities, field_name: 'risk_vulnerabilities' } %>
       </div>
@@ -164,10 +185,25 @@
   </fieldset>
 
   <%# Section 5: Consequences (Multi-entry) %>
+  <% consequence_library = RiskConsequenceEntry.for_project(@risk.project) %>
   <fieldset class="risk-section collapsible" id="risk-consequences">
     <legend onclick="toggleSection('risk-consequences')"><%= l(:label_consequences) %></legend>
     <div class="section-content">
       <p class="section-description"><%= l(:text_consequences_multi_info) %></p>
+
+      <% if consequence_library.any? %>
+        <div class="entry-library-select">
+          <p><strong><%= l(:label_select_from_library) %>:</strong></p>
+          <div class="library-entries">
+            <% consequence_library.each do |entry| %>
+              <span class="library-entry" data-name="<%= entry.name %>" data-description="<%= entry.description %>" data-container="risk_consequences_container" data-template="risk_consequence_template">
+                <a href="#" class="icon icon-add add-from-library"><%= entry.name %></a>
+              </span>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
       <div id="risk_consequences_container" class="multi-entry-container">
         <%= render partial: 'risks/multi_entry_fields', locals: { f: f, association: :risk_consequences, field_name: 'risk_consequences' } %>
       </div>
@@ -180,10 +216,25 @@
   </fieldset>
 
   <%# Section 6: Counter-measures (Multi-entry) %>
+  <% counter_measure_library = RiskCounterMeasureEntry.for_project(@risk.project) %>
   <fieldset class="risk-section collapsible" id="risk-counter-measures">
     <legend onclick="toggleSection('risk-counter-measures')"><%= l(:label_counter_measures) %></legend>
     <div class="section-content">
       <p class="section-description"><%= l(:text_counter_measures_multi_info) %></p>
+
+      <% if counter_measure_library.any? %>
+        <div class="entry-library-select">
+          <p><strong><%= l(:label_select_from_library) %>:</strong></p>
+          <div class="library-entries">
+            <% counter_measure_library.each do |entry| %>
+              <span class="library-entry" data-name="<%= entry.name %>" data-description="<%= entry.description %>" data-container="risk_counter_measures_container" data-template="risk_counter_measure_template">
+                <a href="#" class="icon icon-add add-from-library"><%= entry.name %></a>
+              </span>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
       <div id="risk_counter_measures_container" class="multi-entry-container">
         <%= render partial: 'risks/multi_entry_fields', locals: { f: f, association: :risk_counter_measures, field_name: 'risk_counter_measures' } %>
       </div>
@@ -303,7 +354,7 @@
         </div>
         <div class="splitcontentright">
           <% if @risk.safe_attribute?('strategy') %>
-            <p><%= f.select :strategy, Risk::RISK_STRATEGY.collect {|p| [format_risk_strategy(p), p]}, :include_blank => true %></p>
+            <p><%= f.select :strategy, Risk.strategy_options_for_project(@risk.project), :include_blank => true %></p>
           <% end %>
 
           <% if @risk.probability.present? && @risk.impact.present? %>
@@ -318,6 +369,7 @@
   </fieldset>
 
   <%# Section 9: Risk Treatment %>
+  <% treatment_plan_options = RiskTreatmentPlanSetting.for_project(@risk.project) %>
   <fieldset class="risk-section collapsible" id="risk-treatment-section">
     <legend onclick="toggleSection('risk-treatment-section')"><%= l(:label_risk_treatment) %></legend>
     <div class="section-content">
@@ -325,23 +377,44 @@
 
       <div class="splitcontent">
         <div class="splitcontentleft">
-          <% if @risk.safe_attribute?('risk_treatment_plan') %>
+          <% if @risk.safe_attribute?('treatment_plan_setting_ids') %>
             <p>
-              <%= f.label_for_field :risk_treatment_plan %>
-              <%= f.select :risk_treatment_plan,
-                           Risk::RISK_TREATMENT_PLAN.collect {|p| [l("label_risk_treatment_plan_#{p}"), p]},
-                           :include_blank => true %>
+              <label><%= l(:label_treatment_plans) %></label>
+              <em class="info"><%= l(:text_treatment_plan_multi_info) %></em>
             </p>
+            <div class="treatment-plan-checkboxes">
+              <% treatment_plan_options.each do |setting| %>
+                <% setting_id = setting.persisted? ? setting.id : setting.key %>
+                <% checkbox_id = "treatment_plan_#{setting_id}" %>
+                <div class="treatment-plan-item">
+                  <%= check_box_tag 'risk[treatment_plan_setting_ids][]', setting_id,
+                                    @risk.treatment_plan_setting_ids.include?(setting_id),
+                                    id: checkbox_id,
+                                    class: 'treatment-plan-checkbox' %>
+                  <span class="treatment-plan-label"><%= setting.label %></span>
+                  <% if setting.description.present? %>
+                    <div class="treatment-plan-desc"><%= setting.description %></div>
+                  <% end %>
+                </div>
+              <% end %>
+              <%= hidden_field_tag 'risk[treatment_plan_setting_ids][]', '' %>
+            </div>
           <% end %>
         </div>
         <div class="splitcontentright">
           <% if @risk.safe_attribute?('risk_treatment_owner_id') %>
             <p>
-              <%= f.label_for_field :risk_treatment_owner_id %>
+              <span class="field-label"><%= l(:field_risk_treatment_owner_id) %></span>
               <%= f.select :risk_treatment_owner_id, principals_options_for_select(@risk.assignable_treatment_owners, @risk.risk_treatment_owner),
-                           :include_blank => true %>
+                           :include_blank => true, id: 'risk_risk_treatment_owner_id' %>
               <em class="info"><%= l(:text_risk_treatment_owner_info) %></em>
             </p>
+            <% if @risk.safe_attribute?('custom_treatment_owner_name') %>
+              <div class="custom-owner-field" id="custom_treatment_owner_wrapper">
+                <span class="custom-owner-label"><%= l(:label_or_enter_custom) %></span>
+                <%= text_field_tag 'risk[custom_treatment_owner_name]', @risk.custom_treatment_owner_name, size: 30, placeholder: l(:text_custom_owner_info) %>
+              </div>
+            <% end %>
           <% end %>
         </div>
       </div>
@@ -497,6 +570,37 @@
       });
     });
 
+    // Add from library functionality
+    document.querySelectorAll('.add-from-library').forEach(function(link) {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        var libraryEntry = this.closest('.library-entry');
+        var name = libraryEntry.getAttribute('data-name');
+        var description = libraryEntry.getAttribute('data-description') || '';
+        var containerId = libraryEntry.getAttribute('data-container');
+        var templateId = libraryEntry.getAttribute('data-template');
+
+        var container = document.getElementById(containerId);
+        var template = document.getElementById(templateId);
+
+        if (container && template) {
+          var html = template.innerHTML.replace(/NEW_INDEX/g, multiEntryIndex++);
+          var div = document.createElement('div');
+          div.innerHTML = html;
+          var row = div.firstElementChild;
+
+          // Fill in the name and description from the library entry
+          var nameInput = row.querySelector('input[name*="[name]"]');
+          var descInput = row.querySelector('input[name*="[description]"]');
+          if (nameInput) nameInput.value = name;
+          if (descInput) descInput.value = description;
+
+          container.appendChild(row);
+          attachRemoveHandlers();
+        }
+      });
+    });
+
     attachRemoveHandlers();
   });
 
@@ -592,3 +696,125 @@
     updateRiskIdPrefix();
   });
 </script>
+
+<style>
+  /* Entry library selection styles */
+  .entry-library-select {
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 15px;
+  }
+  .entry-library-select p { margin: 0 0 8px 0; }
+  .library-entries {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .library-entry {
+    display: inline-block;
+  }
+  .library-entry a {
+    display: inline-block;
+    padding: 4px 10px;
+    background: #e8f4e8;
+    border: 1px solid #9c9;
+    border-radius: 3px;
+    font-size: 0.9em;
+    text-decoration: none;
+    color: #363;
+  }
+  .library-entry a:hover {
+    background: #d4edd4;
+    border-color: #6a6;
+  }
+
+  /* Custom owner field styles */
+  .custom-owner-field {
+    margin-top: 10px;
+    padding: 8px 10px;
+    border-left: 3px solid #ddd;
+    background: #f9f9f9;
+    border-radius: 0 4px 4px 0;
+  }
+  .custom-owner-label {
+    display: block;
+    font-size: 0.9em;
+    color: #555;
+    margin-bottom: 5px;
+    font-weight: normal;
+  }
+  .custom-owner-field input[type="text"] {
+    display: block;
+    width: 100%;
+    max-width: 250px;
+    margin-top: 3px;
+  }
+
+  /* Treatment plan checkboxes */
+  .treatment-plan-checkboxes {
+    margin: 10px 0;
+    padding: 12px 15px;
+    background: #fafafa;
+    border-radius: 4px;
+    border: 1px solid #eee;
+  }
+  .treatment-plan-item {
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+  }
+  .treatment-plan-item:last-of-type {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+  .treatment-plan-checkbox {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: static !important;
+    float: none !important;
+    margin: 0 8px 0 0 !important;
+    padding: 0 !important;
+    width: 16px !important;
+    height: 16px !important;
+    min-width: 16px !important;
+    min-height: 16px !important;
+    -webkit-appearance: checkbox !important;
+    -moz-appearance: checkbox !important;
+    appearance: checkbox !important;
+    vertical-align: middle !important;
+  }
+  .treatment-plan-label {
+    display: inline !important;
+    cursor: pointer;
+    line-height: 1.4;
+    font-weight: 600;
+    color: #333;
+    vertical-align: middle;
+  }
+  .treatment-plan-desc {
+    display: block;
+    margin-left: 24px;
+    margin-top: 4px;
+    font-size: 0.85em;
+    color: #666;
+    line-height: 1.4;
+    word-wrap: break-word;
+  }
+
+  /* Add button spacing */
+  .add-multi-entry,
+  .add-from-library {
+    margin-top: 8px;
+  }
+  p > .add-multi-entry {
+    display: inline-block;
+    margin-top: 12px;
+  }
+  .multi-entry-container + p {
+    margin-top: 15px;
+  }
+</style>

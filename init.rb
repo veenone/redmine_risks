@@ -1,6 +1,6 @@
 require 'redmine'
 
-RISKS_VERSION_NUMBER = '2.1.1'
+RISKS_VERSION_NUMBER = '2.3.0'
 
 Redmine::Plugin.register :redmine_risks do
   name 'Risks'
@@ -22,6 +22,7 @@ Redmine::Plugin.register :redmine_risks do
   menu :project_menu, :risk_registries, { :controller => 'risk_registries', :action => 'index' }, :caption => :label_risk_registries, :param => :project_id, :parent => :risk_management, :if => Proc.new { |p| User.current.allowed_to?(:manage_risk_registries, p) }
   menu :project_menu, :risk_areas, { :controller => 'risk_areas', :action => 'index' }, :caption => :label_risk_areas, :param => :project_id, :parent => :risk_management, :if => Proc.new { |p| User.current.allowed_to?(:manage_risk_registries, p) }
   menu :project_menu, :risk_settings, { :controller => 'risk_project_settings', :action => 'show' }, :caption => :label_risk_settings, :param => :project_id, :parent => :risk_management, :if => Proc.new { |p| User.current.allowed_to?(:manage_risk_settings, p) }
+  menu :project_menu, :risk_reports, { :controller => 'risk_reports', :action => 'index' }, :caption => :label_risk_reports, :param => :project_id, :parent => :risk_management, :if => Proc.new { |p| User.current.allowed_to?(:view_risk_reports, p) }
 
   # New risk in the "+" menu
   menu :project_menu, :new_risk, { :controller => 'risks', :action => 'new' }, :caption => :label_new_risk, :after => :new_wiki_sub, :param => :project_id, :parent => :new_object
@@ -46,7 +47,19 @@ Redmine::Plugin.register :redmine_risks do
       :risk_project_settings => [:show, :update, :initialize_point_settings,
                                   :update_impact_points, :update_probability_points,
                                   :add_impact_point, :add_probability_point,
-                                  :delete_impact_point, :delete_probability_point]
+                                  :delete_impact_point, :delete_probability_point,
+                                  :delete_logo,
+                                  :initialize_strategy_settings, :update_strategy_settings,
+                                  :add_strategy_setting, :delete_strategy_setting,
+                                  :initialize_probability_entry_settings, :update_probability_entry_settings,
+                                  :add_probability_entry_setting, :delete_probability_entry_setting,
+                                  :initialize_impact_entry_settings, :update_impact_entry_settings,
+                                  :add_impact_entry_setting, :delete_impact_entry_setting,
+                                  :initialize_treatment_plan_settings, :update_treatment_plan_settings,
+                                  :add_treatment_plan_setting, :delete_treatment_plan_setting,
+                                  :add_vulnerability_entry, :delete_vulnerability_entry,
+                                  :add_consequence_entry, :delete_consequence_entry,
+                                  :add_counter_measure_entry, :delete_counter_measure_entry]
     }
 
     # Risk import
@@ -58,6 +71,11 @@ Redmine::Plugin.register :redmine_risks do
       :risk_registries => [:index, :new, :create, :edit, :update, :destroy],
       :risk_areas => [:index, :new, :create, :edit, :update, :destroy]
     }
+
+    # Risk reports
+    permission :view_risk_reports, {
+      :risk_reports => [:index, :risk_list, :dashboard, :registry]
+    }, :read => true
   end
 
   # Pulls are added to the activity view

@@ -428,3 +428,97 @@ en:
   # Group assignment
   text_risk_owner_supports_groups: "Can be assigned to individual users or groups"
   text_treatment_owner_supports_groups: "Can be assigned to individual users or groups"
+
+  # Risk Reports
+  label_risk_reports: "Reports"
+  label_risk_list_report: "Risk List Report"
+  label_risk_dashboard_report: "Risk Dashboard Report"
+  label_risk_registry_report: "Risk Registry Report"
+  text_risk_list_report_description: "Comprehensive list of all risks with customizable query filters and columns."
+  text_risk_dashboard_report_description: "Visual summary with statistics, risk matrix, and key metrics."
+  text_risk_registry_report_description: "Risks organized by category, registry, and area."
+  label_export_formats: "Export formats"
+  label_export_to_csv: "CSV"
+  label_impact_probability_matrix: "Impact / Probability Matrix"
+  label_risks_by_owner: "Risks by Owner"
+  label_unassigned_risks: "Unassigned Risks"
+  label_count: "Count"
+  text_showing_first_n: "showing first %{count}"
+  permission_view_risk_reports: "View risk reports"
+
+  # PDF Report Settings
+  label_pdf_report_settings: "PDF Report Settings"
+  field_pdf_show_generated_time: "Show generated time"
+  field_pdf_show_logo: "Show logo"
+  field_pdf_logo_path: "Logo file path"
+  field_pdf_show_product_name: "Show product name"
+  field_pdf_product_name: "Product name"
+  text_pdf_show_generated_time_info: "Display the date and time when the report was generated"
+  text_pdf_logo_path_info: "Alternative: specify path to logo file (relative to Redmine root or absolute)"
+  text_pdf_product_name_info: "Product or organization name to display in the report header"
+  label_logo_found: "Logo file found"
+  label_logo_not_found: "Logo file not found"
+  label_current_logo: "Current Logo"
+  label_upload_logo: "Upload Logo"
+  label_or_specify_path: "Or specify a file path instead:"
+  text_upload_logo_info: "Upload an image file (PNG, JPG, GIF, BMP). Max recommended size: 500KB"
+  notice_logo_deleted: "Logo has been deleted."
+  error_invalid_logo_extension: "Invalid file type. Allowed: PNG, JPG, JPEG, GIF, BMP"
+
+  # Strategy Settings
+  label_strategy_settings: "Strategy Settings"
+  text_strategy_settings_info: "Configure the risk strategy options available in this project."
+  text_using_default_strategy_settings: "Using default strategy settings. Click below to customize."
+  button_customize_strategy: "Customize Strategies"
+  label_add_strategy: "Add Strategy"
+
+  # Probability Entry Settings (level labels, not points)
+  label_probability_entry_settings: "Probability Level Settings"
+  text_probability_entry_settings_info: "Configure the probability level labels available in this project."
+  text_using_default_probability_entry_settings: "Using default probability level settings. Click below to customize."
+  button_customize_probability_entries: "Customize Probability Levels"
+  label_add_probability_entry: "Add Probability Level"
+
+  # Impact Entry Settings (level labels, not points)
+  label_impact_entry_settings: "Impact Level Settings"
+  text_impact_entry_settings_info: "Configure the impact level labels available in this project."
+  text_using_default_impact_entry_settings: "Using default impact level settings. Click below to customize."
+  button_customize_impact_entries: "Customize Impact Levels"
+  label_add_impact_entry: "Add Impact Level"
+
+  # Treatment Plan Settings
+  label_treatment_plan_settings: "Treatment Plan Settings"
+  text_treatment_plan_settings_info: "Configure the treatment plan options available in this project. Risks can have multiple treatment plans selected."
+  text_using_default_treatment_plan_settings: "Using default treatment plan settings. Click below to customize."
+  button_customize_treatment_plans: "Customize Treatment Plans"
+  label_add_treatment_plan: "Add Treatment Plan"
+
+  # Project-level Entry Lists
+  label_vulnerability_entries: "Vulnerability Library"
+  text_vulnerability_entries_info: "Manage the list of common vulnerabilities that can be referenced across risks in this project."
+  label_consequence_entries: "Consequence Library"
+  text_consequence_entries_info: "Manage the list of common consequences that can be referenced across risks in this project."
+  label_counter_measure_entries: "Counter-measure Library"
+  text_counter_measure_entries_info: "Manage the list of common counter-measures that can be referenced across risks in this project."
+  label_add_entry: "Add Entry"
+  label_usage_count: "Used in"
+  label_risks_using: "risks"
+
+  # Custom Owner
+  field_custom_risk_owner_name: "Custom Risk Owner"
+  field_custom_treatment_owner_name: "Custom Treatment Owner"
+  text_custom_owner_info: "Enter a custom name if the owner is not in the user list"
+  label_or_enter_custom: "Or enter custom name:"
+
+  # Multi-select Treatment Plan
+  label_treatment_plans: "Treatment Plans"
+  text_treatment_plan_multi_info: "Select one or more treatment plans for this risk"
+  label_select_from_library: "Select from library"
+  text_existing_entries_info: "The following entries have been used in other risks in this project"
+
+  # Settings notices
+  notice_settings_initialized: "Settings have been initialized. You can now customize them."
+  error_setting_in_use: "Cannot delete this setting because it is in use."
+  error_entry_in_use: "Cannot delete this entry because it is linked to risks."
+
+  field_key: "Key"

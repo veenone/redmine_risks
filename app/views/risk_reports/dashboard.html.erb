@@ -1,0 +1,344 @@
+<h2><%= l(:label_risk_dashboard_report) %></h2>
+
+<div class="report-header">
+  <div class="report-info">
+    <p><strong><%= l(:field_project) %>:</strong> <%= @project.name %></p>
+    <p><strong><%= l(:label_generated_on) %>:</strong> <%= format_date(Date.today) %></p>
+  </div>
+  <div class="report-actions hide-when-print">
+    <%= link_to l(:label_export_to_pdf), project_risk_dashboard_report_path(@project, format: :pdf), class: 'icon icon-pdf' %>
+    <%= link_to l(:button_back), project_risk_reports_path(@project), class: 'icon icon-back' %>
+  </div>
+</div>
+
+<div class="dashboard-report">
+  <%# Summary Statistics %>
+  <fieldset class="box">
+    <legend><%= l(:label_risks_overview) %></legend>
+    <div class="stats-grid">
+      <div class="stat-item">
+        <span class="stat-value"><%= @total_risks %></span>
+        <span class="stat-label"><%= l(:label_total_risks) %></span>
+      </div>
+      <div class="stat-item open">
+        <span class="stat-value"><%= @open_risks %></span>
+        <span class="stat-label"><%= l(:label_open_risks) %></span>
+      </div>
+      <div class="stat-item closed">
+        <span class="stat-value"><%= @closed_risks %></span>
+        <span class="stat-label"><%= l(:label_closed_risks) %></span>
+      </div>
+    </div>
+  </fieldset>
+
+  <%# Registry Overview %>
+  <fieldset class="box">
+    <legend><%= l(:label_registry_overview) %></legend>
+    <div class="stats-grid">
+      <div class="stat-item">
+        <span class="stat-value"><%= @total_categories %></span>
+        <span class="stat-label"><%= l(:label_risk_category_entries) %></span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value"><%= @total_registries %></span>
+        <span class="stat-label"><%= l(:label_risk_registries) %></span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value"><%= @total_areas %></span>
+        <span class="stat-label"><%= l(:label_risk_areas) %></span>
+      </div>
+    </div>
+  </fieldset>
+
+  <%# Significance Statistics %>
+  <fieldset class="box">
+    <legend><%= l(:label_risk_significance) %></legend>
+    <div class="stats-grid">
+      <div class="stat-item">
+        <span class="stat-value"><%= @avg_significance ? sprintf('%.2f', @avg_significance) : '-' %></span>
+        <span class="stat-label"><%= l(:label_average_significance) %></span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value"><%= @max_significance || '-' %></span>
+        <span class="stat-label"><%= l(:label_max_significance) %></span>
+      </div>
+    </div>
+  </fieldset>
+
+  <%# Risks by Status %>
+  <fieldset class="box">
+    <legend><%= l(:label_risks_by_status) %></legend>
+    <table class="list">
+      <thead>
+        <tr>
+          <th><%= l(:field_status) %></th>
+          <th><%= l(:label_count) %></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @risks_by_status.each do |status, count| %>
+          <tr class="<%= cycle('odd', 'even') %>">
+            <td><%= format_risk_status(status) %></td>
+            <td><%= count %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </fieldset>
+
+  <%# Risks by Strategy %>
+  <% if @risks_by_strategy.any? %>
+  <fieldset class="box">
+    <legend><%= l(:label_risks_by_strategy) %></legend>
+    <table class="list">
+      <thead>
+        <tr>
+          <th><%= l(:field_strategy) %></th>
+          <th><%= l(:label_count) %></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @risks_by_strategy.each do |strategy, count| %>
+          <tr class="<%= cycle('odd', 'even') %>">
+            <td><%= format_risk_strategy(strategy) %></td>
+            <td><%= count %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </fieldset>
+  <% end %>
+
+  <%# Risks by Category %>
+  <% if @risks_by_category.any? %>
+  <fieldset class="box">
+    <legend><%= l(:label_risks_by_category) %></legend>
+    <table class="list">
+      <thead>
+        <tr>
+          <th><%= l(:field_risk_category_entry) %></th>
+          <th><%= l(:label_count) %></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @risks_by_category.each do |category, count| %>
+          <tr class="<%= cycle('odd', 'even') %>">
+            <td><%= category %></td>
+            <td><%= count %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </fieldset>
+  <% end %>
+
+  <%# Risks by Treatment Plan %>
+  <% if @risks_by_treatment_plan.any? %>
+  <fieldset class="box">
+    <legend><%= l(:label_risks_by_treatment_plan) %></legend>
+    <table class="list">
+      <thead>
+        <tr>
+          <th><%= l(:field_risk_treatment_plan) %></th>
+          <th><%= l(:label_count) %></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @risks_by_treatment_plan.each do |plan, count| %>
+          <tr class="<%= cycle('odd', 'even') %>">
+            <td><%= l("label_risk_treatment_plan_#{plan}") rescue plan %></td>
+            <td><%= count %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </fieldset>
+  <% end %>
+
+  <%# Impact/Probability Matrix %>
+  <fieldset class="box">
+    <legend><%= l(:label_impact_probability_matrix) %></legend>
+    <div class="matrix-container">
+      <table class="risk-matrix">
+        <thead>
+          <tr>
+            <th class="matrix-corner"><%= l(:field_probability_point) %> / <%= l(:field_impact_point) %></th>
+            <% @impact_point_settings.each do |imp| %>
+              <th><%= imp.label %> (<%= imp.score %>)</th>
+            <% end %>
+          </tr>
+        </thead>
+        <tbody>
+          <% @probability_point_settings.reverse.each do |prob| %>
+            <tr>
+              <th><%= prob.label %> (<%= prob.score %>)</th>
+              <% @impact_point_settings.each do |imp| %>
+                <% count = @impact_probability_matrix.dig(prob.score, imp.score) || 0 %>
+                <% significance = prob.score * imp.score %>
+                <td class="matrix-cell significance-<%= significance_class(significance) %>">
+                  <%= count > 0 ? count : '-' %>
+                </td>
+              <% end %>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </fieldset>
+
+  <%# Top Risks by Significance %>
+  <% if @top_risks_by_significance.any? %>
+  <fieldset class="box">
+    <legend><%= l(:label_top_risks_by_significance) %></legend>
+    <table class="list">
+      <thead>
+        <tr>
+          <th><%= l(:label_risk_id) %></th>
+          <th><%= l(:field_subject) %></th>
+          <th><%= l(:field_risk_owner_id) %></th>
+          <th><%= l(:field_impact_point) %></th>
+          <th><%= l(:field_probability_point) %></th>
+          <th><%= l(:field_level_of_significance) %></th>
+          <th><%= l(:field_status) %></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @top_risks_by_significance.each do |risk| %>
+          <tr class="<%= cycle('odd', 'even') %>">
+            <td><%= link_to "##{risk.id}", risk_path(risk) %></td>
+            <td><%= risk.subject %></td>
+            <td><%= risk.risk_owner&.name %></td>
+            <td><%= risk.impact_point %></td>
+            <td><%= risk.probability_point %></td>
+            <td class="significance-<%= significance_class(risk.level_of_significance) %>">
+              <%= risk.level_of_significance %>
+            </td>
+            <td><%= format_risk_status(risk.status) %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </fieldset>
+  <% end %>
+
+  <%# Risks by Owner %>
+  <% if @risks_by_owner.any? %>
+  <fieldset class="box">
+    <legend><%= l(:label_risks_by_owner) %></legend>
+    <table class="list">
+      <thead>
+        <tr>
+          <th><%= l(:field_risk_owner_id) %></th>
+          <th><%= l(:label_count) %></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @risks_by_owner.each do |owner, count| %>
+          <tr class="<%= cycle('odd', 'even') %>">
+            <td><%= owner %></td>
+            <td><%= count %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </fieldset>
+  <% end %>
+</div>
+
+<style>
+.report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.report-header .report-info p {
+  margin: 5px 0;
+}
+
+.report-header .report-actions a {
+  margin-left: 10px;
+}
+
+.dashboard-report .box {
+  margin-bottom: 20px;
+}
+
+.stats-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.stat-item {
+  flex: 1;
+  min-width: 120px;
+  text-align: center;
+  padding: 15px;
+  background: #f5f5f5;
+  border-radius: 4px;
+}
+
+.stat-item .stat-value {
+  display: block;
+  font-size: 2em;
+  font-weight: bold;
+  color: #333;
+}
+
+.stat-item .stat-label {
+  display: block;
+  color: #666;
+  margin-top: 5px;
+}
+
+.stat-item.open .stat-value { color: #f0ad4e; }
+.stat-item.closed .stat-value { color: #5cb85c; }
+
+.matrix-container {
+  overflow-x: auto;
+}
+
+.risk-matrix {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.risk-matrix th, .risk-matrix td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+.risk-matrix th {
+  background: #f5f5f5;
+}
+
+.matrix-corner {
+  font-size: 0.9em;
+}
+
+.matrix-cell {
+  min-width: 60px;
+  font-weight: bold;
+}
+
+.significance-low { background-color: #dff0d8; color: #3c763d; }
+.significance-medium { background-color: #fcf8e3; color: #8a6d3b; }
+.significance-high { background-color: #f2dede; color: #a94442; }
+.significance-critical { background-color: #d9534f; color: #fff; }
+
+@media print {
+  .hide-when-print { display: none !important; }
+  .report-header .report-actions { display: none; }
+  
+  .dashboard-report .box {
+    page-break-inside: avoid;
+  }
+}
+</style>

@@ -1,0 +1,280 @@
+<h2><%= l(:label_risk_registry_report) %></h2>
+
+<div class="report-header">
+  <div class="report-info">
+    <p><strong><%= l(:field_project) %>:</strong> <%= @project.name %></p>
+    <p><strong><%= l(:label_generated_on) %>:</strong> <%= format_date(Date.today) %></p>
+  </div>
+  <div class="report-actions hide-when-print">
+    <%= link_to l(:label_export_to_csv), project_risk_registry_report_path(@project, format: :csv), class: 'icon icon-export' %>
+    <%= link_to l(:label_export_to_pdf), project_risk_registry_report_path(@project, format: :pdf), class: 'icon icon-pdf' %>
+    <%= link_to l(:button_back), project_risk_reports_path(@project), class: 'icon icon-back' %>
+  </div>
+</div>
+
+<div class="registry-report">
+  <%# Registry Summary %>
+  <fieldset class="box">
+    <legend><%= l(:label_registry_overview) %></legend>
+    <div class="stats-grid">
+      <div class="stat-item">
+        <span class="stat-value"><%= @categories.count %></span>
+        <span class="stat-label"><%= l(:label_risk_category_entries) %></span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value"><%= @registries.count %></span>
+        <span class="stat-label"><%= l(:label_risk_registries) %></span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value"><%= @areas.count %></span>
+        <span class="stat-label"><%= l(:label_risk_areas) %></span>
+      </div>
+    </div>
+  </fieldset>
+
+  <%# Risks by Category %>
+  <% @registry_data[:by_category].each do |cat_id, cat_data| %>
+    <% next if cat_data[:risks].empty? %>
+    <fieldset class="box category-section">
+      <legend>
+        <%= l(:field_risk_category_entry) %>: <%= cat_data[:name] %>
+        <% if cat_data[:code].present? %>
+          <span class="category-code">(<%= cat_data[:code] %>)</span>
+        <% end %>
+        <span class="risk-count">(<%= cat_data[:risks].count %> <%= l(:label_risks).downcase %>)</span>
+      </legend>
+      
+      <table class="list registry-table">
+        <thead>
+          <tr>
+            <th><%= l(:field_risk_id_code) %></th>
+            <th><%= l(:field_subject) %></th>
+            <th><%= l(:field_risk_owner_id) %></th>
+            <th><%= l(:field_impact_point) %></th>
+            <th><%= l(:field_probability_point) %></th>
+            <th><%= l(:field_level_of_significance) %></th>
+            <th><%= l(:field_risk_treatment_plan) %></th>
+            <th><%= l(:field_risk_treatment_owner_id) %></th>
+            <th><%= l(:field_status) %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% cat_data[:risks].each do |risk| %>
+            <tr class="<%= cycle('odd', 'even') %> risk <%= risk.css_classes %>">
+              <td>
+                <%= link_to risk.risk_id_code.presence || "##{risk.id}", risk_path(risk) %>
+              </td>
+              <td><%= risk.subject %></td>
+              <td><%= risk.risk_owner&.name %></td>
+              <td class="center"><%= risk.impact_point %></td>
+              <td class="center"><%= risk.probability_point %></td>
+              <td class="center significance-<%= significance_class(risk.level_of_significance) %>">
+                <%= risk.level_of_significance %>
+              </td>
+              <td><%= risk.risk_treatment_plan.present? ? l("label_risk_treatment_plan_#{risk.risk_treatment_plan}") : '' rescue risk.risk_treatment_plan %></td>
+              <td><%= risk.risk_treatment_owner&.name %></td>
+              <td><%= format_risk_status(risk.status) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </fieldset>
+  <% end %>
+
+  <%# Risks by Registry %>
+  <% @registry_data[:by_registry].each do |reg_id, reg_data| %>
+    <% next if reg_data[:risks].empty? %>
+    <fieldset class="box registry-section">
+      <legend>
+        <%= l(:field_risk_registry) %>: <%= reg_data[:name] %>
+        <span class="risk-count">(<%= reg_data[:risks].count %> <%= l(:label_risks).downcase %>)</span>
+      </legend>
+      
+      <table class="list registry-table">
+        <thead>
+          <tr>
+            <th><%= l(:field_risk_id_code) %></th>
+            <th><%= l(:field_subject) %></th>
+            <th><%= l(:field_risk_owner_id) %></th>
+            <th><%= l(:field_level_of_significance) %></th>
+            <th><%= l(:field_status) %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% reg_data[:risks].each do |risk| %>
+            <tr class="<%= cycle('odd', 'even') %> risk <%= risk.css_classes %>">
+              <td><%= link_to risk.risk_id_code.presence || "##{risk.id}", risk_path(risk) %></td>
+              <td><%= risk.subject %></td>
+              <td><%= risk.risk_owner&.name %></td>
+              <td class="center significance-<%= significance_class(risk.level_of_significance) %>">
+                <%= risk.level_of_significance %>
+              </td>
+              <td><%= format_risk_status(risk.status) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </fieldset>
+  <% end %>
+
+  <%# Risks by Area %>
+  <% @registry_data[:by_area].each do |area_id, area_data| %>
+    <% next if area_data[:risks].empty? %>
+    <fieldset class="box area-section">
+      <legend>
+        <%= l(:field_risk_area) %>: <%= area_data[:name] %>
+        <span class="risk-count">(<%= area_data[:risks].count %> <%= l(:label_risks).downcase %>)</span>
+      </legend>
+      
+      <table class="list registry-table">
+        <thead>
+          <tr>
+            <th><%= l(:field_risk_id_code) %></th>
+            <th><%= l(:field_subject) %></th>
+            <th><%= l(:field_risk_owner_id) %></th>
+            <th><%= l(:field_level_of_significance) %></th>
+            <th><%= l(:field_status) %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% area_data[:risks].each do |risk| %>
+            <tr class="<%= cycle('odd', 'even') %> risk <%= risk.css_classes %>">
+              <td><%= link_to risk.risk_id_code.presence || "##{risk.id}", risk_path(risk) %></td>
+              <td><%= risk.subject %></td>
+              <td><%= risk.risk_owner&.name %></td>
+              <td class="center significance-<%= significance_class(risk.level_of_significance) %>">
+                <%= risk.level_of_significance %>
+              </td>
+              <td><%= format_risk_status(risk.status) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </fieldset>
+  <% end %>
+
+  <%# Unassigned Risks %>
+  <% if @registry_data[:unassigned].any? %>
+    <fieldset class="box unassigned-section">
+      <legend>
+        <%= l(:label_unassigned_risks) %>
+        <span class="risk-count">(<%= @registry_data[:unassigned].count %> <%= l(:label_risks).downcase %>)</span>
+      </legend>
+      
+      <table class="list registry-table">
+        <thead>
+          <tr>
+            <th><%= l(:label_risk_id) %></th>
+            <th><%= l(:field_subject) %></th>
+            <th><%= l(:field_risk_owner_id) %></th>
+            <th><%= l(:field_level_of_significance) %></th>
+            <th><%= l(:field_status) %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @registry_data[:unassigned].each do |risk| %>
+            <tr class="<%= cycle('odd', 'even') %> risk <%= risk.css_classes %>">
+              <td><%= link_to "##{risk.id}", risk_path(risk) %></td>
+              <td><%= risk.subject %></td>
+              <td><%= risk.risk_owner&.name %></td>
+              <td class="center significance-<%= significance_class(risk.level_of_significance) %>">
+                <%= risk.level_of_significance %>
+              </td>
+              <td><%= format_risk_status(risk.status) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </fieldset>
+  <% end %>
+</div>
+
+<style>
+.report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.report-header .report-info p {
+  margin: 5px 0;
+}
+
+.report-header .report-actions a {
+  margin-left: 10px;
+}
+
+.registry-report .box {
+  margin-bottom: 20px;
+}
+
+.stats-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.stat-item {
+  flex: 1;
+  min-width: 120px;
+  text-align: center;
+  padding: 15px;
+  background: #f5f5f5;
+  border-radius: 4px;
+}
+
+.stat-item .stat-value {
+  display: block;
+  font-size: 2em;
+  font-weight: bold;
+  color: #333;
+}
+
+.stat-item .stat-label {
+  display: block;
+  color: #666;
+  margin-top: 5px;
+}
+
+.category-code {
+  font-weight: normal;
+  color: #666;
+}
+
+.risk-count {
+  font-weight: normal;
+  font-size: 0.9em;
+  color: #888;
+}
+
+.registry-table {
+  width: 100%;
+}
+
+.registry-table th, .registry-table td {
+  padding: 6px 8px;
+}
+
+.registry-table td.center {
+  text-align: center;
+}
+
+.significance-low { background-color: #dff0d8; color: #3c763d; }
+.significance-medium { background-color: #fcf8e3; color: #8a6d3b; }
+.significance-high { background-color: #f2dede; color: #a94442; }
+.significance-critical { background-color: #d9534f; color: #fff; }
+
+@media print {
+  .hide-when-print { display: none !important; }
+  .report-header .report-actions { display: none; }
+  
+  .registry-report .box {
+    page-break-inside: avoid;
+  }
+}
+</style>

@@ -260,7 +260,18 @@ module RisksHelper
       'low'
     end
   end
-  
+
+  # Alias for use in report templates
+  def significance_class(value)
+    get_significance_class(value)
+  end
+
+  # Format column value for risk report display
+  def format_column_value(risk, column)
+    value = column.value(risk)
+    column_value_with_risks(column, risk, value)
+  end
+
   alias_method :column_value_without_risks, :column_value
   alias_method :column_value, :column_value_with_risks
 end

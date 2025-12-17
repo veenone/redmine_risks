@@ -1,0 +1,98 @@
+<h2><%= l(:label_risk_list_report) %></h2>
+
+<div class="report-header">
+  <div class="report-info">
+    <p><strong><%= l(:field_project) %>:</strong> <%= @project.name %></p>
+    <p><strong><%= l(:label_generated_on) %>:</strong> <%= format_date(Date.today) %></p>
+    <p><strong><%= l(:label_total_risks) %>:</strong> <%= @risk_count %></p>
+  </div>
+  <div class="report-actions">
+    <%= link_to l(:label_export_to_csv), project_risk_list_report_path(@project, **params.permit!.to_h.except(:controller, :action, :project_id).merge(format: :csv)), class: 'icon icon-export' %>
+    <%= link_to l(:label_export_to_pdf), project_risk_list_report_path(@project, **params.permit!.to_h.except(:controller, :action, :project_id).merge(format: :pdf)), class: 'icon icon-pdf' %>
+    <%= link_to l(:button_back), project_risk_reports_path(@project), class: 'icon icon-back' %>
+  </div>
+</div>
+
+<%= form_tag(project_risk_list_report_path(@project), method: :get, id: 'query_form') do %>
+  <div id="query_form_with_buttons" class="hide-when-print">
+    <div id="query_form_content">
+      <%= render partial: 'queries/filters', locals: { query: @query } %>
+    </div>
+    <p class="buttons">
+      <%= link_to_function l(:button_apply), '$("#query_form").submit()', class: 'icon icon-checked' %>
+      <%= link_to l(:button_clear), project_risk_list_report_path(@project), class: 'icon icon-reload' %>
+    </p>
+  </div>
+<% end %>
+
+<% if @query.valid? %>
+  <div class="autoscroll">
+    <table class="list risks report-table">
+      <thead>
+        <tr>
+          <% @query.columns.each do |column| %>
+            <th class="<%= column.css_classes %>"><%= column.caption %></th>
+          <% end %>
+        </tr>
+      </thead>
+      <tbody>
+        <% @risks.each do |risk| %>
+          <tr class="<%= cycle('odd', 'even') %> risk <%= risk.css_classes %>">
+            <% @query.columns.each do |column| %>
+              <td class="<%= column.css_classes %>">
+                <%= format_column_value(risk, column) %>
+              </td>
+            <% end %>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="pagination">
+    <%= l(:label_total) %>: <%= @risk_count %>
+    <% if @risk_count > @limit %>
+      (<%= l(:text_showing_first_n, count: @limit) %>)
+    <% end %>
+  </p>
+<% else %>
+  <p class="nodata"><%= l(:label_no_data) %></p>
+<% end %>
+
+<style>
+.report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.report-header .report-info p {
+  margin: 5px 0;
+}
+
+.report-header .report-actions a {
+  margin-left: 10px;
+}
+
+.report-table {
+  width: 100%;
+}
+
+.report-table th, .report-table td {
+  padding: 6px 8px;
+}
+
+@media print {
+  .hide-when-print { display: none !important; }
+  .report-header .report-actions { display: none; }
+}
+</style>
+
+<% content_for :header_tags do %>
+  <%= stylesheet_link_tag 'queries', plugin: 'redmine_risks' %>
+<% end %>
