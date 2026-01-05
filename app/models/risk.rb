@@ -345,6 +345,7 @@ class Risk < ActiveRecord::Base
     end
   }
 
+  before_validation :normalize_risk_id_code
   before_save :force_updated_on_change, :update_closed_on, :set_assigned_to_was
   after_save :create_journal
 
@@ -783,6 +784,11 @@ class Risk < ActiveRecord::Base
     end
 
     user.allowed_to?(permission, project)
+  end
+
+  # Convert empty risk_id_code to nil to avoid unique index conflicts
+  def normalize_risk_id_code
+    self.risk_id_code = nil if risk_id_code.blank?
   end
 
   # Make sure updated_on is updated when adding a note and set updated_on now
