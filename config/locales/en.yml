@@ -522,3 +522,13 @@ en:
   error_entry_in_use: "Cannot delete this entry because it is linked to risks."
 
   field_key: "Key"
+
+  # Assessment Field Visibility Settings
+  label_assessment_field_visibility: "Risk Assessment Field Visibility"
+  text_assessment_field_visibility_info: "Configure which legacy risk assessment fields are displayed. The new Impact Point and Probability Point fields are always shown."
+  field_show_probability_field: "Show Probability (legacy)"
+  field_show_impact_field: "Show Impact (legacy)"
+  field_show_magnitude_field: "Show Magnitude (legacy)"
+  text_show_probability_field_info: "Display the legacy probability dropdown (Unlikely/Low/Medium/High/Expected)"
+  text_show_impact_field_info: "Display the legacy impact dropdown (Negligible/Minor/Moderate/Significant/Severe)"
+  text_show_magnitude_field_info: "Display the calculated magnitude based on legacy probability and impact fields"

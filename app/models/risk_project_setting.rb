@@ -21,7 +21,10 @@ class RiskProjectSetting < ActiveRecord::Base
                   'pdf_product_name',
                   'pdf_show_generated_time',
                   'pdf_show_logo',
-                  'pdf_show_product_name'
+                  'pdf_show_product_name',
+                  'show_probability_field',
+                  'show_impact_field',
+                  'show_magnitude_field'
 
   # Handle logo file upload
   def pdf_logo_file=(file)
@@ -115,5 +118,18 @@ class RiskProjectSetting < ActiveRecord::Base
 
   def pdf_show_generated_time?
     pdf_show_generated_time != false
+  end
+
+  # Risk assessment field visibility helpers
+  def show_probability_field?
+    show_probability_field == true
+  end
+
+  def show_impact_field?
+    show_impact_field == true
+  end
+
+  def show_magnitude_field?
+    show_magnitude_field == true
   end
 end

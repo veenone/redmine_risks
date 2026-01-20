@@ -262,30 +262,45 @@
         </div>
       </div>
 
-      <div class="attributes-grid" style="margin-top: 15px;">
-        <div class="attribute-item">
-          <span class="attribute-label"><%= l(:field_probability) %></span>
-          <span class="attribute-value"><%= @risk.probability.present? ? format_risk_probability(@risk.probability) : "-" %></span>
+      <% if risk_project_setting.show_probability_field? || risk_project_setting.show_impact_field? || risk_project_setting.show_magnitude_field? %>
+        <div class="attributes-grid" style="margin-top: 15px;">
+          <% if risk_project_setting.show_probability_field? %>
+            <div class="attribute-item">
+              <span class="attribute-label"><%= l(:field_probability) %></span>
+              <span class="attribute-value"><%= @risk.probability.present? ? format_risk_probability(@risk.probability) : "-" %></span>
+            </div>
+          <% end %>
+          <% if risk_project_setting.show_impact_field? %>
+            <div class="attribute-item">
+              <span class="attribute-label"><%= l(:field_impact) %></span>
+              <span class="attribute-value"><%= @risk.impact.present? ? format_risk_impact(@risk.impact) : "-" %></span>
+            </div>
+          <% end %>
+          <% if risk_project_setting.show_magnitude_field? %>
+            <div class="attribute-item">
+              <span class="attribute-label"><%= l(:field_magnitude) %></span>
+              <span class="attribute-value">
+                <% if @risk.probability.present? && @risk.impact.present? %>
+                  <span class="magnitude-badge <%= @risk.magnitude.to_s.downcase %>"><%= @risk.magnitude %></span>
+                <% else %>
+                  -
+                <% end %>
+              </span>
+            </div>
+          <% end %>
+          <div class="attribute-item">
+            <span class="attribute-label"><%= l(:field_strategy) %></span>
+            <span class="attribute-value"><%= @risk.strategy.present? ? format_risk_strategy(@risk.strategy) : "-" %></span>
+          </div>
         </div>
-        <div class="attribute-item">
-          <span class="attribute-label"><%= l(:field_impact) %></span>
-          <span class="attribute-value"><%= @risk.impact.present? ? format_risk_impact(@risk.impact) : "-" %></span>
+      <% else %>
+        <div class="attributes-grid" style="margin-top: 15px;">
+          <div class="attribute-item">
+            <span class="attribute-label"><%= l(:field_strategy) %></span>
+            <span class="attribute-value"><%= @risk.strategy.present? ? format_risk_strategy(@risk.strategy) : "-" %></span>
+          </div>
         </div>
-        <div class="attribute-item">
-          <span class="attribute-label"><%= l(:field_magnitude) %></span>
-          <span class="attribute-value">
-            <% if @risk.probability.present? && @risk.impact.present? %>
-              <span class="magnitude-badge <%= @risk.magnitude.to_s.downcase %>"><%= @risk.magnitude %></span>
-            <% else %>
-              -
-            <% end %>
-          </span>
-        </div>
-        <div class="attribute-item">
-          <span class="attribute-label"><%= l(:field_strategy) %></span>
-          <span class="attribute-value"><%= @risk.strategy.present? ? format_risk_strategy(@risk.strategy) : "-" %></span>
-        </div>
-      </div>
+      <% end %>
     </div>
   </fieldset>
 

@@ -342,29 +342,40 @@
         </div>
       </div>
 
-      <div class="splitcontent" style="margin-top: 15px;">
-        <div class="splitcontentleft">
-          <% if @risk.safe_attribute?('probability') %>
-            <p><%= f.select :probability, format_risk_levels(Risk::RISK_PROBABILITY, @risk.probability) {|p| format_risk_probability(p)}, :include_blank => true %></p>
-          <% end %>
+      <% if risk_project_setting.show_probability_field? || risk_project_setting.show_impact_field? || risk_project_setting.show_magnitude_field? %>
+        <div class="splitcontent" style="margin-top: 15px;">
+          <div class="splitcontentleft">
+            <% if risk_project_setting.show_probability_field? && @risk.safe_attribute?('probability') %>
+              <p><%= f.select :probability, format_risk_levels(Risk::RISK_PROBABILITY, @risk.probability) {|p| format_risk_probability(p)}, :include_blank => true %></p>
+            <% end %>
 
-          <% if @risk.safe_attribute?('impact') %>
-            <p><%= f.select :impact, format_risk_levels(Risk::RISK_IMPACT, @risk.impact) {|i| format_risk_impact(i)}, :include_blank => true %></p>
-          <% end %>
-        </div>
-        <div class="splitcontentright">
-          <% if @risk.safe_attribute?('strategy') %>
-            <p><%= f.select :strategy, Risk.strategy_options_for_project(@risk.project), :include_blank => true %></p>
-          <% end %>
+            <% if risk_project_setting.show_impact_field? && @risk.safe_attribute?('impact') %>
+              <p><%= f.select :impact, format_risk_levels(Risk::RISK_IMPACT, @risk.impact) {|i| format_risk_impact(i)}, :include_blank => true %></p>
+            <% end %>
+          </div>
+          <div class="splitcontentright">
+            <% if @risk.safe_attribute?('strategy') %>
+              <p><%= f.select :strategy, Risk.strategy_options_for_project(@risk.project), :include_blank => true %></p>
+            <% end %>
 
-          <% if @risk.probability.present? && @risk.impact.present? %>
-            <p>
-              <label><%= l(:field_magnitude) %></label>
-              <span class="value magnitude-badge <%= @risk.magnitude.to_s.downcase %>"><%= @risk.magnitude %></span>
-            </p>
-          <% end %>
+            <% if risk_project_setting.show_magnitude_field? && @risk.probability.present? && @risk.impact.present? %>
+              <p>
+                <label><%= l(:field_magnitude) %></label>
+                <span class="value magnitude-badge <%= @risk.magnitude.to_s.downcase %>"><%= @risk.magnitude %></span>
+              </p>
+            <% end %>
+          </div>
         </div>
-      </div>
+      <% else %>
+        <%# Only show strategy if no legacy fields are enabled %>
+        <% if @risk.safe_attribute?('strategy') %>
+          <div class="splitcontent" style="margin-top: 15px;">
+            <div class="splitcontentleft">
+              <p><%= f.select :strategy, Risk.strategy_options_for_project(@risk.project), :include_blank => true %></p>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
     </div>
   </fieldset>
 

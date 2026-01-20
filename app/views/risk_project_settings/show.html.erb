@@ -30,6 +30,30 @@
   </fieldset>
 
   <fieldset class="box">
+    <legend><%= l(:label_assessment_field_visibility) %></legend>
+
+    <p class="info"><%= l(:text_assessment_field_visibility_info) %></p>
+
+    <p>
+      <%= f.check_box :show_probability_field %>
+      <%= f.label :show_probability_field, l(:field_show_probability_field) %>
+      <em class="info"><%= l(:text_show_probability_field_info) %></em>
+    </p>
+
+    <p>
+      <%= f.check_box :show_impact_field %>
+      <%= f.label :show_impact_field, l(:field_show_impact_field) %>
+      <em class="info"><%= l(:text_show_impact_field_info) %></em>
+    </p>
+
+    <p>
+      <%= f.check_box :show_magnitude_field %>
+      <%= f.label :show_magnitude_field, l(:field_show_magnitude_field) %>
+      <em class="info"><%= l(:text_show_magnitude_field_info) %></em>
+    </p>
+  </fieldset>
+
+  <fieldset class="box">
     <legend><%= l(:label_pdf_report_settings) %></legend>
 
     <p>
